@@ -18,3 +18,6 @@ If you are developing a production application, we recommend using TypeScript wi
 ## Show notifications
 ## Modal
 ## Size from backend
+
+
+$in operator

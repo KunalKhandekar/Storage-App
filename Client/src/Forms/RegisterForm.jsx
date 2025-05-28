@@ -33,13 +33,11 @@ export default function RegistrationForm() {
       });
       const data = await res.json();
       if (data.error) {
-        const err = {
-          message: data.error,
-        };
-        throw new Error(err);
+        setError(data.error);
+      } else {
+        // Success case
+        navigate("/");
       }
-      // Success case
-      navigate("/");
     } catch (err) {
       setError(err.message || "Registration failed.");
     } finally {

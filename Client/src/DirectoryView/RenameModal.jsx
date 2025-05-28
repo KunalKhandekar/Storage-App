@@ -13,12 +13,12 @@ function RenameModal({ item, onClose, onRename }) {
     if (dotIndex !== -1) {
       input.setSelectionRange(0, dotIndex);
     } else {
-      input.select(); 
+      input.select();
     }
   }, [item.name]);
 
   const handleRename = async () => {
-    await fetch(`http://localhost:4000/${item.type}/${item.id}`, {
+    await fetch(`http://localhost:4000/${item.type}/${item._id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -39,7 +39,7 @@ function RenameModal({ item, onClose, onRename }) {
         <h2 className="text-lg font-semibold mb-4">Rename {item.type}</h2>
         <input
           type="text"
-            ref={inputRef}
+          ref={inputRef}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md mb-4"
