@@ -5,8 +5,7 @@ import checkAuth from "./middlewares/auth.js";
 import dirRoutes from "./routes/dirRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import { connectDB } from "./db.js";
-
+import { connectDB } from "./config/db.js";
 
 export const absolutePath = import.meta.dirname + "/storage/";
 try {
@@ -33,7 +32,7 @@ try {
   app.use("/user", userRoutes);
 
   app.use((err, req, res, next) => {
-    res.status(500).json({ message: "Something Went wrong" });
+    res.status(500).json({ error: "Something Went wrong" });
   });
 
   app.listen(port, () => {
