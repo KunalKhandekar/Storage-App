@@ -14,35 +14,40 @@ router.post("/register", async (req, res, next) => {
     };
 
     try {
-
         const userFound = await db.collection("users").findOne({ email });
-        console.log(userFound);
         if (userFound) return res.status(400).json({
             error: "User already exists",
             message: "Failed to create user"
         });
-
-        const { insertedId: rootDirId } = await db.collection("directories").insertOne({
+        const rootDirId = new ObjectId();
+        const userId = new ObjectId();
+        await db.collection("directories").insertOne({
+            _id: rootDirId,
             name: `root-${email}`,
+            userId,
             parentDirId: null,
         });
 
-        const { insertedId: userId } = await db.collection("users").insertOne({
+        console.log({
+            _id: userId,
+            name,
+            password,
+            email,
+            rootDirId
+        })
+        await db.collection("users").insertOne({
+            _id: userId,
             name,
             password,
             email,
             rootDirId
         });
-
-        await db.collection("directories").updateOne({ _id: new ObjectId(String(rootDirId)) }, {
-            $set: { userId }
-        });
-
-
         res.status(201).json({ message: "User Created Successfully" });
     } catch (error) {
-        console.log(error);
-        next(error);
+        if (error.errorResponse.code === 121)
+            res.status(400).json({ error: "1) Email must be valid. 2) Name & Password Must be atleast 3 Characters long." });
+        else
+            next(error);
     }
 });
 
