@@ -28,15 +28,15 @@ function ItemCard({
   const openItem = () => {
     if (item.type === "directory") {
       setCurrentPath(item.name);
-      navigate(`/directory/${item.id}`);
+      navigate(`/directory/${item._id}`);
     } else {
-      window.location.href = `${URL}/file/${item.id}`;
+      window.location.href = `${URL}/file/${item._id}`;
     }
   };
 
   const handleDelete = async (e) => {
     e.stopPropagation();
-    await fetch(URL + `/${item.type}/${item.id}`, {
+    await fetch(URL + `/${item.type}/${item._id}`, {
       method: "DELETE",
       credentials: "include",
     });
@@ -46,13 +46,13 @@ function ItemCard({
 
   const handleRename = (e) => {
     e.stopPropagation();
-    console.log("Rename clicked for", item.id);
+    console.log("Rename clicked for", item._id);
     setRenameModalData({ open: true, item });
   };
 
   const handleDropdownOpen = (e) => {
     e.stopPropagation();
-    setActiveDropdown(activeDropdown === item.id ? null : item.id);
+    setActiveDropdown(activeDropdown === item._id ? null : item._id);
   };
 
   return (
@@ -84,11 +84,11 @@ function ItemCard({
             >
               <MoreVertical className="w-4 h-4 text-gray-500" />
             </button>
-            {activeDropdown === item.id && (
+            {activeDropdown === item._id && (
               <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-30 min-w-32">
                 {item.type === "file" && (
                   <a
-                    href={`${URL}/file/${item.id}?action=download`}
+                    href={`${URL}/file/${item._id}?action=download`}
                     download
                     onClick={(e) => e.stopPropagation()}
                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
