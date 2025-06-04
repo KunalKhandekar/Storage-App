@@ -8,38 +8,30 @@ import userRoutes from "./routes/userRoutes.js";
 import { connectDB } from "./config/db.js";
 
 export const absolutePath = import.meta.dirname + "/storage/";
-try {
-  const db = await connectDB();
-  const app = express();
-  const port = 4000;
 
-  app.use(express.json());
-  app.use(cookieParser());
-  app.use(
-    cors({
-      origin: ["http://localhost:5173"],
-      credentials: true,
-    })
-  );
+await connectDB();
 
-  app.use(async (req, _, next) => {
-    req.db = db;
-    next();
-  });
+const app = express();
+const port = 4000;
 
-  app.use("/file", checkAuth, fileRoutes);
-  app.use("/directory", checkAuth, dirRoutes);
-  app.use("/user", userRoutes);
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  })
+);
 
-  app.use((err, req, res, next) => {
-    res.status(500).json({ error: "Something Went wrong" });
-  });
+app.use("/file", checkAuth, fileRoutes);
+app.use("/directory", checkAuth, dirRoutes);
+app.use("/user", userRoutes);
 
-  app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
-  });
+app.use((err, req, res, next) => {
+  console.log(err);
+  res.status(500).json({ error: "Something Went wrong" });
+});
 
-} catch (error) {
-  console.log("Error connecting DB");
-  console.log(error);
-}
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});

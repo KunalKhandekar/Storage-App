@@ -1,15 +1,14 @@
-import { MongoClient } from "mongodb";
-
-export const client = new MongoClient("mongodb://127.0.0.1:27017/StorageApp");
+import mongoose from "mongoose";
 
 export const connectDB = async () => {
-    await client.connect();
-    console.log("DB Connected")
-    return client.db();
-}
+  await mongoose.connect(
+    "mongodb://admin:admin@localhost:27017/StorageApp?replicaSet=rs0&authSource=admin"
+  );
+  console.log("DB Connected");
+};
 
-process.on('SIGINT', async() => {
-    await client.close();
-    console.log("Client Disconnected");
-    process.exit(0);
-})
+process.on("SIGINT", async () => {
+  await client.close();
+  console.log("Client Disconnected");
+  process.exit(0);
+});
