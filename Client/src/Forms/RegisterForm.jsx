@@ -36,7 +36,7 @@ export default function RegistrationForm() {
         setError(data.error);
       } else {
         // Success case
-        navigate("/");
+        navigate("/login");
       }
     } catch (err) {
       setError(err.message || "Registration failed.");
