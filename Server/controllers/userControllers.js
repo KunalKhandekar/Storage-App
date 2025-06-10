@@ -1,6 +1,7 @@
 import mongoose, { Types } from "mongoose";
 import Directory from "../models/dirModel.js";
 import User from "../models/userModel.js";
+import bcrypt from "bcrypt";
 
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -17,6 +18,8 @@ export const registerUser = async (req, res, next) => {
         error: "User already exists",
         message: "Failed to create user",
       });
+
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const rootDirId = new Types.ObjectId();
     const userId = new Types.ObjectId();
@@ -39,7 +42,7 @@ export const registerUser = async (req, res, next) => {
         {
           _id: userId,
           name,
-          password,
+          password: hashedPassword,
           email,
           rootDirId,
         },
@@ -68,15 +71,28 @@ export const loginUser = async (req, res) => {
       error: "All fields are required",
     });
 
-  const user = await User.findOne({ email, password }).select("-password").lean();
+  const user = await User.findOne({ email }).lean();
 
   if (!user)
     return res.status(404).json({
       error: "Invalid Credentials",
     });
 
-  res.cookie("uid", user._id.toString(), {
+  const isValidPassword = await bcrypt.compare(password, user.password);
+
+  if (!isValidPassword)
+    return res.status(404).json({
+      error: "Invalid Credentials",
+    });
+
+  const payload = JSON.stringify({
+    id: user._id.toString(),
+    expiry: Date.now() + 7 * 24 * 60 * 60 * 1000,
+  });
+
+  res.cookie("token", Buffer.from(payload).toString("base64url"), {
     httpOnly: true,
+    signed: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
   return res.status(200).json({
@@ -92,12 +108,6 @@ export const getUserInfo = (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-  res.cookie("uid", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "none",
-    path: "/",
-    expires: new Date(0),
-  });
+  res.cookie("token");
   res.status(204).end();
 };

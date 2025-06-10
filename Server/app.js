@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.js";
 import { connectDB } from "./config/db.js";
 
 export const absolutePath = import.meta.dirname + "/storage/";
+const secretKey = "HelloWorld";
 
 await connectDB();
 
@@ -15,7 +16,7 @@ const app = express();
 const port = 4000;
 
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser(secretKey));
 app.use(
   cors({
     origin: ["http://localhost:5173"],
