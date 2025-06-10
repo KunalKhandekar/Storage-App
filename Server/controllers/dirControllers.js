@@ -5,7 +5,6 @@ import Directory from "../models/dirModel.js";
 import File from "../models/fileModel.js";
 
 export const getDir = async (req, res) => {
-  const { uid } = req.cookies;
   const { id } = req.params;
 
   try {
@@ -15,7 +14,7 @@ export const getDir = async (req, res) => {
           userId: req.user._id,
         }).lean()
       : await Directory.findOne({
-          userId: uid,
+          userId: req.user._id,
         }).lean();
 
     if (!directoryData)
@@ -74,7 +73,6 @@ export const createDir = async (req, res) => {
       userId: dirObj.userId,
     });
 
-    console.log(dir);
     await dir.save();
     res.status(200).json({ message: "Directory Created" });
   } catch (error) {
@@ -123,8 +121,6 @@ export const deleteDir = async (req, res) => {
     const includeThisDir = [...(directories?.map((dir) => dir._id) || []), id];
 
     await Directory.deleteMany({ _id: { $in: includeThisDir } });
-
-    console.log(files);
 
     for (const { storedName } of files) {
       await rm(path.join(absolutePath, storedName));
