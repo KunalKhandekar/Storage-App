@@ -25,6 +25,16 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
     navigate("/login");
   };
 
+  const LogoutAll = async () => {
+    await fetch("http://localhost:4000/user/logout-all", {
+      method: "POST",
+      credentials: "include",
+    });
+    navigate("/login");
+  };
+
+
+
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">
@@ -63,6 +73,12 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
                   onClick={Logout}
                 >
                   Logout
+                </button>
+                <button
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={LogoutAll}
+                >
+                  Logout All Devices
                 </button>
               </div>
             )}

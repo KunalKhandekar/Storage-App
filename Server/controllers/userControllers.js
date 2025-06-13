@@ -1,7 +1,7 @@
 import mongoose, { Types } from "mongoose";
 import Directory from "../models/dirModel.js";
+import Session from "../models/SessionModel.js";
 import User from "../models/userModel.js";
-import bcrypt from "bcrypt";
 
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -19,7 +19,7 @@ export const registerUser = async (req, res, next) => {
         message: "Failed to create user",
       });
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    
 
     const rootDirId = new Types.ObjectId();
     const userId = new Types.ObjectId();
@@ -42,7 +42,7 @@ export const registerUser = async (req, res, next) => {
         {
           _id: userId,
           name,
-          password: hashedPassword,
+          password,
           email,
           rootDirId,
         },
@@ -71,26 +71,25 @@ export const loginUser = async (req, res) => {
       error: "All fields are required",
     });
 
-  const user = await User.findOne({ email }).lean();
-
-  if (!user)
+  const user = await User.findOne({ email });
+  if (!user || !(await user.comparePassword(password)))
     return res.status(404).json({
       error: "Invalid Credentials",
     });
 
-  const isValidPassword = await bcrypt.compare(password, user.password);
-
-  if (!isValidPassword)
-    return res.status(404).json({
-      error: "Invalid Credentials",
+  const userSessions = await Session.find({ userId: user._id });
+  if (userSessions.length >= 2) {
+    let smallestValue = Infinity;
+    userSessions.forEach((session) => {
+      if (session.createdAt < smallestValue) {
+        smallestValue = session.createdAt;
+      }
     });
+    await Session.deleteOne({ createdAt: smallestValue });
+  }
+  const session = await Session.create({ userId: user._id });
 
-  const payload = JSON.stringify({
-    id: user._id.toString(),
-    expiry: Date.now() + 7 * 24 * 60 * 60 * 1000,
-  });
-
-  res.cookie("token", Buffer.from(payload).toString("base64url"), {
+  res.cookie("token", session._id, {
     httpOnly: true,
     signed: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -107,7 +106,14 @@ export const getUserInfo = (req, res) => {
   });
 };
 
-export const logoutUser = (req, res) => {
-  res.cookie("token");
+export const logoutUser = async (req, res) => {
+  const { token } = req.signedCookies;
+  await Session.deleteOne({ userId: req.user._id, _id: token });
+  res.clearCookie("token");
+  res.status(204).end();
+};
+
+export const logoutAll = async (req, res) => {
+  await Session.deleteMany({ userId: req.user._id });
   res.status(204).end();
 };
