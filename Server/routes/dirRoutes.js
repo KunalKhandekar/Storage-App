@@ -1,7 +1,12 @@
 import { Router } from "express";
 
 import validateRequest from "../middlewares/validateRequest.js";
-import { createDir, deleteDir, getDir, updateDir } from "../controllers/dirControllers.js";
+import {
+  createDir,
+  deleteDir,
+  getDir,
+  updateDir,
+} from "../controllers/dirControllers.js";
 
 const router = Router();
 
@@ -14,6 +19,6 @@ router.patch("/:id", updateDir);
 router.delete("/:id", deleteDir);
 
 router.param("id", validateRequest);
-router.param("pzrentDirId", validateRequest);
+router.param("parentDirId", validateRequest);
 
 export default router;
