@@ -1,3 +1,8 @@
+## RBAC 
+
+![image](https://github.com/user-attachments/assets/c77026eb-80e7-4c2e-a863-1d1ea603c425)
+
+
 ## Registration
 
   ![Screenshot 2025-06-13 142059](https://github.com/user-attachments/assets/61700dce-5c24-448e-bdf2-0fbe222081f4)
