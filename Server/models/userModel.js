@@ -12,7 +12,6 @@ const userSchema = new Schema(
     password: {
       type: String,
       minLength: 3,
-      required: true,
     },
     email: {
       type: String,
@@ -24,6 +23,12 @@ const userSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Directory",
       required: true,
+    },
+    picture: {
+      type: String,
+      required: true,
+      default:
+        "https://img.freepik.com/premium-vector/round-gray-circle-with-simple-human-silhouette-light-gray-shadow-around-circle_213497-4963.jpg?semt=ais_hybrid&w=740",
     },
   },
   {

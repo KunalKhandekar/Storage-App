@@ -19,8 +19,6 @@ export const registerUser = async (req, res, next) => {
         message: "Failed to create user",
       });
 
-    
-
     const rootDirId = new Types.ObjectId();
     const userId = new Types.ObjectId();
 
@@ -72,7 +70,7 @@ export const loginUser = async (req, res) => {
     });
 
   const user = await User.findOne({ email });
-  if (!user || !(await user.comparePassword(password)))
+  if (!user || !(user.comparePassword(password)))
     return res.status(404).json({
       error: "Invalid Credentials",
     });
@@ -103,6 +101,7 @@ export const getUserInfo = (req, res) => {
   res.status(200).json({
     email: req.user.email,
     name: req.user.name,
+    picture: req.user.picture,
   });
 };
 
