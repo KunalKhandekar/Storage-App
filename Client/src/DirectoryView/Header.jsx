@@ -1,10 +1,11 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 const Header = ({ showUserDropdown, setShowUserDropdown }) => {
   const [user, setUser] = useState({});
   const navigate = useNavigate();
-
+  
   const getUserDetails = async () => {
     const res = await fetch("http://localhost:4000/user", {
       credentials: "include",
@@ -12,11 +13,11 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
     const data = await res.json();
     setUser(data);
   };
-
+  
   useEffect(() => {
     getUserDetails();
   }, [navigate]);
-
+  
   const Logout = async () => {
     await fetch("http://localhost:4000/user/logout", {
       method: "POST",
@@ -24,7 +25,7 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
     });
     navigate("/login");
   };
-
+  
   const LogoutAll = async () => {
     await fetch("http://localhost:4000/user/logout-all", {
       method: "POST",
@@ -32,15 +33,23 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
     });
     navigate("/login");
   };
-
+  
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-semibold text-gray-900">File Manager</h1>
         </div>
-
         <div className="flex items-center space-x-4">
+          {user.role !== "User" && (
+            <button
+              className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 hover:border-gray-300"
+              onClick={() => navigate("/users")}
+            >
+              <Users className="w-4 h-4" />
+              <span className="font-medium">User Management</span>
+            </button>
+          )}
           {/* User Dropdown */}
           <div className="relative">
             <button
@@ -60,7 +69,6 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
               </div>
               <ChevronDown className="w-4 h-4" />
             </button>
-
             {showUserDropdown && (
               <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-20 min-w-48">
                 <div className="px-4 py-2 border-b border-gray-100">

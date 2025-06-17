@@ -13,24 +13,36 @@ export const loginWithGoogle = async (req, res, next) => {
   const { email, name, picture, sub } = userData;
   const mongooseSession = await mongoose.startSession();
 
+  let transactionStarted = false;
+
   try {
     const userFound = await User.findOne({ email });
+
+    // If user is found and marked as deleted
+    if (userFound?.isDeleted) {
+      return res
+        .status(403)
+        .json({ message: "User account is deactivated or deleted." });
+    }
+
     if (userFound) {
-        console.log({ userFound, condition: !userFound.picture.includes("googleusercontent.com") })
+      // Update picture if it's not from Google
       if (!userFound.picture.includes("googleusercontent.com")) {
         userFound.picture = picture;
         await userFound.save();
       }
+
+      // Limit to 2 sessions
       const userSessions = await Session.find({ userId: userFound._id });
 
       if (userSessions.length >= 2) {
-        let smallestValue = Infinity;
+        let oldestSession = userSessions[0];
         userSessions.forEach((session) => {
-          if (session.createdAt < smallestValue) {
-            smallestValue = session.createdAt;
+          if (session.createdAt < oldestSession.createdAt) {
+            oldestSession = session;
           }
         });
-        await Session.deleteOne({ createdAt: smallestValue });
+        await Session.deleteOne({ _id: oldestSession._id });
       }
 
       const session = await Session.create({ userId: userFound._id });
@@ -40,15 +52,19 @@ export const loginWithGoogle = async (req, res, next) => {
         signed: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
+
       return res.status(200).json({
         message: "Logged In",
       });
     }
 
+    // Create new user and root directory
     const rootDirId = new Types.ObjectId();
     const userId = new Types.ObjectId();
 
     mongooseSession.startTransaction();
+    transactionStarted = true;
+
     await Directory.create(
       [
         {
@@ -58,7 +74,7 @@ export const loginWithGoogle = async (req, res, next) => {
           parentDirId: null,
         },
       ],
-      { mongooseSession }
+      { session: mongooseSession }
     );
 
     await User.create(
@@ -71,7 +87,7 @@ export const loginWithGoogle = async (req, res, next) => {
           rootDirId,
         },
       ],
-      { mongooseSession }
+      { session: mongooseSession }
     );
 
     const session = await Session.create({ userId });
@@ -81,12 +97,18 @@ export const loginWithGoogle = async (req, res, next) => {
       signed: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    mongooseSession.commitTransaction();
+
+    await mongooseSession.commitTransaction();
+
     return res.status(200).json({
       message: "Account Created & Logged In",
     });
   } catch (error) {
-    mongooseSession.abortTransaction();
+    if (transactionStarted) {
+      await mongooseSession.abortTransaction();
+    }
     next(error);
+  } finally {
+    mongooseSession.endSession();
   }
 };

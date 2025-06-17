@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import DirectoryView from "./DirectoryView/main";
 import LoginForm from "./Forms/LoginForm";
 import RegistrationForm from "./Forms/RegisterForm";
+import UsersTable from "./AdminView/UsersTable";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegistrationForm />,
   },
+  {
+    path: "/users",
+    element: <UsersTable />
+  }
 ]);
 
 const App = () => {

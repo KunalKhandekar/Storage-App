@@ -23,8 +23,6 @@ export const verifyOTP = async (req, res, next) => {
   if (!isValid) {
     return res.status(400).json({ error: "Invalid or Expired OTP." });
   }
-
   await OTP.deleteOne({ email });
-
   return res.status(200).json({ message: "OTP Verified Successful" });
 };
