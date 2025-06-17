@@ -1,7 +1,10 @@
 import mongoose, { Types } from "mongoose";
 import Directory from "../models/dirModel.js";
+import File from "../models/fileModel.js";
 import Session from "../models/SessionModel.js";
 import User from "../models/userModel.js";
+import path from "path";
+import { rm } from "fs/promises";
 
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -70,9 +73,22 @@ export const loginUser = async (req, res) => {
     });
 
   const user = await User.findOne({ email });
-  if (!user || !(user.comparePassword(password)))
+
+  if (user.isDeleted) {
+    return res
+      .status(403)
+      .json({ message: "User account is deactivated or deleted." });
+  }
+
+  if (!user.password) {
+    return res
+      .status(403)
+      .json({ message: "User account is created using google." });
+  }
+
+  if (!user || !user.comparePassword(password))
     return res.status(404).json({
-      error: "Invalid Credentials",
+      message: "Invalid Credentials",
     });
 
   const userSessions = await Session.find({ userId: user._id });
@@ -102,6 +118,7 @@ export const getUserInfo = (req, res) => {
     email: req.user.email,
     name: req.user.name,
     picture: req.user.picture,
+    role: req.user.role,
   });
 };
 
@@ -114,5 +131,75 @@ export const logoutUser = async (req, res) => {
 
 export const logoutAll = async (req, res) => {
   await Session.deleteMany({ userId: req.user._id });
+  res.status(204).end();
+};
+
+export const getAllUsers = async (req, res) => {
+  const currentUser = req.user;
+  const AllUsers = await User.find()
+    .select("name email picture role isDeleted")
+    .lean();
+  const sessions = await Session.find().select("userId").lean();
+  const sessionUserIds = new Set(sessions.map((s) => s.userId.toString()));
+
+  const nonDeletedUsers = AllUsers.filter((user) => !user.isDeleted);
+  const Users = nonDeletedUsers
+    .filter((user) => user._id.toString() !== currentUser._id.toString())
+    .map((user) => {
+      return {
+        _id: user._id,
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        role: user.role,
+        isLoggedIn: sessionUserIds.has(user._id.toString()),
+      };
+    });
+  res.json({ Users, currentUser });
+};
+
+export const logoutSpecificUser = async (req, res) => {
+  const currentUser = req.user;
+  const { userId } = req.params;
+  const user = await User.findOne({ _id: userId }).select("role").lean();
+
+  // Manager cannot logout admin.
+  if (currentUser.role === "Manager" && user.role === "Admin") {
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to make this action" });
+  }
+
+  await Session.deleteMany({ userId });
+  res.status(204).end();
+};
+
+export const DeleteSpecificUser = async (req, res) => {
+  const currentUser = req.user;
+  const { userId } = req.params;
+  const user = await User.findOne({ _id: userId }).select("role");
+
+  // User cannot delete itself.
+  if (currentUser._id.toString() === user._id.toString()) {
+    return res
+      .status(403)
+      .json({ message: "You are not allowed to delete your self" });
+  }
+
+  // Manager cannot delete Admin user.
+  if (currentUser.role === "Manager" && user.role === "Admin") {
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to make this action" });
+  }
+
+  // Deleting all sessions of the user
+  await Session.deleteMany({ userId });
+
+  // Soft deleting user.
+  user.isDeleted = true;
+  await user.save();
+
   res.status(204).end();
 };

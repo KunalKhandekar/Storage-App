@@ -21,6 +21,7 @@ export default function RegistrationForm() {
   const URL = "http://localhost:4000";
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    setError("");
     console.log("Google Login Success:", credentialResponse);
     const res = await fetch(`${URL}/auth/google`, {
       method: "POST",
@@ -32,7 +33,8 @@ export default function RegistrationForm() {
     });
 
     const resData = await res.json();
-    if (res.ok) {
+    console.log(resData);
+    if (resData) {
       navigate("/");
     }
   };
@@ -59,13 +61,13 @@ export default function RegistrationForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify({ email: formData.email, action: "register" }),
       });
 
       const data = await res.json();
 
-      if (data.error) {
-        setError(data.error);
+      if (res.status === 401) {
+        setError(data.message);
       } else {
         setSuccess("OTP sent successfully! Please check your email.");
         setCurrentStep("otp");

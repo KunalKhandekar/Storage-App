@@ -10,7 +10,14 @@ export default async function checkAuth(req, res, next) {
   if (!session) {
     return res.status(401).json({ error: "Not logged in" });
   }
-  const user = session.userId; 
+  const user = session.userId;
+
+  if (user.isDeleted) {
+    return res
+      .status(403)
+      .json({ message: "User account is deactivated or deleted." });
+  };
+  
   req.user = user;
   next();
 }

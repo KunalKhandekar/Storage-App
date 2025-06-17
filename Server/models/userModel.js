@@ -30,6 +30,16 @@ const userSchema = new Schema(
       default:
         "https://img.freepik.com/premium-vector/round-gray-circle-with-simple-human-silhouette-light-gray-shadow-around-circle_213497-4963.jpg?semt=ais_hybrid&w=740",
     },
+    role: {
+      type: String,
+      enum: ["Admin", "Manager", "User"],
+      default: "User",
+    },
+    isDeleted: {
+      type: Boolean,
+      required: true,
+      default: false,
+    }
   },
   {
     strict: "throw",

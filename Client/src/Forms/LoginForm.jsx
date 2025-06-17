@@ -50,8 +50,8 @@ export default function LoginForm() {
 
       const data = await res.json();
 
-      if (data.error) {
-        setError("Invalid credentials. Please try again.");
+      if (res.status === 403 || res.status === 404) {
+        setError(data.message);
         return;
       }
 
@@ -61,7 +61,7 @@ export default function LoginForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify({ email: formData.email, action: "login" }),
       });
 
       const otpData = await otpRes.json();
@@ -153,7 +153,7 @@ export default function LoginForm() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    console.log("Google Login Success:", credentialResponse);
+    setError("");
     const res = await fetch(`${URL}/auth/google`, {
       method: "POST",
       headers: {
@@ -163,9 +163,15 @@ export default function LoginForm() {
       body: JSON.stringify(credentialResponse),
     });
 
-    const resData = await res.json()
+    const resData = await res.json();
 
-    if(res.ok) {
+    if (res.status === 403) {
+      setError(resData.message);
+      return;
+    }
+
+    console.log(resData);
+    if (resData) {
       navigate("/");
     }
   };
