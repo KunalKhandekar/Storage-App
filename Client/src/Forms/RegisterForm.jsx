@@ -1,3 +1,4 @@
+import { GoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -18,6 +19,23 @@ export default function RegistrationForm() {
   const [success, setSuccess] = useState("");
 
   const URL = "http://localhost:4000";
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    console.log("Google Login Success:", credentialResponse);
+    const res = await fetch(`${URL}/auth/google`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(credentialResponse),
+    });
+
+    const resData = await res.json();
+    if (res.ok) {
+      navigate("/");
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -416,6 +434,28 @@ export default function RegistrationForm() {
               )}
             </button>
           </div>
+
+          {/* Divider and Google Login - Only show on Email step */}
+          {currentStep === "email" && (
+            <>
+              <div className="relative mt-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Or</span>
+                </div>
+              </div>
+
+              {/* Google Login Button with proper alignment */}
+              <div className="mt-6">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => {}}
+                />
+              </div>
+            </>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">

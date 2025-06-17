@@ -15,7 +15,7 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
 
   useEffect(() => {
     getUserDetails();
-  }, []);
+  }, [navigate]);
 
   const Logout = async () => {
     await fetch("http://localhost:4000/user/logout", {
@@ -33,8 +33,6 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
     navigate("/login");
   };
 
-
-
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">
@@ -50,10 +48,11 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
               className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                {user?.name
-                  ?.split(" ")
-                  ?.map((n) => n[0])
-                  .join("")}
+                <img
+                  src={user.picture}
+                  alt="user-Profile-Image"
+                  className="w-full overflow-hidden rounded-full"
+                />
               </div>
               <div className="text-left">
                 <div className="font-medium">{user?.name}</div>

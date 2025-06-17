@@ -10,7 +10,7 @@ export default async function checkAuth(req, res, next) {
   if (!session) {
     return res.status(401).json({ error: "Not logged in" });
   }
-  const user = session.userId; // Whole user Object after populating
+  const user = session.userId; 
   req.user = user;
   next();
 }

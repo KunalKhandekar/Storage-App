@@ -6,6 +6,7 @@ import dirRoutes from "./routes/dirRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import otpRoutes from "./routes/otpRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { connectDB } from "./config/db.js";
 
 export const absolutePath = import.meta.dirname + "/storage/";
@@ -29,6 +30,7 @@ app.use("/file", checkAuth, fileRoutes);
 app.use("/directory", checkAuth, dirRoutes);
 app.use("/user", userRoutes);
 app.use("/otp", otpRoutes);
+app.use("/auth", authRoutes);
 
 app.use((err, req, res, next) => {
   console.log(err);

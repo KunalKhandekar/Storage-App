@@ -14,7 +14,7 @@ const validations = [
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: ["_id", "name", "password", "email", "rootDirId"],
+        required: ["_id", "name", "picture", "email", "rootDirId"],
         additionalProperties: false,
         properties: {
           _id: {
@@ -39,6 +39,9 @@ const validations = [
           rootDirId: {
             bsonType: "objectId",
             description: "rootDirId must be a valid ObjectId",
+          },
+          picture: {
+            bsonType: "string",
           },
           __v: {
             bsonType: "number",
