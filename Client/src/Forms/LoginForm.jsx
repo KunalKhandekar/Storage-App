@@ -50,6 +50,7 @@ export default function LoginForm() {
 
       const data = await res.json();
 
+      console.log(res.status);
       if (res.status === 403 || res.status === 404) {
         setError(data.message);
         return;
@@ -61,6 +62,7 @@ export default function LoginForm() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ email: formData.email, action: "login" }),
       });
 
@@ -96,6 +98,7 @@ export default function LoginForm() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           email: formData.email,
           otp: parseInt(formData.otp),
@@ -128,6 +131,7 @@ export default function LoginForm() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ email: formData.email }),
       });
 

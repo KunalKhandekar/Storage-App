@@ -1,11 +1,11 @@
 import mongoose, { Types } from "mongoose";
+import redisClient from "../config/redis.js";
+import Directory from "../models/dirModel.js";
+import User from "../models/userModel.js";
 import {
   clientID,
   verifyGoogleIdToken,
 } from "../services/googleAuthService.js";
-import Directory from "../models/dirModel.js";
-import User from "../models/userModel.js";
-import Session from "../models/SessionModel.js";
 
 export const loginWithGoogle = async (req, res, next) => {
   const IdToken = req.body.credential;
@@ -33,26 +33,30 @@ export const loginWithGoogle = async (req, res, next) => {
       }
 
       // Limit to 2 sessions
-      const userSessions = await Session.find({ userId: userFound._id });
+      const userSessions = await redisClient.ft.search(
+        "userIdIdx",
+        `@userId:{${userFound._id}}`,
+        {
+          RETURN: [],
+        }
+      );
 
-      if (userSessions.length >= 2) {
-        let oldestSession = userSessions[0];
-        userSessions.forEach((session) => {
-          if (session.createdAt < oldestSession.createdAt) {
-            oldestSession = session;
-          }
-        });
-        await Session.deleteOne({ _id: oldestSession._id });
+      if (userSessions.total >= 2) {
+        await redisClient.del(userSessions.documents[0].id);
       }
 
-      const session = await Session.create({ userId: userFound._id });
-
-      res.cookie("token", session._id, {
+      const sessionID = crypto.randomUUID();
+      const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
+      await redisClient.json.set(`session:${sessionID}`, "$", {
+        userId: userFound._id,
+        rootDirId: userFound.rootDirId,
+      });
+      await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
+      res.cookie("token", sessionID, {
         httpOnly: true,
         signed: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: sessionExpiry,
       });
-
       return res.status(200).json({
         message: "Logged In",
       });
@@ -90,12 +94,16 @@ export const loginWithGoogle = async (req, res, next) => {
       { session: mongooseSession }
     );
 
-    const session = await Session.create({ userId });
-
-    res.cookie("token", session._id, {
+    const sessionID = crypto.randomUUID();
+    const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
+    await redisClient.json.set(`session:${sessionID}`, "$", {
+      userId: userFound._id,
+    });
+    await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
+    res.cookie("token", sessionID, {
       httpOnly: true,
       signed: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: sessionExpiry,
     });
 
     await mongooseSession.commitTransaction();

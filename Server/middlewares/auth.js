@@ -1,4 +1,5 @@
-import Session from "../models/SessionModel.js";
+import redisClient from "../config/redis.js";
+import User from "../models/userModel.js";
 
 export default async function checkAuth(req, res, next) {
   const { token } = req.signedCookies;
@@ -6,18 +7,18 @@ export default async function checkAuth(req, res, next) {
     return res.status(401).json({ error: "Not logged in" });
   }
 
-  const session = await Session.findOne({ _id: token }).populate("userId");
+  const session = await redisClient.json.get(`session:${token}`);
   if (!session) {
     return res.status(401).json({ error: "Not logged in" });
   }
-  const user = session.userId;
+  const user = await User.findById(session.userId).select("-password").lean();
 
   if (user.isDeleted) {
     return res
       .status(403)
       .json({ message: "User account is deactivated or deleted." });
-  };
-  
+  }
+
   req.user = user;
   next();
 }
