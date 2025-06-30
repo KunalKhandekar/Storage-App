@@ -3,8 +3,11 @@ import path from "node:path";
 import { absolutePath } from "../app.js";
 import Directory from "../models/dirModel.js";
 import File from "../models/fileModel.js";
+import { StatusCodes } from "http-status-codes";
+import CustomError from "../utils/ErrorResponse.js";
+import CustomSuccess from "../utils/SuccessResponse.js";
 
-export const getDir = async (req, res) => {
+export const getDir = async (req, res, next) => {
   const { id } = req.params;
 
   try {
@@ -18,7 +21,10 @@ export const getDir = async (req, res) => {
         }).lean();
 
     if (!directoryData)
-      return res.status(400).json({ error: "Unathorized Access" });
+       throw new CustomError(
+        "You are not authorized to make this action",
+        StatusCodes.UNAUTHORIZED
+      );
 
     const files = (
       await File.find({ parentDirId: directoryData?._id }).lean()
@@ -28,14 +34,13 @@ export const getDir = async (req, res) => {
       await Directory.find({ parentDirId: directoryData?._id }).lean()
     ).map((dir) => ({ ...dir, type: "directory" }));
 
-    res.status(200).json({ ...directoryData, files, directory });
+    return CustomSuccess.send(res, null, StatusCodes.OK, { ...directoryData, files, directory })
   } catch (error) {
-    console.log(error.message);
-    res.status(404).json({ message: "Failed to get directory details" });
+    next(error);
   }
 };
 
-export const updateDir = async (req, res) => {
+export const updateDir = async (req, res, next) => {
   const { id } = req.params;
   const user = req.user;
   const { name } = req.body;
@@ -47,14 +52,13 @@ export const updateDir = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    res.status(200).json({ message: "Directory Renamed" });
+    return CustomSuccess.send(res, "Directory renamed", StatusCodes.OK);
   } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Failed to update" });
+    next(error);
   }
 };
 
-export const createDir = async (req, res) => {
+export const createDir = async (req, res, next) => {
   const user = req.user;
   const parentDirId = req.params.parentDirId || user.rootDirId;
   const { dirname } = req.headers;
@@ -65,8 +69,11 @@ export const createDir = async (req, res) => {
       userId: req.user._id,
     }).lean();
 
-    if (!dirObj) return res.status(400).json({ error: "Unathorized Access" });
-
+    if (!dirObj)
+      throw new CustomError(
+        "You are not authorized to make this action",
+        StatusCodes.UNAUTHORIZED
+      );
     const dir = new Directory({
       name: dirname,
       parentDirId,
@@ -74,14 +81,13 @@ export const createDir = async (req, res) => {
     });
 
     await dir.save();
-    res.status(200).json({ message: "Directory Created" });
+    return CustomSuccess.send(res, "Directory created", StatusCodes.OK);
   } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Failed to create folder" });
+    next(error);
   }
 };
 
-export const deleteDir = async (req, res) => {
+export const deleteDir = async (req, res, next) => {
   const { id } = req.params;
   const user = req.user;
 
@@ -114,7 +120,11 @@ export const deleteDir = async (req, res) => {
       { projection: { _id: 1 } }
     ).lean();
 
-    if (!dirObj) return res.status(400).json({ error: "Unathorized Access" });
+    if (!dirObj)
+      throw new CustomError(
+        "You are not authorized to make this action",
+        StatusCodes.UNAUTHORIZED
+      );
 
     const { files, directories } = await deleteDirectory(id);
 
@@ -128,9 +138,8 @@ export const deleteDir = async (req, res) => {
 
     await File.deleteMany({ _id: { $in: files?.map((file) => file._id) } });
 
-    res.status(200).json({ message: "File Deleted" });
+    return CustomSuccess.send(res, "Directory deleted", StatusCodes.OK);
   } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Failed to delete" });
+    next(error);
   }
 };

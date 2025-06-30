@@ -1,14 +1,26 @@
 import { Resend } from "resend";
+import CustomError from "../utils/ErrorResponse.js";
+import { StatusCodes } from "http-status-codes";
 
-const resend = new Resend("re_e7bSjkA8_61C5xGQE1jqsg77VfQLpe6Dj");
+const resend = new Resend(process.env.RESEND_KEY);
 
 export const sendOTPService = async (email, otp) => {
-  const res = await resend.emails.send({
-    from: "Storage App <otp@resend.dev>",
-    to: [email],
-    subject: "Your OTP for Authentication",
-    text: `Your OTP is ${otp}`,
-  });
+  try {
+    const res = await resend.emails.send({
+      from: "StorageApp <StorageApp@kunalkhandekar.tech>",
+      to: [email],
+      subject: "Your OTP for Authentication",
+      text: `Your OTP is ${otp}`,
+    });
 
-  return res;
+    return res;
+  } catch (error) {
+    throw new CustomError(
+      "Error while sending email",
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      {
+        details: error.message,
+      }
+    );
+  }
 };

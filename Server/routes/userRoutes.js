@@ -11,9 +11,11 @@ import {
   registerUser,
 } from "../controllers/userControllers.js";
 import { checkRole } from "../middlewares/checkRole.js";
+import validateRequest from "../middlewares/validateRequest.js";
 
 const router = Router();
 
+router.param("userId", validateRequest);
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/", checkAuth, getUserInfo);

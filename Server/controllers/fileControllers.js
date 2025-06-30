@@ -3,17 +3,19 @@ import path from "path";
 import { absolutePath } from "../app.js";
 import Directory from "../models/dirModel.js";
 import File from "../models/fileModel.js";
+import CustomError from "../utils/ErrorResponse.js";
+import { StatusCodes } from "http-status-codes";
+import CustomSuccess from "../utils/SuccessResponse.js";
 
-export const uploadFile = async (req, res) => {
-
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: "No files uploaded" });
-  }
-
-  const { originalname, storedName } = req.files[0];
-  const parentDirId = req.headers.parentdirid || req.user.rootDirId;
-
+export const uploadFile = async (req, res, next) => {
   try {
+    if (!req.files || req.files.length === 0) {
+      throw new CustomError("No files uploaded", StatusCodes.BAD_REQUEST);
+    }
+
+    const { originalname, storedName } = req.files[0];
+    const parentDirId = req.headers.parentdirid || req.user.rootDirId;
+
     const parentDirectory = await Directory.findOne({
       _id: parentDirId,
       userId: req.user._id,
@@ -21,9 +23,10 @@ export const uploadFile = async (req, res) => {
 
     if (!parentDirectory) {
       await rm(path.join(absolutePath, storedName));
-      return res.status(400).json({
-        error: "You are not authorized to upload file",
-      });
+      throw new CustomError(
+        "You are not authorized to make this action",
+        StatusCodes.UNAUTHORIZED
+      );
     }
 
     await File.create({
@@ -33,35 +36,38 @@ export const uploadFile = async (req, res) => {
       parentDirId: parentDirectory._id,
     });
 
-    res.status(200).json({ message: "File Uploaded" });
+    return CustomSuccess.send(res, "File uploaded", StatusCodes.CREATED);
   } catch (error) {
-    console.error(error);
-    res.status(404).json({ message: "Failed to Upload file" });
+    next(error);
   }
 };
 
-export const getFileById = async (req, res) => {
-  const { id } = req.params;
+export const getFileById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-  const fileObj = await File.findOne({
-    _id: id,
-    userId: req.user._id,
-  });
+    const fileObj = await File.findOne({
+      _id: id,
+      userId: req.user._id,
+    });
 
-  if (!fileObj) {
-    return res.status(404).json({ message: "File not found" });
+    if (!fileObj) {
+      throw new CustomError("File not found", StatusCodes.NOT_FOUND);
+    }
+
+    const filePath = path.join(absolutePath, fileObj.storedName);
+
+    if (req.query.action === "download") {
+      return res.download(filePath, fileObj.name);
+    }
+
+    res.sendFile(filePath);
+  } catch (error) {
+    next(error);
   }
-
-  const filePath = path.join(absolutePath, fileObj.storedName);
-
-  if (req.query.action === "download") {
-    return res.download(filePath, fileObj.name);
-  }
-
-  res.sendFile(filePath);
 };
 
-export const renameFile = async (req, res) => {
+export const renameFile = async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.body;
 
@@ -71,20 +77,18 @@ export const renameFile = async (req, res) => {
   }).lean();
 
   if (!fileObj) {
-    return res.status(404).json({ message: "File not found" });
+    throw new CustomError("File not found", StatusCodes.NOT_FOUND);
   }
 
   try {
-    await File
-      .updateOne({ _id: fileObj._id }, { $set: { name } }).lean();
-    res.json({ message: "File Renamed" });
+    await File.updateOne({ _id: fileObj._id }, { $set: { name } }).lean();
+    return CustomSuccess.send(res, "File renamed", StatusCodes.OK);
   } catch (error) {
-    console.error(error);
-    res.status(404).json({ message: "File not found" });
+    next(error);
   }
 };
 
-export const deleteFile = async (req, res) => {
+export const deleteFile = async (req, res, next) => {
   const { id } = req.params;
 
   const fileObj = await File.findOne({
@@ -93,15 +97,14 @@ export const deleteFile = async (req, res) => {
   });
 
   if (!fileObj) {
-    return res.status(404).json({ message: "File not found" });
+    throw new CustomError("File not found", StatusCodes.NOT_FOUND);
   }
 
   try {
     await File.deleteOne({ _id: fileObj._id });
     await rm(path.join(absolutePath, fileObj.storedName));
-    res.json({ message: "File Deleted" });
+    return CustomSuccess.send(res, "File deleted", StatusCodes.OK);
   } catch (error) {
-    console.error(error);
-    res.status(404).json({ message: "File not found" });
+    next(error);
   }
 };

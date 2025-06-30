@@ -36,27 +36,6 @@ export default function LoginForm() {
     setSuccess("");
 
     try {
-      const res = await fetch(`${URL}/user/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-        credentials: "include",
-      });
-
-      const data = await res.json();
-
-      console.log(res.status);
-      if (res.status === 403 || res.status === 404) {
-        setError(data.message);
-        return;
-      }
-
-      // If credentials are valid, send OTP
       const otpRes = await fetch(`${URL}/otp/send-otp`, {
         method: "POST",
         headers: {
@@ -68,8 +47,8 @@ export default function LoginForm() {
 
       const otpData = await otpRes.json();
 
-      if (otpData.error) {
-        setError("Failed to send verification code. Please try again.");
+      if (!otpData.success) {
+        setError(otpData.message);
       } else {
         setSuccess("Verification code sent to your email!");
         setCurrentStep("otp");
@@ -93,22 +72,23 @@ export default function LoginForm() {
     setSuccess("");
 
     try {
-      const res = await fetch(`${URL}/otp/verify-otp`, {
+      const res = await fetch(`${URL}/user/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({
           email: formData.email,
-          otp: parseInt(formData.otp),
+          password: formData.password,
+          otp: formData.otp,
         }),
+        credentials: "include",
       });
 
-      const data = await res.json();
+      const resData = await res.json();
 
-      if (data.error) {
-        setError(data.error);
+      if (!resData.success) {
+        setError(resData.message);
       } else {
         navigate("/");
       }
@@ -404,7 +384,7 @@ export default function LoginForm() {
               </div>
 
               {/* Google Login Button with proper alignment */}
-              <div className="mt-6">
+              <div className="mt-6 flex justify-center">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
