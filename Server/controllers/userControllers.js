@@ -68,6 +68,8 @@ export const registerUser = async (req, res, next) => {
           email,
           password,
           rootDirId,
+          canLoginWithPassword: true,
+          createdWith: "email",
         },
       ],
       { session }

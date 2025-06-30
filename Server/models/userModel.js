@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import bcrypt, { compare } from "bcrypt";
+import { required } from "zod/v4-mini";
 
 const userSchema = new Schema(
   {
@@ -27,8 +28,10 @@ const userSchema = new Schema(
     picture: {
       type: String,
       required: true,
-      default:
-        "https://img.freepik.com/premium-vector/round-gray-circle-with-simple-human-silhouette-light-gray-shadow-around-circle_213497-4963.jpg?semt=ais_hybrid&w=740",
+      default: function () {
+        const encodedName = encodeURIComponent(this.name || "User");
+        return `https://api.dicebear.com/7.x/initials/svg?seed=${encodedName}`;
+      },
     },
     role: {
       type: String,
@@ -39,7 +42,16 @@ const userSchema = new Schema(
       type: Boolean,
       required: true,
       default: false,
-    }
+    },
+    createdWith: {
+      type: String,
+      enum: ["email", "google", "github"],
+      required: true,
+    },
+    canLoginWithPassword: {
+      type: Boolean,
+      required: true,
+    },
   },
   {
     strict: "throw",

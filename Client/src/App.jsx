@@ -1,14 +1,18 @@
-
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import DirectoryView from "./DirectoryView/main";
 import LoginForm from "./Forms/LoginForm";
 import RegistrationForm from "./Forms/RegisterForm";
 import UsersTable from "./AdminView/UsersTable";
+import AuthError from "./components/AuthError";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <DirectoryView />,
+  },
+  {
+    path: "/auth/error",
+    element: <AuthError />,
   },
   {
     path: "/directory/:dirId",
@@ -24,8 +28,8 @@ const router = createBrowserRouter([
   },
   {
     path: "/users",
-    element: <UsersTable />
-  }
+    element: <UsersTable />,
+  },
 ]);
 
 const App = () => {
