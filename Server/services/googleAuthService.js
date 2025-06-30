@@ -1,20 +1,24 @@
 import { OAuth2Client } from "google-auth-library";
-
-
-export const clientID = '53857639641-1se37lrtof61kmpu74g521k95erfpmkc.apps.googleusercontent.com';
+import CustomError from "../utils/ErrorResponse.js";
+import { StatusCodes } from "http-status-codes";
 
 const client = new OAuth2Client();
 
-export async function verifyGoogleIdToken(idToken, client_id) {
+export async function verifyGoogleIdToken(idToken) {
   try {
     const ticket = await client.verifyIdToken({
       idToken,
-      audience: client_id,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
     return payload;
   } catch (error) {
-    console.log(error.message);
-    return { error: error.message };
+    throw new CustomError(
+      "Error while verifying ID_TOKEN",
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      {
+        details: error.message,
+      }
+    );
   }
 }

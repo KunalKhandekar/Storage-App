@@ -1,7 +1,4 @@
-import {
-  Folder,
-  X
-} from "lucide-react";
+import { Folder, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "./Header";
@@ -22,27 +19,23 @@ const FileUploadApp = () => {
   const URL = "http://localhost:4000";
 
   const getItemList = async () => {
-    const res = await fetch(`${URL}/directory/${dirId || ""}`, {
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        navigate("/login");
-      } else {
-        console.error(`Fetch failed with status: ${res.status}`);
-      }
-      return;
-    }
-
     try {
-      const dirItems = await res.json();
+      const res = await fetch(`${URL}/directory/${dirId || ""}`, {
+        credentials: "include",
+      });
 
-      setFiles(dirItems?.files);
-      setDirectories(dirItems?.directory);
-      setCurrentPath(dirItems?.name);
-    } catch (err) {
-      console.error("Error fetching files:", err.message);
+      const resData = await res.json();
+
+      if (resData.success) {
+        console.log(resData.data);
+        setFiles(resData?.data?.files);
+        setDirectories(resData?.data?.directory);
+        setCurrentPath(resData?.data?.name);
+      } else {
+        navigate("/login");
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 

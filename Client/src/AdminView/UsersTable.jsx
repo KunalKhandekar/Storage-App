@@ -17,20 +17,21 @@ const UsersTable = () => {
         credentials: "include",
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.Users);
-        setRole(data.currentUser.role);
-        setCurrentUser(data.currentUser);
-        setError(null);
-      } else if (response.status === 403) {
-        setError("You are not authorized to access this route.");
-        navigate("/");
-      } else if (response.status === 401) {
+      if (response.status === 401) {
         navigate("/login");
+        return;
+      }
+
+      const resData = await response.json();
+
+      if (resData.success) {
+        setUsers(resData.data.Users);
+        setRole(resData.data.currentUser.role);
+        setCurrentUser(resData.data.currentUser);
+        setError(null);
       } else {
+        setError(resData.message);
         setUsers([]);
-        setError("Failed to fetch users - Server responded with an error");
       }
     } catch (err) {
       setUsers([]);

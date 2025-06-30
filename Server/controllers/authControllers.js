@@ -2,27 +2,27 @@ import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
 import Directory from "../models/dirModel.js";
 import User from "../models/userModel.js";
-import {
-  clientID,
-  verifyGoogleIdToken,
-} from "../services/googleAuthService.js";
+import { verifyGoogleIdToken } from "../services/googleAuthService.js";
+import CustomError from "../utils/ErrorResponse.js";
+import { StatusCodes } from "http-status-codes";
+import CustomSuccess from "../utils/SuccessResponse.js";
 
 export const loginWithGoogle = async (req, res, next) => {
   const IdToken = req.body.credential;
-  const userData = await verifyGoogleIdToken(IdToken, clientID);
-  const { email, name, picture, sub } = userData;
   const mongooseSession = await mongoose.startSession();
-
   let transactionStarted = false;
 
   try {
+    const userData = await verifyGoogleIdToken(IdToken);
+    const { email, name, picture } = userData;
     const userFound = await User.findOne({ email });
 
     // If user is found and marked as deleted
     if (userFound?.isDeleted) {
-      return res
-        .status(403)
-        .json({ message: "User account is deactivated or deleted." });
+      throw new CustomError(
+        "User account is deactivated or deleted.",
+        StatusCodes.FORBIDDEN
+      );
     }
 
     if (userFound) {
@@ -57,9 +57,7 @@ export const loginWithGoogle = async (req, res, next) => {
         signed: true,
         maxAge: sessionExpiry,
       });
-      return res.status(200).json({
-        message: "Logged In",
-      });
+      return CustomSuccess.send(res, "Logged in", StatusCodes.OK);
     }
 
     // Create new user and root directory
@@ -97,7 +95,7 @@ export const loginWithGoogle = async (req, res, next) => {
     const sessionID = crypto.randomUUID();
     const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
     await redisClient.json.set(`session:${sessionID}`, "$", {
-      userId: userFound._id,
+      userId: userId,
     });
     await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
     res.cookie("token", sessionID, {
@@ -108,9 +106,11 @@ export const loginWithGoogle = async (req, res, next) => {
 
     await mongooseSession.commitTransaction();
 
-    return res.status(200).json({
-      message: "Account Created & Logged In",
-    });
+    return CustomSuccess.send(
+      res,
+      "Account created & logged in",
+      StatusCodes.OK
+    );
   } catch (error) {
     if (transactionStarted) {
       await mongooseSession.abortTransaction();

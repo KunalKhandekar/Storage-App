@@ -5,35 +5,44 @@ import { useNavigate } from "react-router-dom";
 const Header = ({ showUserDropdown, setShowUserDropdown }) => {
   const [user, setUser] = useState({});
   const navigate = useNavigate();
-  
+
+  const BASE_URL = "http://localhost:4000";
+
   const getUserDetails = async () => {
-    const res = await fetch("http://localhost:4000/user", {
-      credentials: "include",
-    });
-    const data = await res.json();
-    setUser(data);
+    try {
+      const res = await fetch(`${BASE_URL}/user`, {
+        credentials: "include",
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        setUser(resData.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
-  
+
   useEffect(() => {
     getUserDetails();
   }, [navigate]);
-  
+
   const Logout = async () => {
-    await fetch("http://localhost:4000/user/logout", {
+    const res = await fetch(`${BASE_URL}/user/logout`, {
       method: "POST",
       credentials: "include",
     });
-    navigate("/login");
+
+    if (res.status === 204) navigate("/login");
   };
-  
+
   const LogoutAll = async () => {
-    await fetch("http://localhost:4000/user/logout-all", {
+    const res = await fetch(`${BASE_URL}/user/logout-all`, {
       method: "POST",
       credentials: "include",
     });
-    navigate("/login");
+    if (res.status === 204) navigate("/login");
   };
-  
+
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">

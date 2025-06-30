@@ -8,20 +8,21 @@ import userRoutes from "./routes/userRoutes.js";
 import otpRoutes from "./routes/otpRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { connectDB } from "./config/db.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 export const absolutePath = import.meta.dirname + "/storage/";
-const secretKey = "HelloWorld";
+const secretKey = process.env.COOKIE_SECRET;
 
 await connectDB();
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 app.use(express.json());
 app.use(cookieParser(secretKey));
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [process.env.ALLOWED_ORGS],
     credentials: true,
   })
 );
@@ -32,10 +33,8 @@ app.use("/user", userRoutes);
 app.use("/otp", otpRoutes);
 app.use("/auth", authRoutes);
 
-app.use((err, req, res, next) => {
-  console.log(err);
-  res.status(500).json({ error: "Something Went wrong" });
-});
+// Error Handler Middleware with Custom Error Class.
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

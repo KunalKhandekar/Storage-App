@@ -1,14 +1,19 @@
 import mongoose from "mongoose";
 
-export const connectDB = async () => {
-  await mongoose.connect(
-    "mongodb://admin:admin@localhost:27017/StorageApp?replicaSet=rs0&authSource=admin"
-  );
-  console.log("DB Connected");
-};
+export async function connectDB() {
+  try {
+    await mongoose.connect(process.env.MONGODB_URL);
+    console.log("Database connected");
+  } catch (err) {
+    console.log(err);
+    console.log("Could Not Connect to the Database");
+    process.exit(1);
+  }
+}
 
+// It doesn't work with --watch command
 process.on("SIGINT", async () => {
-  await client.close();
-  console.log("Client Disconnected");
+  await mongoose.disconnect();
+  console.log("Database Disconnected!");
   process.exit(0);
 });

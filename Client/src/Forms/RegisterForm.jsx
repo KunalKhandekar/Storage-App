@@ -12,8 +12,8 @@ export default function RegistrationForm() {
     otp: "",
   });
 
-  // Step tracking: 'email' -> 'otp' -> 'password'
-  const [currentStep, setCurrentStep] = useState("email");
+  // Step tracking: 'credentials' -> 'otp'
+  const [currentStep, setCurrentStep] = useState("credentials");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -34,7 +34,7 @@ export default function RegistrationForm() {
 
     const resData = await res.json();
     console.log(resData);
-    if (resData) {
+    if (resData.success) {
       navigate("/");
     }
   };
@@ -46,8 +46,8 @@ export default function RegistrationForm() {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.name) {
-      setError("Please enter your name and email address");
+    if (!formData.email || !formData.name || !formData.password) {
+      setError("Please fill in all fields");
       return;
     }
 
@@ -64,12 +64,12 @@ export default function RegistrationForm() {
         body: JSON.stringify({ email: formData.email, action: "register" }),
       });
 
-      const data = await res.json();
+      const resData = await res.json();
 
-      if (res.status === 401) {
-        setError(data.message);
+      if (!resData.success) {
+        setError(resData.message);
       } else {
-        setSuccess("OTP sent successfully! Please check your email.");
+        setSuccess(resData.message);
         setCurrentStep("otp");
       }
     } catch (err) {
@@ -79,48 +79,10 @@ export default function RegistrationForm() {
     }
   };
 
-  const handleVerifyOTP = async (e) => {
+  const handleFinalSubmit = async (e) => {
     e.preventDefault();
     if (!formData.otp) {
       setError("Please enter the OTP");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      const res = await fetch(`${URL}/otp/verify-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          otp: parseInt(formData.otp),
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setSuccess("Email verified successfully! Now create your password.");
-        setCurrentStep("password");
-      }
-    } catch (err) {
-      setError(err.message || "OTP verification failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFinalSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.password) {
-      setError("Please enter a password");
       return;
     }
 
@@ -137,13 +99,14 @@ export default function RegistrationForm() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          otp: formData.otp,
         }),
       });
 
-      const data = await res.json();
+      const resData = await res.json();
 
-      if (data.error) {
-        setError(data.error);
+      if (!resData.success) {
+        setError(resData.message);
       } else {
         navigate("/login");
       }
@@ -159,11 +122,16 @@ export default function RegistrationForm() {
     await handleSendOTP({ preventDefault: () => {} });
   };
 
-  const handleBackToEmail = () => {
-    setCurrentStep("email");
+  const handleBackToCredentials = () => {
+    setCurrentStep("credentials");
     setFormData({ ...formData, otp: "" });
     setError("");
     setSuccess("");
+  };
+
+    const handleGoogleError = () => {
+    console.log("Google Login Failed");
+    setError("Google login failed. Please try again.");
   };
 
   return (
@@ -173,9 +141,10 @@ export default function RegistrationForm() {
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
             <p className="mt-2 text-sm text-gray-600">
-              {currentStep === "email" && "Enter your details to get started"}
-              {currentStep === "otp" && "Verify your email address"}
-              {currentStep === "password" && "Complete your registration"}
+              {currentStep === "credentials" &&
+                "Enter your details to get started"}
+              {currentStep === "otp" &&
+                "Verify your email to complete registration"}
             </p>
           </div>
 
@@ -184,53 +153,33 @@ export default function RegistrationForm() {
             <div className="flex items-center space-x-4">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 ${
-                  currentStep === "email"
+                  currentStep === "credentials"
                     ? "bg-indigo-600 border-indigo-600 text-white"
-                    : currentStep === "otp" || currentStep === "password"
-                    ? "bg-green-500 border-green-500 text-white"
-                    : "border-gray-300 text-gray-400"
+                    : "bg-green-500 border-green-500 text-white"
                 }`}
               >
                 1
               </div>
               <div
                 className={`w-8 h-1 ${
-                  currentStep === "otp" || currentStep === "password"
-                    ? "bg-green-500"
-                    : "bg-gray-300"
+                  currentStep === "otp" ? "bg-green-500" : "bg-gray-300"
                 }`}
               ></div>
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 ${
                   currentStep === "otp"
                     ? "bg-indigo-600 border-indigo-600 text-white"
-                    : currentStep === "password"
-                    ? "bg-green-500 border-green-500 text-white"
                     : "border-gray-300 text-gray-400"
                 }`}
               >
                 2
               </div>
-              <div
-                className={`w-8 h-1 ${
-                  currentStep === "password" ? "bg-green-500" : "bg-gray-300"
-                }`}
-              ></div>
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 ${
-                  currentStep === "password"
-                    ? "bg-indigo-600 border-indigo-600 text-white"
-                    : "border-gray-300 text-gray-400"
-                }`}
-              >
-                3
-              </div>
             </div>
           </div>
 
           <div className="space-y-6">
-            {/* Step 1: Name and Email */}
-            {currentStep === "email" && (
+            {/* Step 1: Credentials */}
+            {currentStep === "credentials" && (
               <>
                 <div>
                   <label
@@ -264,6 +213,25 @@ export default function RegistrationForm() {
                     name="email"
                     placeholder="Enter your email"
                     value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 placeholder-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    placeholder="Create a strong password"
+                    value={formData.password}
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 placeholder-gray-400"
@@ -305,10 +273,10 @@ export default function RegistrationForm() {
                 <div className="flex justify-between items-center text-sm">
                   <button
                     type="button"
-                    onClick={handleBackToEmail}
+                    onClick={handleBackToCredentials}
                     className="text-indigo-600 hover:text-indigo-500 font-medium"
                   >
-                    ← Change Email
+                    ← Back to Details
                   </button>
                   <button
                     type="button"
@@ -318,50 +286,6 @@ export default function RegistrationForm() {
                   >
                     Resend Code
                   </button>
-                </div>
-              </>
-            )}
-
-            {/* Step 3: Password */}
-            {currentStep === "password" && (
-              <>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="flex items-center justify-center mb-2">
-                    <svg
-                      className="w-5 h-5 text-green-500 mr-2"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="text-sm font-medium text-green-800">
-                      Email Verified!
-                    </span>
-                  </div>
-                  <p className="text-xs text-green-700">{formData.email}</p>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Create Password
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    name="password"
-                    placeholder="Create a strong password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 placeholder-gray-400"
-                  />
                 </div>
               </>
             )}
@@ -384,10 +308,8 @@ export default function RegistrationForm() {
             <button
               type="submit"
               onClick={
-                currentStep === "email"
+                currentStep === "credentials"
                   ? handleSendOTP
-                  : currentStep === "otp"
-                  ? handleVerifyOTP
                   : handleFinalSubmit
               }
               disabled={loading}
@@ -419,26 +341,22 @@ export default function RegistrationForm() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  {currentStep === "email"
+                  {currentStep === "credentials"
                     ? "Sending..."
-                    : currentStep === "otp"
-                    ? "Verifying..."
                     : "Creating Account..."}
                 </div>
               ) : (
                 <>
-                  {currentStep === "email"
+                  {currentStep === "credentials"
                     ? "Send Verification Code"
-                    : currentStep === "otp"
-                    ? "Verify Code"
                     : "Create Account"}
                 </>
               )}
             </button>
           </div>
 
-          {/* Divider and Google Login - Only show on Email step */}
-          {currentStep === "email" && (
+          {/* Divider and Google Login - Only show on Credentials step */}
+          {currentStep === "credentials" && (
             <>
               <div className="relative mt-6">
                 <div className="absolute inset-0 flex items-center">
@@ -449,11 +367,11 @@ export default function RegistrationForm() {
                 </div>
               </div>
 
-              {/* Google Login Button with proper alignment */}
-              <div className="mt-6">
+              {/* Google Login Button */}
+              <div className="mt-6 flex justify-center">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
-                  onError={() => {}}
+                  onError={handleGoogleError}
                 />
               </div>
             </>

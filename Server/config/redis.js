@@ -7,6 +7,7 @@ const redisClient = await createClient()
   })
   .connect();
 
+  // Custom method for deleting many sessions.
 redisClient.deleteManySessions = async function (userId) {
   const userSessions = await this.ft.search(
     "userIdIdx",
