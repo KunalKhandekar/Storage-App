@@ -6,6 +6,8 @@ import { verifyGoogleIdToken } from "../services/googleAuthService.js";
 import CustomError from "../utils/ErrorResponse.js";
 import { StatusCodes } from "http-status-codes";
 import CustomSuccess from "../utils/SuccessResponse.js";
+import githubClient from "../services/githubAuthService.js";
+
 
 export const loginWithGoogle = async (req, res, next) => {
   const IdToken = req.body.credential;
@@ -17,30 +19,33 @@ export const loginWithGoogle = async (req, res, next) => {
     const { email, name, picture } = userData;
     const userFound = await User.findOne({ email });
 
-    // If user is found and marked as deleted
-    if (userFound?.isDeleted) {
-      throw new CustomError(
-        "User account is deactivated or deleted.",
-        StatusCodes.FORBIDDEN
-      );
-    }
-
     if (userFound) {
-      // Update picture if it's not from Google
-      if (!userFound.picture.includes("googleusercontent.com")) {
+      if (userFound.isDeleted) {
+        throw new CustomError(
+          "This account has been deactivated or deleted. Please contact support for recovery.",
+          StatusCodes.FORBIDDEN
+        );
+      }
+
+      if (userFound.createdWith !== "email" && userFound.createdWith !== "google") {
+        throw new CustomError(
+          `This email is already registered using ${userFound.createdWith}. Please login with ${userFound.createdWith}.`,
+          StatusCodes.FORBIDDEN
+        );
+      }
+
+      if (userFound.createdWith === "email") {
+        userFound.createdWith = "google";
+        await userFound.save();
+      }
+
+      if (userFound.picture.includes("api.dicebear.com")) {
         userFound.picture = picture;
         await userFound.save();
       }
 
-      // Limit to 2 sessions
-      const userSessions = await redisClient.ft.search(
-        "userIdIdx",
-        `@userId:{${userFound._id}}`,
-        {
-          RETURN: [],
-        }
-      );
-
+      // Session limiting
+      const userSessions = await redisClient.ft.search("userIdIdx", `@userId:{${userFound._id}}`, { RETURN: [] });
       if (userSessions.total >= 2) {
         await redisClient.del(userSessions.documents[0].id);
       }
@@ -52,71 +57,143 @@ export const loginWithGoogle = async (req, res, next) => {
         rootDirId: userFound.rootDirId,
       });
       await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-      res.cookie("token", sessionID, {
-        httpOnly: true,
-        signed: true,
-        maxAge: sessionExpiry,
-      });
-      return CustomSuccess.send(res, "Logged in", StatusCodes.OK);
+      res.cookie("token", sessionID, { httpOnly: true, signed: true, maxAge: sessionExpiry });
+
+      return CustomSuccess.send(res, "Logged in with Google successfully.", StatusCodes.OK);
     }
 
-    // Create new user and root directory
+    // Register new Google user
     const rootDirId = new Types.ObjectId();
     const userId = new Types.ObjectId();
-
     mongooseSession.startTransaction();
     transactionStarted = true;
 
-    await Directory.create(
-      [
-        {
-          _id: rootDirId,
-          name: `root-${email}`,
-          userId,
-          parentDirId: null,
-        },
-      ],
-      { session: mongooseSession }
-    );
-
-    await User.create(
-      [
-        {
-          _id: userId,
-          name,
-          picture,
-          email,
-          rootDirId,
-        },
-      ],
-      { session: mongooseSession }
-    );
+    await Directory.create([{ _id: rootDirId, name: `root-${email}`, userId, parentDirId: null }], { session: mongooseSession });
+    await User.create([{ _id: userId, name, picture, email, rootDirId, canLoginWithPassword: false, createdWith: "google" }], {
+      session: mongooseSession,
+    });
 
     const sessionID = crypto.randomUUID();
     const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
-    await redisClient.json.set(`session:${sessionID}`, "$", {
-      userId: userId,
-    });
+    await redisClient.json.set(`session:${sessionID}`, "$", { userId });
     await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-    res.cookie("token", sessionID, {
-      httpOnly: true,
-      signed: true,
-      maxAge: sessionExpiry,
-    });
+    res.cookie("token", sessionID, { httpOnly: true, signed: true, maxAge: sessionExpiry });
 
     await mongooseSession.commitTransaction();
-
-    return CustomSuccess.send(
-      res,
-      "Account created & logged in",
-      StatusCodes.OK
-    );
+    return CustomSuccess.send(res, "New account created with Google and logged in.", StatusCodes.OK);
   } catch (error) {
-    if (transactionStarted) {
-      await mongooseSession.abortTransaction();
-    }
+    if (transactionStarted) await mongooseSession.abortTransaction();
     next(error);
   } finally {
     mongooseSession.endSession();
   }
 };
+
+export const redirectToAuthURL = async (req, res, next) => {
+  const { state, url } = githubClient.getWebFlowAuthorizationUrl({
+    scopes: ["read:user", "user:email"],
+    redirectUrl: `${process.env.BASE_URL}/auth/github/callback`,
+  });
+
+  res.cookie("_github_state", state, {
+    httpOnly: true,
+    signed: true,
+    maxAge: 1000 * 60 * 10,
+  });
+
+  res.redirect(url);
+};
+
+export const loginWithGithub = async (req, res, next) => {
+  const { _github_state } = req.signedCookies;
+  const { code, state } = req.query;
+
+  if (!_github_state || !code || !state || _github_state !== state) {
+    return res.redirect(
+      `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent("GitHub login failed: Invalid state or missing code.")}`
+    );
+  }
+
+  const mongooseSession = await mongoose.startSession();
+  let transactionStarted = false;
+
+  try {
+    const { email, name, picture } = await githubClient.getUserDetails(code);
+    if (!email) {
+      return res.redirect(
+        `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent("Your GitHub email is not verified. Please verify and try again.")}`
+      );
+    }
+
+    const userFound = await User.findOne({ email });
+
+    if (userFound) {
+      if (userFound.isDeleted) {
+        return res.redirect(
+          `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent("This account is deactivated. Contact support.")}`
+        );
+      }
+
+      if (userFound.createdWith !== "email" && userFound.createdWith !== "github") {
+        return res.redirect(
+          `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent("This email is already registered with another method. Please login with your original provider.")}`
+        );
+      }
+
+      if (userFound.createdWith === "email") {
+        userFound.createdWith = "github";
+        await userFound.save();
+      }
+
+      if (userFound.picture.includes("api.dicebear.com")) {
+        userFound.picture = picture;
+        await userFound.save();
+      }
+
+      const userSessions = await redisClient.ft.search("userIdIdx", `@userId:{${userFound._id}}`, { RETURN: [] });
+      if (userSessions.total >= 2) {
+        await redisClient.del(userSessions.documents[0].id);
+      }
+
+      const sessionID = crypto.randomUUID();
+      const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
+      await redisClient.json.set(`session:${sessionID}`, "$", {
+        userId: userFound._id,
+        rootDirId: userFound.rootDirId,
+      });
+      await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
+      res.cookie("token", sessionID, { httpOnly: true, signed: true, maxAge: sessionExpiry });
+
+      return res.redirect(`${process.env.CLIENT_URL}/`);
+    }
+
+    // Register new GitHub user
+    const rootDirId = new Types.ObjectId();
+    const userId = new Types.ObjectId();
+    mongooseSession.startTransaction();
+    transactionStarted = true;
+
+    await Directory.create([{ _id: rootDirId, name: `root-${email}`, userId, parentDirId: null }], { session: mongooseSession });
+    await User.create([{ _id: userId, name, picture, email, rootDirId, canLoginWithPassword: false, createdWith: "github" }], {
+      session: mongooseSession,
+    });
+
+    const sessionID = crypto.randomUUID();
+    const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
+    await redisClient.json.set(`session:${sessionID}`, "$", { userId });
+    await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
+    res.cookie("token", sessionID, { httpOnly: true, signed: true, maxAge: sessionExpiry });
+
+    await mongooseSession.commitTransaction();
+
+    res.redirect(`${process.env.CLIENT_URL}/`);
+  } catch (error) {
+    if (transactionStarted) await mongooseSession.abortTransaction();
+    return res.redirect(
+      `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent("GitHub login failed. Please try again later or contact support.")}`
+    );
+  } finally {
+    mongooseSession.endSession();
+  }
+};
+

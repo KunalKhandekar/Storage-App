@@ -36,9 +36,9 @@ const checkAction = async (req, res, next) => {
       );
     }
 
-    if (user && !user.password) {
+    if (user && !user.canLoginWithPassword) {
       throw new CustomError(
-        "This account was created with Google. Please use Google Sign-In.",
+        "This account was created with Socail login. Please use Google/Github Sign-In.",
         StatusCodes.BAD_REQUEST
       );
     }

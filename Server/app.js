@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(cookieParser(secretKey));
 app.use(
   cors({
-    origin: [process.env.ALLOWED_ORGS],
+    origin: [process.env.CLIENT_URL],
     credentials: true,
   })
 );

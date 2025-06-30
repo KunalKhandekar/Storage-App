@@ -14,7 +14,17 @@ const validations = [
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: ["_id", "name", "picture", "email", "rootDirId", "role", "isDeleted"],
+        required: [
+          "_id",
+          "name",
+          "picture",
+          "email",
+          "rootDirId",
+          "role",
+          "isDeleted",
+          "createdWith",
+          "canLoginWithPassword",
+        ],
         additionalProperties: false,
         properties: {
           _id: {
@@ -48,6 +58,12 @@ const validations = [
             enum: ["Admin", "Manager", "User"],
           },
           isDeleted: {
+            bsonType: "bool",
+          },
+          createdWith: {
+            bsonType: "string",
+          },
+          canLoginWithPassword: {
             bsonType: "bool",
           },
           __v: {
