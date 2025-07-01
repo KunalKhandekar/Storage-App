@@ -34,9 +34,10 @@ export default function RegistrationForm() {
     });
 
     const resData = await res.json();
-    console.log(resData);
     if (resData.success) {
       navigate("/");
+    } else {
+      setError(resData.message);
     }
   };
 

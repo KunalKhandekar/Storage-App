@@ -4,6 +4,7 @@ import LoginForm from "./Forms/LoginForm";
 import RegistrationForm from "./Forms/RegisterForm";
 import UsersTable from "./AdminView/UsersTable";
 import AuthError from "./components/AuthError";
+import SettingsPage from "./components/Settings";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginForm />,
+  },
+  {
+    path: "/settings",
+    element: <SettingsPage />,
   },
   {
     path: "/register",

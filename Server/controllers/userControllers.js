@@ -10,6 +10,7 @@ import CustomError from "../utils/ErrorResponse.js";
 import { StatusCodes } from "http-status-codes";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import OTP from "../models/otpModel.js";
+import { hash } from "bcrypt";
 
 // Utility Function
 const canPerformLogout = (actorRole, targetRole) => {
@@ -288,6 +289,80 @@ export const DeleteSpecificUser = async (req, res, next) => {
     await user.save();
 
     return CustomSuccess.send(res, null, StatusCodes.NO_CONTENT);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSettingDetails = async (req, res, next) => {
+  const { name, email, canLoginWithPassword, createdWith, picture } = req.user;
+  const settings = {
+    name,
+    email,
+    picture,
+    manualLogin: canLoginWithPassword,
+    socialLogin: createdWith !== "email",
+    socialProvider: createdWith === "email" ? null : createdWith,
+  };
+  return CustomSuccess.send(res, null, StatusCodes.OK, settings);
+};
+
+export const setPasswordForManualLogin = async (req, res, next) => {
+  console.log({ body: req.body });
+  const { password } = req.body;
+  try {
+    const hashedPassword = await hash(password, 10);
+
+    await User.findByIdAndUpdate(req.user._id, {
+      $set: { password: hashedPassword, canLoginWithPassword: true },
+    });
+    return CustomSuccess.send(
+      res,
+      "Your password has been updated",
+      StatusCodes.OK
+    );
+  } catch (error) {
+    console.log(error);
+    throw new CustomError(
+      "Something went wrong while setting password",
+      StatusCodes.BAD_GATEWAY
+    );
+  }
+};
+
+export const updatePassword = async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+  try {
+    const user = await User.findOne({ _id: req.user._id });
+    if (!(await user.comparePassword(oldPassword))) {
+      throw new CustomError(
+        "Cannot change password, old password is not valid.",
+        StatusCodes.CONFLICT
+      );
+    }
+    user.password = newPassword;
+    await user.save();
+    return CustomSuccess.send(
+      res,
+      "Your password has been updated",
+      StatusCodes.OK
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  const name = req.body.name;
+  try {
+    const user = await User.findOne({ _id: req.user._id });
+    if (user.name !== name) {
+      user.name = name;
+    }
+    user.picture = `${process.env.BASE_URL}/profilePictures/${req.file.filename}`;
+    await user.save();
+
+    return CustomSuccess.send(res, "Profile Updated.", StatusCodes.OK);
   } catch (error) {
     next(error);
   }

@@ -118,10 +118,10 @@ export default function LoginForm() {
 
       const data = await res.json();
 
-      if (data.error) {
-        setError("Failed to resend code. Please try again.");
-      } else {
+      if (data.success) {
         setSuccess("New verification code sent!");
+      } else {
+        setError("Failed to resend code. Please try again.");
       }
     } catch (err) {
       setError("Failed to resend code. Please try again.");
@@ -139,6 +139,7 @@ export default function LoginForm() {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setError("");
+    console.log("Google Login Success:", credentialResponse);
     const res = await fetch(`${URL}/auth/google`, {
       method: "POST",
       headers: {
@@ -149,15 +150,10 @@ export default function LoginForm() {
     });
 
     const resData = await res.json();
-
-    if (res.status === 403) {
-      setError(resData.message);
-      return;
-    }
-
-    console.log(resData);
-    if (resData) {
+    if (resData.success) {
       navigate("/");
+    } else {
+      setError(resData.message);
     }
   };
 
@@ -389,7 +385,7 @@ export default function LoginForm() {
               {/* Social Login Buttons Container */}
               <div className="mt-6 space-y-3">
                 {/* Google Login Button */}
-                <div className="w-full">
+                <div className="w-full flex justify-center">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}

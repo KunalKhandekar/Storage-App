@@ -17,7 +17,7 @@ await connectDB();
 
 const app = express();
 const port = process.env.PORT || 4000;
-
+app.use("/profilePictures", express.static("profilePictures"));
 app.use(express.json());
 app.use(cookieParser(secretKey));
 app.use(
