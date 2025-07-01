@@ -1,16 +1,20 @@
 import { Router } from "express";
 import checkAuth from "../middlewares/auth.js";
 import {
-  DeleteSpecificUser,
+  deleteUser,
+  disableUser,
   getAllUsers,
   getSettingDetails,
   getUserInfo,
+  hardDeleteUser,
   loginUser,
   logoutAll,
   logoutSpecificUser,
   logoutUser,
+  recoverUser,
   registerUser,
   setPasswordForManualLogin,
+  softDeleteUser,
   updatePassword,
   updateProfile,
 } from "../controllers/userControllers.js";
@@ -43,10 +47,14 @@ router.post("/logout", checkAuth, logoutUser);
 router.post("/logout-all", checkAuth, logoutAll);
 router.get("/all-users", checkAuth, checkRole, getAllUsers);
 router.post("/:userId/logout", checkAuth, checkRole, logoutSpecificUser);
-router.delete("/:userId/delete", checkAuth, checkRole, DeleteSpecificUser);
+router.delete("/:userId/delete/soft", checkAuth, checkRole, softDeleteUser);
+router.delete("/:userId/delete/hard", checkAuth, checkRole, hardDeleteUser);
+router.patch("/:userId/recover", checkAuth, checkRole, recoverUser);
 router.get("/settings", checkAuth, getSettingDetails);
 router.patch("/setPassword", checkAuth, setPasswordForManualLogin);
 router.patch("/updatePassword", checkAuth, updatePassword);
 router.post("/updateProfile", checkAuth, upload.single("file"), updateProfile);
+router.patch("/disable", checkAuth, disableUser)
+router.delete("/delete", checkAuth, deleteUser)
 
 export default router;
