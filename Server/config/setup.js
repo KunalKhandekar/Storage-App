@@ -55,13 +55,14 @@ const validations = [
           },
           role: {
             bsonType: "string",
-            enum: ["Admin", "Manager", "User"],
+            enum: ["SuperAdmin", "Admin", "Manager", "User"],
           },
           isDeleted: {
             bsonType: "bool",
           },
           createdWith: {
             bsonType: "string",
+            enum: ["email", "google", "github"],
           },
           canLoginWithPassword: {
             bsonType: "bool",
