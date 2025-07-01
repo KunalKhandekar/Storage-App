@@ -1,6 +1,5 @@
+import { compare, hash } from "bcrypt";
 import { model, Schema } from "mongoose";
-import bcrypt, { compare } from "bcrypt";
-import { required } from "zod/v4-mini";
 
 const userSchema = new Schema(
   {
@@ -57,7 +56,7 @@ const userSchema = new Schema(
     strict: "throw",
     methods: {
       comparePassword(candidatePassword) {
-        return bcrypt.compare(candidatePassword, this.password);
+        return compare(candidatePassword, this.password);
       },
     },
   }
@@ -65,7 +64,7 @@ const userSchema = new Schema(
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  this.password = await hash(this.password, 10);
   next();
 });
 

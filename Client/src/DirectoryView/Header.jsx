@@ -1,8 +1,8 @@
-import { ChevronDown, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Header = ({ showUserDropdown, setShowUserDropdown }) => {
+const Header = () => {
   const [user, setUser] = useState({});
   const navigate = useNavigate();
 
@@ -26,23 +26,6 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
     getUserDetails();
   }, [navigate]);
 
-  const Logout = async () => {
-    const res = await fetch(`${BASE_URL}/user/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
-
-    if (res.status === 204) navigate("/login");
-  };
-
-  const LogoutAll = async () => {
-    const res = await fetch(`${BASE_URL}/user/logout-all`, {
-      method: "POST",
-      credentials: "include",
-    });
-    if (res.status === 204) navigate("/login");
-  };
-
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">
@@ -59,46 +42,26 @@ const Header = ({ showUserDropdown, setShowUserDropdown }) => {
               <span className="font-medium">User Management</span>
             </button>
           )}
-          {/* User Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowUserDropdown(!showUserDropdown)}
-              className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                <img
-                  src={user.picture}
-                  alt="user-Profile-Image"
-                  className="w-full overflow-hidden rounded-full"
-                />
+
+          {/* User Profile - Clickable to Settings */}
+          <button
+            onClick={() => navigate("/settings")}
+            className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg transition-colors p-2"
+          >
+            <div className="text-right">
+              <div className="font-medium text-sm text-gray-900">
+                {user?.name}
               </div>
-              <div className="text-left">
-                <div className="font-medium">{user?.name}</div>
-                <div className="text-xs text-gray-500">{user?.email}</div>
-              </div>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {showUserDropdown && (
-              <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-20 min-w-48">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <div className="font-medium text-sm">{user?.name}</div>
-                  <div className="text-xs text-gray-500">{user?.email}</div>
-                </div>
-                <button
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                  onClick={Logout}
-                >
-                  Logout
-                </button>
-                <button
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                  onClick={LogoutAll}
-                >
-                  Logout All Devices
-                </button>
-              </div>
-            )}
-          </div>
+              <div className="text-xs text-gray-500">{user?.email}</div>
+            </div>
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+              <img
+                src={user.picture}
+                alt="user-Profile-Image"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+          </button>
         </div>
       </div>
     </header>
