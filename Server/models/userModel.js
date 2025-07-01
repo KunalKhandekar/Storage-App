@@ -34,7 +34,7 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["Admin", "Manager", "User"],
+      enum: ["SuperAdmin", "Admin", "Manager", "User"],
       default: "User",
     },
     isDeleted: {

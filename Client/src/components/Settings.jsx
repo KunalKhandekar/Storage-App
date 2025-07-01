@@ -12,8 +12,10 @@ import {
   CheckCircle,
   AlertCircle,
   Upload,
+  Github,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { BsGithub, BsGoogle } from "react-icons/bs";
 
 // Modal Component
 const Modal = ({ isOpen, onClose, title, children, type = "info" }) => {
@@ -35,8 +37,14 @@ const Modal = ({ isOpen, onClose, title, children, type = "info" }) => {
   const { icon: Icon, color } = getIconAndColor();
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+    <div
+      className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg p-6 max-w-md w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Icon className={`${color} w-6 h-6`} />
@@ -64,17 +72,38 @@ const Modal = ({ isOpen, onClose, title, children, type = "info" }) => {
 };
 
 // Confirmation Modal Component
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = "Confirm", cancelText = "Cancel", type = "warning" }) => {
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  type = "warning",
+}) => {
   if (!isOpen) return null;
 
   const getIconAndColor = () => {
     switch (type) {
       case "danger":
-        return { icon: AlertCircle, color: "text-red-600", buttonColor: "bg-red-600 hover:bg-red-700" };
+        return {
+          icon: AlertCircle,
+          color: "text-red-600",
+          buttonColor: "bg-red-600 hover:bg-red-700",
+        };
       case "warning":
-        return { icon: AlertCircle, color: "text-yellow-600", buttonColor: "bg-yellow-600 hover:bg-yellow-700" };
+        return {
+          icon: AlertCircle,
+          color: "text-yellow-600",
+          buttonColor: "bg-yellow-600 hover:bg-yellow-700",
+        };
       default:
-        return { icon: AlertCircle, color: "text-blue-600", buttonColor: "bg-blue-600 hover:bg-blue-700" };
+        return {
+          icon: AlertCircle,
+          color: "text-blue-600",
+          buttonColor: "bg-blue-600 hover:bg-blue-700",
+        };
     }
   };
 
@@ -82,11 +111,11 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl p-6 shadow-lg w-96"
+        className="bg-white rounded-xl p-6 shadow-lg w-full max-w-sm"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center space-x-2 mb-4">
@@ -120,8 +149,19 @@ export default function SettingsPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Modal states
-  const [modal, setModal] = useState({ isOpen: false, title: "", message: "", type: "info" });
-  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: "", message: "", onConfirm: null, type: "warning" });
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+    type: "warning",
+  });
 
   const [profileData, setProfileData] = useState({
     name: "",
@@ -160,8 +200,7 @@ export default function SettingsPage() {
   // Check if profile has changes
   const hasProfileChanges = () => {
     return (
-      profileData.name !== originalProfileData.name ||
-      selectedImage !== null
+      profileData.name !== originalProfileData.name || selectedImage !== null
     );
   };
 
@@ -178,7 +217,13 @@ export default function SettingsPage() {
   };
 
   const closeConfirmModal = () => {
-    setConfirmModal({ isOpen: false, title: "", message: "", onConfirm: null, type: "warning" });
+    setConfirmModal({
+      isOpen: false,
+      title: "",
+      message: "",
+      onConfirm: null,
+      type: "warning",
+    });
   };
 
   const getUserSettings = async () => {
@@ -196,11 +241,11 @@ export default function SettingsPage() {
           socialLogin,
           socialProvider,
         } = resData.data;
-        
+
         const userData = { email, name, picture };
         setProfileData(userData);
         setOriginalProfileData(userData);
-        
+
         setHasManualPassword(manualLogin);
         if (socialLogin) {
           setConnectedAccount({
@@ -212,7 +257,11 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.log(error);
-      showModal("Error", "Failed to load user settings. Please try again.", "error");
+      showModal(
+        "Error",
+        "Failed to load user settings. Please try again.",
+        "error"
+      );
     }
   };
 
@@ -224,19 +273,27 @@ export default function SettingsPage() {
     const file = event.target.files[0];
     if (file) {
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        showModal("Invalid File", "Please select a valid image file (JPG, PNG, or GIF).", "error");
+      if (!file.type.startsWith("image/")) {
+        showModal(
+          "Invalid File",
+          "Please select a valid image file (JPG, PNG, or GIF).",
+          "error"
+        );
         return;
       }
-      
+
       // Validate file size (2MB)
       if (file.size > 2 * 1024 * 1024) {
-        showModal("File Too Large", "Please select an image smaller than 2MB.", "error");
+        showModal(
+          "File Too Large",
+          "Please select an image smaller than 2MB.",
+          "error"
+        );
         return;
       }
 
       setSelectedImage(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -246,48 +303,50 @@ export default function SettingsPage() {
     }
   };
 
- const handleProfileUpdate = async () => {
-  try {
-    const formData = new FormData();
-    formData.append("file", selectedImage); // Image file
-    formData.append("name", profileData.name); // Name or other fields
+  const handleProfileUpdate = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedImage); // Image file
+      formData.append("name", profileData.name); // Name or other fields
 
-    const response = await fetch(`${BASE_URL}/user/updateProfile`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
+      const response = await fetch(`${BASE_URL}/user/updateProfile`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to update profile");
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      const data = await response.json();
+
+      console.log(data);
+
+      showModal("Success", "Profile updated successfully!", "success");
+
+      setSelectedImage(null);
+      setImagePreview(null);
+
+      setOriginalProfileData({
+        ...profileData,
+        picture: imagePreview || profileData.picture,
+      });
+
+      if (imagePreview) {
+        setProfileData((prev) => ({
+          ...prev,
+          picture: imagePreview,
+        }));
+      }
+    } catch (error) {
+      showModal(
+        "Error",
+        "Failed to update profile. Please try again.",
+        "error"
+      );
     }
-
-    const data = await response.json();
-
-    console.log(data);
-
-    showModal("Success", "Profile updated successfully!", "success");
-
-    setSelectedImage(null);
-    setImagePreview(null);
-
-    setOriginalProfileData({
-      ...profileData,
-      picture: imagePreview || profileData.picture
-    });
-
-    if (imagePreview) {
-      setProfileData(prev => ({
-        ...prev,
-        picture: imagePreview
-      }));
-    }
-
-  } catch (error) {
-    showModal("Error", "Failed to update profile. Please try again.", "error");
-  }
-};
-
+  };
 
   const setPassword = async () => {
     const res = await fetch(`${BASE_URL}/user/setPassword`, {
@@ -328,14 +387,22 @@ export default function SettingsPage() {
       try {
         const response = await setPassword();
         if (response.success) {
-          showModal("Success", "Password set successfully! You can now login manually.", "success");
+          showModal(
+            "Success",
+            "Password set successfully! You can now login manually.",
+            "success"
+          );
           setHasManualPassword(true);
           setPasswordData({ current: "", new: "", confirm: "" });
         } else {
           showModal("Error", response.message, "error");
         }
       } catch (error) {
-        showModal("Error", "Failed to set password. Please try again.", "error");
+        showModal(
+          "Error",
+          "Failed to set password. Please try again.",
+          "error"
+        );
       }
     } else {
       // Changing existing password
@@ -353,7 +420,11 @@ export default function SettingsPage() {
           showModal("Error", response.message, "error");
         }
       } catch (error) {
-        showModal("Error", "Failed to update password. Please try again.", "error");
+        showModal(
+          "Error",
+          "Failed to update password. Please try again.",
+          "error"
+        );
       }
     }
   };
@@ -398,11 +469,19 @@ export default function SettingsPage() {
             credentials: "include",
           });
           if (res.status === 204) {
-            showModal("Success", "Logged out from all devices successfully!", "success");
+            showModal(
+              "Success",
+              "Logged out from all devices successfully!",
+              "success"
+            );
             setTimeout(() => navigate("/login"), 1500);
           }
         } catch (error) {
-          showModal("Error", "Failed to logout from all devices. Please try again.", "error");
+          showModal(
+            "Error",
+            "Failed to logout from all devices. Please try again.",
+            "error"
+          );
         }
         closeConfirmModal();
       },
@@ -411,61 +490,102 @@ export default function SettingsPage() {
   };
 
   const getSocialIcon = (provider) => {
-    const iconClass = "w-6 h-6 rounded";
-    switch (provider) {
-      case "google":
-        return (
-          <div
-            className={`${iconClass} bg-white border flex items-center justify-center`}
-          >
-            <svg viewBox="0 0 24 24" className="w-4 h-4">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-          </div>
-        );
-      default:
-        return <div className={`${iconClass} bg-gray-300`}></div>;
+    const iconClass = "w-6 h-6";
+
+    if (provider === "google") {
+      return (
+        <svg viewBox="0 0 24 24" className={iconClass}>
+          <path
+            fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+          />
+        </svg>
+      );
     }
+
+    if (provider === "github") {
+      return <BsGithub className="text-black w-6 h-6" />;
+    }
+
+    return <div className="w-6 h-6 bg-gray-300 rounded" />;
+  };
+
+  const handleAccountDisable = () => {
+    showConfirmModal(
+      "Disable Account",
+      "Are you sure you want to disable your account? This action will hide your profile and stop notifications. You can reactivate it later by contacting our support team.",
+      async () => {
+        try {
+          const res = await fetch(`${BASE_URL}/user/disable`, {
+            method: "PATCH",
+            credentials: "include",
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            showModal(
+              "Account Disabled",
+              "Your account has been disabled. You can contact support to reactivate it anytime.",
+              "success"
+            );
+            setTimeout(() => navigate("/login"), 2000);
+          } else {
+            showModal(
+              "Error",
+              data.message || "Something went wrong.",
+              "error"
+            );
+          }
+        } catch (err) {
+          showModal(
+            "Error",
+            "Failed to disable account. Please try again.",
+            "error"
+          );
+        }
+
+        closeConfirmModal();
+      },
+      "warning"
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
       <div className="max-w-3xl mx-auto px-4">
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Profile Settings */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
               <User className="mr-2" size={20} />
               Profile Settings
             </h2>
 
             {/* Profile Picture */}
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">
                 Profile Picture
               </h3>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 space-x-4 sm:gap-5">
                 <img
                   src={imagePreview || profileData.picture}
                   alt="User Profile"
-                  className="rounded-full w-20 h-20 object-cover border-2 border-gray-200"
+                  className="rounded-full w-20 h-20 sm:w-24 sm:h-24 object-cover border-2 border-gray-200 mx-auto sm:mx-0"
                 />
-                <div>
+                <div className="">
                   <input
                     type="file"
                     id="profileImage"
@@ -475,16 +595,16 @@ export default function SettingsPage() {
                   />
                   <label
                     htmlFor="profileImage"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2 cursor-pointer w-52"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 cursor-pointer w-full sm:w-auto"
                   >
                     <Camera size={16} />
                     <span>Upload New Picture</span>
                   </label>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-gray-500 mt-1 text-center sm:text-left">
                     JPG, PNG or GIF. Max size 2MB.
                   </p>
                   {selectedImage && (
-                    <p className="text-sm text-green-600 mt-1 flex items-center">
+                    <p className="text-sm text-green-600 mt-1 flex items-center justify-center sm:justify-start">
                       <Upload size={14} className="mr-1" />
                       {selectedImage.name} selected
                     </p>
@@ -527,7 +647,7 @@ export default function SettingsPage() {
               <button
                 onClick={handleProfileUpdate}
                 disabled={!hasProfileChanges()}
-                className={`px-6 py-2 rounded-md transition-colors flex items-center space-x-2 ${
+                className={`w-full sm:w-auto px-6 py-2 rounded-md transition-colors flex items-center justify-center space-x-2 ${
                   hasProfileChanges()
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -541,11 +661,11 @@ export default function SettingsPage() {
 
           {/* Connected Account */}
           {isSocialLogin && (
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
                 Connected Account
               </h2>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded-lg space-y-3 sm:space-y-0">
                 <div className="flex items-center space-x-3">
                   {getSocialIcon(connectedAccount.provider)}
                   <div>
@@ -554,12 +674,12 @@ export default function SettingsPage() {
                         ? "Google"
                         : "GitHub"}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 break-all">
                       {connectedAccount.email}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="sm:flex items-center justify-center sm:justify-end hidden">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     Connected
                   </span>
@@ -573,8 +693,8 @@ export default function SettingsPage() {
           )}
 
           {/* Password Settings */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
               <Lock className="mr-2" size={20} />
               {hasManualPassword
                 ? "Change Password"
@@ -582,7 +702,7 @@ export default function SettingsPage() {
             </h2>
 
             <div className="mb-4">
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">
                 {hasManualPassword
                   ? "Update your password for manual login access."
                   : "Set a password to enable manual login in addition to your social login."}
@@ -681,7 +801,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={handlePasswordAction}
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
               >
                 {hasManualPassword ? "Change Password" : "Set Password"}
               </button>
@@ -689,8 +809,8 @@ export default function SettingsPage() {
           </div>
 
           {/* Logout Options */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
               <LogOut className="mr-2" size={20} />
               Logout Options
             </h2>
@@ -740,9 +860,33 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* Disable Account */}
+          <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-red-900 mb-4 flex items-center">
+              <Trash2 className="mr-2" size={20} />
+              Disable My Account
+            </h2>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+              <p className="text-yellow-800 font-medium mb-2">
+                ⚠️ This action is temporary and can be reversed.
+              </p>
+              <p className="text-gray-700 text-sm">
+                Disabling your account will hide your profile and stop all email
+                or app notifications. Your data will be retained securely and
+                can be restored anytime by contacting our support team.
+              </p>
+            </div>
+            <button
+              onClick={handleAccountDisable}
+              className="w-full sm:w-auto bg-yellow-600 text-white px-6 py-2 rounded-md hover:bg-yellow-700 transition-colors font-medium"
+            >
+              Disable Account
+            </button>
+          </div>
+
           {/* Delete Account */}
-          <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6">
-            <h2 className="text-xl font-semibold text-red-900 mb-4 flex items-center">
+          <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-red-900 mb-4 flex items-center">
               <Trash2 className="mr-2" size={20} />
               Delete My Account
             </h2>
@@ -758,7 +902,7 @@ export default function SettingsPage() {
             </div>
             <button
               onClick={handleAccountDelete}
-              className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors font-medium"
+              className="w-full sm:w-auto bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors font-medium"
             >
               Delete Account Permanently
             </button>
