@@ -433,9 +433,32 @@ export default function SettingsPage() {
     showConfirmModal(
       "Delete Account",
       "Are you sure you want to delete your account? This action cannot be undone and will permanently remove all your data.",
-      () => {
-        // Implement account deletion logic here
-        showModal("Success", "Account deleted successfully!", "success");
+      async () => {
+        try {
+          const res = await fetch(`${BASE_URL}/user/delete`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+
+          if (res.status === 204) {
+            showModal("Account Deleted", "Your account has been deleted.");
+            setTimeout(() => navigate("/login"), 2000);
+          } else {
+            showModal(
+              "Error",
+              data.message || "Something went wrong.",
+              "error"
+            );
+          }
+        } catch (err) {
+          console.log(err);
+          showModal(
+            "Error",
+            "Failed to disable account. Please try again.",
+            "error"
+          );
+        }
+
         closeConfirmModal();
       },
       "danger"
@@ -533,9 +556,7 @@ export default function SettingsPage() {
             credentials: "include",
           });
 
-          const data = await res.json();
-
-          if (data.success) {
+          if (res.status === 204) {
             showModal(
               "Account Disabled",
               "Your account has been disabled. You can contact support to reactivate it anytime.",

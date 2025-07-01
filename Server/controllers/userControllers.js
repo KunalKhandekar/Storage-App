@@ -11,11 +11,14 @@ import { StatusCodes } from "http-status-codes";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import OTP from "../models/otpModel.js";
 import { hash } from "bcrypt";
-
+import File from "../models/fileModel.js";
+import { rm } from "node:fs/promises";
+import path from "node:path";
+import { absolutePath } from "../app.js";
 // Utility Function
-const canPerformLogout = (actorRole, targetRole) => {
-  const hierarchy = ["User", "Manager", "Admin"];
-  return hierarchy.indexOf(actorRole) >= hierarchy.indexOf(targetRole);
+const canPerform = (actorRole, targetRole) => {
+  const hierarchy = ["User", "Manager", "Admin", "SuperAdmin"];
+  return hierarchy.indexOf(actorRole) > hierarchy.indexOf(targetRole);
 };
 
 export const registerUser = async (req, res, next) => {
@@ -201,20 +204,20 @@ export const getAllUsers = async (req, res, next) => {
     );
     const sessionUserIds = new Set(sessions.map((s) => s.data.userId));
 
-    const nonDeletedUsers = AllUsers.filter((user) => !user.isDeleted);
-    const Users = nonDeletedUsers
-      .filter((user) => user._id.toString() !== currentUser._id.toString())
-      .map((user) => {
-        return {
-          _id: user._id,
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          picture: user.picture,
-          role: user.role,
-          isLoggedIn: sessionUserIds.has(user._id.toString()),
-        };
-      });
+    const Users = AllUsers.filter(
+      (user) => user._id.toString() !== currentUser._id.toString()
+    ).map((user) => {
+      return {
+        _id: user._id,
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        role: user.role,
+        isDeleted: user.isDeleted,
+        isLoggedIn: sessionUserIds.has(user._id.toString()),
+      };
+    });
 
     return CustomSuccess.send(res, null, StatusCodes.OK, {
       Users,
@@ -235,7 +238,7 @@ export const logoutSpecificUser = async (req, res, next) => {
       throw new CustomError("User not found", StatusCodes.NOT_FOUND);
     }
 
-    if (!canPerformLogout(currentUser.role, user.role)) {
+    if (!canPerform(currentUser.role, user.role)) {
       throw new CustomError(
         "Insufficient permissions to logout this user",
         StatusCodes.FORBIDDEN
@@ -249,7 +252,7 @@ export const logoutSpecificUser = async (req, res, next) => {
   }
 };
 
-export const DeleteSpecificUser = async (req, res, next) => {
+export const softDeleteUser = async (req, res, next) => {
   try {
     const currentUser = req.user;
     const { userId } = req.params;
@@ -269,7 +272,7 @@ export const DeleteSpecificUser = async (req, res, next) => {
     }
 
     // Check permissions
-    if (!canPerformLogout(currentUser.role, user.role)) {
+    if (!canPerform(currentUser.role, user.role)) {
       throw new CustomError(
         "Insufficient permissions to delete this user",
         StatusCodes.FORBIDDEN
@@ -286,6 +289,83 @@ export const DeleteSpecificUser = async (req, res, next) => {
 
     // Soft deleting user
     user.isDeleted = true;
+    await user.save();
+
+    return CustomSuccess.send(res, null, StatusCodes.NO_CONTENT);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const hardDeleteUser = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const { userId } = req.params;
+
+    const user = await User.findOne({ _id: userId }).select("role");
+
+    if (!user) {
+      throw new CustomError("User not found", StatusCodes.NOT_FOUND);
+    }
+
+    // Prevent self-deletion
+    if (currentUser._id.toString() === user._id.toString()) {
+      throw new CustomError(
+        "Cannot hard delete your own account",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    // Check permissions
+    if (currentUser.role !== "SuperAdmin" || user.role === "SuperAdmin") {
+      throw new CustomError(
+        "Insufficient permissions to hard delete this user",
+        StatusCodes.FORBIDDEN
+      );
+    }
+
+    // Deleting all sessions of the user
+    await redisClient.deleteManySessions(userId);
+
+    // delete all files of the user (virtual and local)
+    const allFiles = await File.find({ userId: user._id });
+    for (const file of allFiles) {
+      await rm(path.join(absolutePath, file.storedName));
+      await file.deleteOne();
+    }
+
+    // delete all folder of the user
+    await Directory.deleteMany({ userId: user._id });
+
+    // delete the user Data itself
+    await user.deleteOne();
+
+    return CustomSuccess.send(res, null, StatusCodes.NO_CONTENT);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const recoverUser = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const { userId } = req.params;
+
+    const user = await User.findOne({ _id: userId }).select("role");
+
+    if (!user) {
+      throw new CustomError("User not found", StatusCodes.NOT_FOUND);
+    }
+
+    // Check permissions
+    if (currentUser.role !== "SuperAdmin" || user.role === "SuperAdmin") {
+      throw new CustomError(
+        "Insufficient permissions to recover user",
+        StatusCodes.FORBIDDEN
+      );
+    }
+
+    user.isDeleted = false;
     await user.save();
 
     return CustomSuccess.send(res, null, StatusCodes.NO_CONTENT);
@@ -363,6 +443,62 @@ export const updateProfile = async (req, res, next) => {
     await user.save();
 
     return CustomSuccess.send(res, "Profile Updated.", StatusCodes.OK);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const disableUser = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ _id: req.user._id });
+
+    if (!user) {
+      throw new CustomError("User not found", StatusCodes.NOT_FOUND);
+    }
+
+    // Check if user is already deleted
+    if (user.isDeleted) {
+      throw new CustomError("User is already deleted", StatusCodes.CONFLICT);
+    }
+
+    // Deleting all sessions of the user
+    await redisClient.deleteManySessions(user._id);
+
+    // Soft deleting user
+    user.isDeleted = true;
+    await user.save();
+
+    return CustomSuccess.send(res, null, StatusCodes.NO_CONTENT);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ _id: req.user._id });
+
+    if (!user) {
+      throw new CustomError("User not found", StatusCodes.NOT_FOUND);
+    }
+
+    // Deleting all sessions of the user
+    await redisClient.deleteManySessions(user._id);
+
+    // delete all files of the user (virtual and local)
+    const allFiles = await File.find({ userId: user._id });
+    for (const file of allFiles) {
+      await rm(path.join(absolutePath, file.storedName));
+      await file.deleteOne();
+    }
+
+    // delete all folder of the user
+    await Directory.deleteMany({ userId: user._id });
+
+    // delete the user Data itself
+    await user.deleteOne();
+
+    return CustomSuccess.send(res, null, StatusCodes.NO_CONTENT);
   } catch (error) {
     next(error);
   }
