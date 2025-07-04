@@ -8,7 +8,7 @@ const UsersTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
-  // Mock navigate function for demo purposes
+
   const navigate = useNavigate();
 
   const fetchUsers = async () => {

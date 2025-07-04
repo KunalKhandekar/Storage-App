@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { renameFile_or_Directory } from "../../Apis/file_Dir_Api";
 
 function RenameModal({ item, onClose, onRename }) {
   const [newName, setNewName] = useState(item.name);
@@ -7,7 +8,6 @@ function RenameModal({ item, onClose, onRename }) {
   useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
-
     input.focus();
     const dotIndex = item.name.lastIndexOf(".");
     if (dotIndex !== -1) {
@@ -18,13 +18,15 @@ function RenameModal({ item, onClose, onRename }) {
   }, [item.name]);
 
   const handleRename = async () => {
-    await fetch(`http://localhost:4000/${item.type}/${item._id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ name: newName }),
-    });
-    onRename();
+    const res = await renameFile_or_Directory(item, newName);
+    if (res.success) {
+      // TOAST
+      console.log(res.message);
+      onRename();
+    } else {
+      // TOAST
+      console.log(res.message);
+    }
   };
 
   return (

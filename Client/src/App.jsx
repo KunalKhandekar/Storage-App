@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import DirectoryView from "./DirectoryView/main";
-import LoginForm from "./Forms/LoginForm";
-import RegistrationForm from "./Forms/RegisterForm";
-import UsersTable from "./AdminView/UsersTable";
+import DirectoryView from "./Pages/DirectoryPage";
+import LoginForm from "./components/Forms/LoginForm";
+import RegistrationForm from "./components/Forms/RegisterForm";
+import UsersTable from "./Pages/AdminViewPage/UsersTable";
 import AuthError from "./components/AuthError";
-import SettingsPage from "./components/Settings";
+import SettingsPage from "./Pages/SettingsPage";
 
 const router = createBrowserRouter([
   {

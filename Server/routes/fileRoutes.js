@@ -31,7 +31,7 @@ router.param("id", validateRequest);
 router.get("/:id", getFileById);
 
 // UPLOAD file(s)
-router.post("/upload", upload.array("myfiles", 5), uploadFile);
+router.post("/upload", upload.single("myfiles"), uploadFile);
 
 // DELETE file
 router.delete("/:id", deleteFile);

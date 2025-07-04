@@ -1,15 +1,15 @@
 import {
   Download,
   Edit2,
-  Eye,
   File,
   Folder,
   MoreVertical,
   Trash2,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import RenameModal from "./RenameModal";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { deleteFile_or_Directory } from "../../Apis/file_Dir_Api";
+import RenameModal from "./RenameModal";
 
 function ItemCard({
   item,
@@ -36,17 +36,19 @@ function ItemCard({
 
   const handleDelete = async (e) => {
     e.stopPropagation();
-    await fetch(URL + `/${item.type}/${item._id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    setActionDone(true);
+    const res = await deleteFile_or_Directory(item);
+    if (res.success) {
+      // TOAST
+      console.log(res.message);
+      setActionDone(true);
+    } else {
+      // TOAST
+      console.log("Error:", res.message);
+    }
   };
 
   const handleRename = (e) => {
     e.stopPropagation();
-    console.log("Rename clicked for", item._id);
     setRenameModalData({ open: true, item });
   };
 

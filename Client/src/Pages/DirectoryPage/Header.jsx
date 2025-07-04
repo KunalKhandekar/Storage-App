@@ -1,29 +1,24 @@
 import { Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getUserDetails } from "../../Apis/userApi";
 
 const Header = () => {
   const [user, setUser] = useState({});
   const navigate = useNavigate();
 
-  const BASE_URL = "http://localhost:4000";
-
-  const getUserDetails = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/user`, {
-        credentials: "include",
-      });
-      const resData = await res.json();
-      if (resData.success) {
-        setUser(resData.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    getUserDetails();
+    const fetchUser = async () => {
+      const res = await getUserDetails();
+      if (res.success) {
+        setUser(res.data);
+      } else {
+        // TOAST
+        console.error("Error:", res.message);
+      }
+    };
+
+    fetchUser();
   }, [navigate]);
 
   return (
