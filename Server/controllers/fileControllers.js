@@ -9,11 +9,11 @@ import CustomSuccess from "../utils/SuccessResponse.js";
 
 export const uploadFile = async (req, res, next) => {
   try {
-    if (!req.files || req.files.length === 0) {
+    if (!req.file) {
       throw new CustomError("No files uploaded", StatusCodes.BAD_REQUEST);
     }
 
-    const { originalname, storedName } = req.files[0];
+    const { originalname, storedName } = req.file;
     const parentDirId = req.headers.parentdirid || req.user.rootDirId;
 
     const parentDirectory = await Directory.findOne({

@@ -1,70 +1,35 @@
 import { FolderPlus, Upload } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { uploadInBatches } from "../../Apis/uploadApi";
+
+const MAX_CONCURRENT_UPLOADS = 5;
 
 const UploadSection = ({ setShowCreateModal, setActionDone }) => {
   const [progressMap, setProgressMap] = useState({});
   const [dragOver, setDragOver] = useState(false);
   const { dirId } = useParams();
 
-  const uploadFile = (file) => {
-    return new Promise((resolve, reject) => {
-      const formData = new FormData();
-      formData.append("myfiles", file);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "http://localhost:4000/file/upload", true);
-      xhr.withCredentials = true;
-      xhr.setRequestHeader("parentdirid", dirId || "");
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
-          setProgressMap((prev) => ({ ...prev, [file.name]: percent }));
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          setProgressMap((prev) => {
-            const updated = { ...prev };
-            delete updated[file.name];
-            return updated;
-          });
-          resolve();
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
-        }
-      };
-
-      xhr.onerror = () => {
-        setProgressMap((prev) => {
-          const updated = { ...prev };
-          updated[file.name] = "Failed";
-          return updated;
-        });
-        reject(new Error("Upload failed due to network error"));
-      };
-
-      xhr.send(formData);
-    });
-  };
-
   const handleFileUpload = async (selectedFiles) => {
     const fileList = Array.from(selectedFiles);
     const initialProgress = {};
-
     fileList.forEach((file) => {
       initialProgress[file.name] = 0;
     });
-
     setProgressMap(initialProgress);
 
     try {
-      await Promise.all(fileList.map(uploadFile));
+      await uploadInBatches(
+        fileList,
+        MAX_CONCURRENT_UPLOADS,
+        dirId,
+        setProgressMap
+      );
       setActionDone(true);
+      // TOAST
+      console.log("All files uploaded successfully");
     } catch (err) {
-      console.error("One or more uploads failed:", err);
+      console.error("Some uploads failed");
     }
   };
 

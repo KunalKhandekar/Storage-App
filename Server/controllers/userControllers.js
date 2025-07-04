@@ -439,11 +439,14 @@ export const updateProfile = async (req, res, next) => {
     if (user.name !== name) {
       user.name = name;
     }
-    user.picture = `${process.env.BASE_URL}/profilePictures/${req.file.filename}`;
+    if (req.file && req.file.filename) {
+      user.picture = `${process.env.BASE_URL}/profilePictures/${req.file.filename}`;
+    }
     await user.save();
 
     return CustomSuccess.send(res, "Profile Updated.", StatusCodes.OK);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
@@ -499,6 +502,59 @@ export const deleteUser = async (req, res, next) => {
     await user.deleteOne();
 
     return CustomSuccess.send(res, null, StatusCodes.NO_CONTENT);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changeRole = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const currentUser = req.user;
+    const { newRole } = req.body;
+    const hierarchy = ["User", "Manager", "Admin", "SuperAdmin"];
+
+    // Check for valid role.
+    if (!hierarchy.includes(newRole)) {
+      throw new CustomError(
+        `Role is not valid as per the given standards, Given role is ${newRole}`,
+        StatusCodes.CONFLICT
+      );
+    }
+
+    // Prevent self promotion
+    if (currentUser._id.toString() === userId) {
+      throw new CustomError(
+        "You cannot promote yourself.",
+        StatusCodes.CONFLICT
+      );
+    }
+
+    // Restrict assigning higher roles
+    if (currentUser.role !== "SuperAdmin" && newRole === "SuperAdmin") {
+      throw new CustomError(
+        "Only SuperAdmin can promote to SuperAdmin role",
+        StatusCodes.CONFLICT
+      );
+    }
+
+    const target_user = await User.findOne({ _id: userId }).select("role name");
+    if (
+      hierarchy.indexOf(target_user.role) >= hierarchy.indexOf(currentUser.role)
+    ) {
+      throw new CustomError(
+        "You cannot change role of users higher than/Equal to your own level",
+        StatusCodes.CONFLICT
+      );
+    }
+
+    target_user.role = newRole;
+    await target_user.save();
+
+    return CustomSuccess.send(
+      res,
+      `${target_user.name} role has been changed to ${newRole}`
+    );
   } catch (error) {
     next(error);
   }
