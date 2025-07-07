@@ -1,9 +1,9 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import DirectoryView from "./Pages/DirectoryPage";
+import AuthError from "./components/AuthError";
 import LoginForm from "./components/Forms/LoginForm";
 import RegistrationForm from "./components/Forms/RegisterForm";
-import UsersTable from "./Pages/AdminViewPage/UsersTable";
-import AuthError from "./components/AuthError";
+import AdminView from "./Pages/AdminViewPage";
+import DirectoryView from "./Pages/DirectoryPage";
 import SettingsPage from "./Pages/SettingsPage";
 
 const router = createBrowserRouter([
@@ -33,7 +33,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/users",
-    element: <UsersTable />,
+    element: <AdminView />,
   },
 ]);
 

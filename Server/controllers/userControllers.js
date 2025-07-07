@@ -219,7 +219,7 @@ export const getAllUsers = async (req, res, next) => {
       };
     });
 
-    return CustomSuccess.send(res, null, StatusCodes.OK, {
+    CustomSuccess.send(res, null, StatusCodes.OK, {
       Users,
       currentUser,
     });
@@ -358,7 +358,7 @@ export const recoverUser = async (req, res, next) => {
     }
 
     // Check permissions
-    if (currentUser.role !== "SuperAdmin" || user.role === "SuperAdmin") {
+    if (currentUser.role !== "SuperAdmin") {
       throw new CustomError(
         "Insufficient permissions to recover user",
         StatusCodes.FORBIDDEN
@@ -553,7 +553,8 @@ export const changeRole = async (req, res, next) => {
 
     return CustomSuccess.send(
       res,
-      `${target_user.name} role has been changed to ${newRole}`
+      `${target_user.name} role has been changed to ${newRole}`,
+      StatusCodes.OK
     );
   } catch (error) {
     next(error);
