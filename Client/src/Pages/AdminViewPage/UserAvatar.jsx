@@ -1,6 +1,8 @@
 // components/UserAvatar.js
 
 const UserAvatar = ({ user, size = "default", isDeleted = false }) => {
+  if (!user?.name) return null;
+  
   const sizeClasses = {
     small: "h-8 w-8",
     default: "h-10 w-10",
@@ -26,7 +28,7 @@ const UserAvatar = ({ user, size = "default", isDeleted = false }) => {
           isDeleted ? "text-red-600" : "text-blue-600"
         }`}
       >
-        {user.name
+        {user?.name
           .split(" ")
           .map((n) => n[0])
           .join("")}

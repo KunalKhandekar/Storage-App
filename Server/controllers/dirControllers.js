@@ -18,6 +18,7 @@ export const getDir = async (req, res, next) => {
         }).lean()
       : await Directory.findOne({
           userId: req.user._id,
+          parentDirId: null,
         }).lean();
 
     if (!directoryData)

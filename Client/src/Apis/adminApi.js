@@ -46,3 +46,12 @@ export const changeRole = async (userId, role) => {
     return error?.response?.data;
   }
 };
+
+export const getUserDirectory = async (userId, dirId) => {
+  try {
+    const response = await axios.get(`/user/${userId}/${dirId}`);
+    return response.data;
+  } catch (error) {
+    return error?.response?.data;
+  }
+};

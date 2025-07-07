@@ -15,6 +15,7 @@ import File from "../models/fileModel.js";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 import { absolutePath } from "../app.js";
+
 // Utility Function
 const canPerform = (actorRole, targetRole) => {
   const hierarchy = ["User", "Manager", "Admin", "SuperAdmin"];
@@ -556,6 +557,67 @@ export const changeRole = async (req, res, next) => {
       `${target_user.name} role has been changed to ${newRole}`,
       StatusCodes.OK
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSpecificUserDirectory = async (req, res, next) => {
+  const { userId, dirId } = req.params;
+
+  try {
+    const targetUser = await User.findOne({_id: userId}).select("-password").lean(); 
+    const directoryData = dirId
+      ? await Directory.findOne({
+          _id: dirId,
+          userId,
+        }).lean()
+      : await Directory.findOne({
+          userId,
+          parentDirId: null,
+        });
+
+    if (!directoryData)
+      throw new CustomError("Directory data not found.", StatusCodes.CONFLICT);
+
+    const files = (
+      await File.find({ parentDirId: directoryData?._id }).lean()
+    ).map((file) => ({ ...file, type: "file" }));
+
+    const directories = (
+      await Directory.find({ parentDirId: directoryData?._id }).lean()
+    ).map((dir) => ({ ...dir, type: "directory" }));
+
+    return CustomSuccess.send(res, null, StatusCodes.OK, {
+      ...directoryData,
+      files,
+      directories,
+      targetUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getFile = async (req, res, next) => {
+  const { userId, fileId } = req.params;
+  try {
+    const fileObj = await File.findOne({
+      _id: fileId,
+      userId: userId,
+    });
+
+    if (!fileObj) {
+      throw new CustomError("File not found", StatusCodes.NOT_FOUND);
+    }
+
+    const filePath = path.join(absolutePath, fileObj.storedName);
+
+    if (req.query.action === "download") {
+      return res.download(filePath, fileObj.name);
+    }
+
+    res.sendFile(filePath);
   } catch (error) {
     next(error);
   }
