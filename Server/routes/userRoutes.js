@@ -1,11 +1,14 @@
 import { Router } from "express";
-import checkAuth from "../middlewares/auth.js";
+import multer from "multer";
+import path from "node:path";
 import {
   changeRole,
   deleteUser,
   disableUser,
   getAllUsers,
+  getFile,
   getSettingDetails,
+  getSpecificUserDirectory,
   getUserInfo,
   hardDeleteUser,
   loginUser,
@@ -19,12 +22,9 @@ import {
   updatePassword,
   updateProfile,
 } from "../controllers/userControllers.js";
+import checkAuth from "../middlewares/auth.js";
 import { checkRole } from "../middlewares/checkRole.js";
 import validateRequest from "../middlewares/validateRequest.js";
-import path from "node:path";
-import multer from "multer";
-import CustomError from "../utils/ErrorResponse.js";
-import { StatusCodes } from "http-status-codes";
 
 const profileStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "profilePictures/"),
@@ -60,5 +60,8 @@ router.post("/updateProfile", checkAuth, upload.single("file"), updateProfile);
 router.patch("/disable", checkAuth, disableUser);
 router.delete("/delete", checkAuth, deleteUser);
 router.post("/:userId/changeRole", checkAuth, checkRole, changeRole);
+
+router.get("/:userId/{:dirId}", checkAuth, checkRole, getSpecificUserDirectory);
+router.get("/:userId/file/:fileId", checkAuth, checkRole, getFile);
 
 export default router;

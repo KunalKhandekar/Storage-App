@@ -13,28 +13,28 @@ const UserProfile = ({ user }) => {
             <UserAvatar user={user} />
             <div>
               <p className="text-sm font-medium text-gray-900 truncate max-w-[150px]">
-                {user.name}
+                {user?.name}
               </p>
               <p className="text-xs text-gray-500 truncate max-w-[150px]">
-                {user.email}
+                {user?.email}
               </p>
             </div>
           </div>
-          <RoleBadge role={user.role} />
+          <RoleBadge role={user?.role} />
         </div>
 
         {/* Desktop Layout */}
         <div className="hidden sm:flex sm:items-center sm:justify-end sm:space-x-3">
           <div className="text-right">
-            <p className="text-sm font-medium text-gray-900">{user.name}</p>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+            <p className="text-sm text-gray-500">{user?.email}</p>
           </div>
           <UserAvatar user={user} />
         </div>
 
         {/* Role Badge for Desktop */}
         <div className="hidden sm:flex sm:justify-end">
-          <RoleBadge role={user.role} />
+          <RoleBadge role={user?.role} />
         </div>
       </div>
     </div>

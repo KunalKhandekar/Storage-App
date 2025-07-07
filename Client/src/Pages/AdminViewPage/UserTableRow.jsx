@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import RoleBadge from "./RoleBadge";
 import RoleChangeDropdown from "./RoleChangeDropdown";
 import StatusBadge from "./StatusBadge";
@@ -12,13 +13,15 @@ const UserTableRow = ({
   onRecover,
   onRoleChange,
 }) => {
+  const navigate = useNavigate();
+
   return (
     <tr
       className={`hover:bg-gray-50 transition-colors ${
         user.isDeleted ? "bg-red-50" : ""
       }`}
     >
-      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+      <td className="px-3 sm:px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => navigate(`/users/${user._id}`)}>
         <div className="flex items-center">
           <div className="flex-shrink-0">
             <UserAvatar user={user} size="small" isDeleted={user.isDeleted} />

@@ -5,6 +5,7 @@ import RegistrationForm from "./components/Forms/RegisterForm";
 import AdminView from "./Pages/AdminViewPage";
 import DirectoryView from "./Pages/DirectoryPage";
 import SettingsPage from "./Pages/SettingsPage";
+import { AdminUserView } from "./Pages/AdminUserView";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: "/users",
     element: <AdminView />,
+  },
+  {
+    path: "/users/:userId/:dirId?",
+    element: <AdminUserView />,
   },
 ]);
 

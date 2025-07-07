@@ -45,12 +45,12 @@ const FileUploadApp = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-fit max-w-6xl m-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <main className="p-6">
+      <main className="p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
         {/* Upload Progress */}
         <UploadSection
           setShowCreateModal={setShowCreateModal}
