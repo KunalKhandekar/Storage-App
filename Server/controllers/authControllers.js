@@ -2,20 +2,22 @@ import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
 import Directory from "../models/dirModel.js";
 import User from "../models/userModel.js";
-import { verifyGoogleIdToken } from "../services/googleAuthService.js";
+import {
+  connectGoogleDrive,
+  verifyGoogleCode,
+} from "../services/googleService.js";
 import CustomError from "../utils/ErrorResponse.js";
 import { StatusCodes } from "http-status-codes";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import githubClient from "../services/githubAuthService.js";
 
-
 export const loginWithGoogle = async (req, res, next) => {
-  const IdToken = req.body.credential;
+  const code = req.body.code;
   const mongooseSession = await mongoose.startSession();
   let transactionStarted = false;
 
   try {
-    const userData = await verifyGoogleIdToken(IdToken);
+    const userData = await verifyGoogleCode(code);
     const { email, name, picture } = userData;
     const userFound = await User.findOne({ email });
 
@@ -27,7 +29,10 @@ export const loginWithGoogle = async (req, res, next) => {
         );
       }
 
-      if (userFound.createdWith !== "email" && userFound.createdWith !== "google") {
+      if (
+        userFound.createdWith !== "email" &&
+        userFound.createdWith !== "google"
+      ) {
         throw new CustomError(
           `This email is already registered using ${userFound.createdWith}. Please login with ${userFound.createdWith}.`,
           StatusCodes.FORBIDDEN
@@ -45,7 +50,11 @@ export const loginWithGoogle = async (req, res, next) => {
       }
 
       // Session limiting
-      const userSessions = await redisClient.ft.search("userIdIdx", `@userId:{${userFound._id}}`, { RETURN: [] });
+      const userSessions = await redisClient.ft.search(
+        "userIdIdx",
+        `@userId:{${userFound._id}}`,
+        { RETURN: [] }
+      );
       if (userSessions.total >= 2) {
         await redisClient.del(userSessions.documents[0].id);
       }
@@ -57,9 +66,17 @@ export const loginWithGoogle = async (req, res, next) => {
         rootDirId: userFound.rootDirId,
       });
       await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-      res.cookie("token", sessionID, { httpOnly: true, signed: true, maxAge: sessionExpiry });
+      res.cookie("token", sessionID, {
+        httpOnly: true,
+        signed: true,
+        maxAge: sessionExpiry,
+      });
 
-      return CustomSuccess.send(res, "Logged in with Google successfully.", StatusCodes.OK);
+      return CustomSuccess.send(
+        res,
+        "Logged in with Google successfully.",
+        StatusCodes.OK
+      );
     }
 
     // Register new Google user
@@ -68,19 +85,43 @@ export const loginWithGoogle = async (req, res, next) => {
     mongooseSession.startTransaction();
     transactionStarted = true;
 
-    await Directory.create([{ _id: rootDirId, name: `root-${email}`, userId, parentDirId: null }], { session: mongooseSession });
-    await User.create([{ _id: userId, name, picture, email, rootDirId, canLoginWithPassword: false, createdWith: "google" }], {
-      session: mongooseSession,
-    });
+    await Directory.create(
+      [{ _id: rootDirId, name: `root-${email}`, userId, parentDirId: null }],
+      { session: mongooseSession }
+    );
+    await User.create(
+      [
+        {
+          _id: userId,
+          name,
+          picture,
+          email,
+          rootDirId,
+          canLoginWithPassword: false,
+          createdWith: "google",
+        },
+      ],
+      {
+        session: mongooseSession,
+      }
+    );
 
     const sessionID = crypto.randomUUID();
     const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
     await redisClient.json.set(`session:${sessionID}`, "$", { userId });
     await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-    res.cookie("token", sessionID, { httpOnly: true, signed: true, maxAge: sessionExpiry });
+    res.cookie("token", sessionID, {
+      httpOnly: true,
+      signed: true,
+      maxAge: sessionExpiry,
+    });
 
     await mongooseSession.commitTransaction();
-    return CustomSuccess.send(res, "New account created with Google and logged in.", StatusCodes.OK);
+    return CustomSuccess.send(
+      res,
+      "New account created with Google and logged in.",
+      StatusCodes.OK
+    );
   } catch (error) {
     if (transactionStarted) await mongooseSession.abortTransaction();
     next(error);
@@ -134,7 +175,10 @@ export const loginWithGithub = async (req, res, next) => {
         );
       }
 
-      if (userFound.createdWith !== "email" && userFound.createdWith !== "github") {
+      if (
+        userFound.createdWith !== "email" &&
+        userFound.createdWith !== "github"
+      ) {
         return res.redirect(
           `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent("This email is already registered with another method. Please login with your original provider.")}`
         );
@@ -150,7 +194,11 @@ export const loginWithGithub = async (req, res, next) => {
         await userFound.save();
       }
 
-      const userSessions = await redisClient.ft.search("userIdIdx", `@userId:{${userFound._id}}`, { RETURN: [] });
+      const userSessions = await redisClient.ft.search(
+        "userIdIdx",
+        `@userId:{${userFound._id}}`,
+        { RETURN: [] }
+      );
       if (userSessions.total >= 2) {
         await redisClient.del(userSessions.documents[0].id);
       }
@@ -162,7 +210,11 @@ export const loginWithGithub = async (req, res, next) => {
         rootDirId: userFound.rootDirId,
       });
       await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-      res.cookie("token", sessionID, { httpOnly: true, signed: true, maxAge: sessionExpiry });
+      res.cookie("token", sessionID, {
+        httpOnly: true,
+        signed: true,
+        maxAge: sessionExpiry,
+      });
 
       return res.redirect(`${process.env.CLIENT_URL}/`);
     }
@@ -173,16 +225,36 @@ export const loginWithGithub = async (req, res, next) => {
     mongooseSession.startTransaction();
     transactionStarted = true;
 
-    await Directory.create([{ _id: rootDirId, name: `root-${email}`, userId, parentDirId: null }], { session: mongooseSession });
-    await User.create([{ _id: userId, name, picture, email, rootDirId, canLoginWithPassword: false, createdWith: "github" }], {
-      session: mongooseSession,
-    });
+    await Directory.create(
+      [{ _id: rootDirId, name: `root-${email}`, userId, parentDirId: null }],
+      { session: mongooseSession }
+    );
+    await User.create(
+      [
+        {
+          _id: userId,
+          name,
+          picture,
+          email,
+          rootDirId,
+          canLoginWithPassword: false,
+          createdWith: "github",
+        },
+      ],
+      {
+        session: mongooseSession,
+      }
+    );
 
     const sessionID = crypto.randomUUID();
     const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
     await redisClient.json.set(`session:${sessionID}`, "$", { userId });
     await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-    res.cookie("token", sessionID, { httpOnly: true, signed: true, maxAge: sessionExpiry });
+    res.cookie("token", sessionID, {
+      httpOnly: true,
+      signed: true,
+      maxAge: sessionExpiry,
+    });
 
     await mongooseSession.commitTransaction();
 
@@ -197,3 +269,29 @@ export const loginWithGithub = async (req, res, next) => {
   }
 };
 
+export const connectToDrive = async (req, res, next) => {
+  const code = req.body.code;
+  try {
+    const files = await connectGoogleDrive(code, req.user);
+    return CustomSuccess.send(res, "Files imported", StatusCodes.OK, {
+      files,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDriveProgress = async (req, res) => {
+  const data = await redisClient.hGetAll(`drive-sync:${req.user._id}`);
+  if (!data || !data.total) {
+    return res.status(404).json({ message: "Progress not found" });
+  }
+  const total = parseInt(data.total || "1", 10);
+  const downloaded = parseInt(data.downloaded || "0", 10);
+  const percentage = Math.round((downloaded / total) * 100);
+  return CustomSuccess.send(res, null, StatusCodes.OK, {
+    total,
+    downloaded,
+    percentage,
+  });
+};

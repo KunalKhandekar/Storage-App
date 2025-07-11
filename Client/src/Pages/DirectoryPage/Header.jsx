@@ -22,7 +22,7 @@ const Header = () => {
   }, [navigate]);
 
   return (
-    <div className="sticky top-0 z-50 my-3 bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="sticky top-0 z-50 mb-3 bg-white rounded-lg shadow-sm border border-gray-200 w-full">
       <header className="px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Title */}

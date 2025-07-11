@@ -85,14 +85,6 @@ export default function LoginForm() {
     setSuccess("");
   };
 
-  const handleGoogleSuccess = async (res) => {
-    const result = await googleAuth(res);
-    if (result.success) navigate("/");
-    else setError(result.message);
-  };
-
-  const handleGoogleError = () =>
-    setError("Google login failed. Please try again.");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -179,8 +171,7 @@ export default function LoginForm() {
           {currentStep === "credentials" && (
             <>
               <SocialAuthButtons
-                onGoogleSuccess={handleGoogleSuccess}
-                onGoogleError={handleGoogleError}
+                setError={setError}
                 githubURL={`${URL}/auth/github`}
               />
             </>

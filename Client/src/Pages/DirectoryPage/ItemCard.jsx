@@ -1,10 +1,16 @@
+"use client";
+
 import {
   Download,
   Edit2,
   File,
+  FileText,
   Folder,
+  ImageIcon,
   MoreVertical,
+  Music,
   Trash2,
+  Video,
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,13 +23,61 @@ function ItemCard({
   setActiveDropdown,
   setCurrentPath,
   setActionDone,
+  viewMode = "list",
 }) {
   const navigate = useNavigate();
   const [renameModalData, setRenameModalData] = useState({
     open: false,
     item: null,
   });
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const URL = "http://localhost:4000";
+
+  // Get appropriate icon based on file type
+  const getFileIcon = () => {
+    if (item.type === "directory") {
+      return (
+        <Folder
+          className={`${
+            viewMode === "grid" ? "w-6 h-6 sm:w-8 sm:h-8" : "w-5 h-5"
+          } text-blue-500`}
+        />
+      );
+    }
+
+    const extension = item.name.split(".").pop()?.toLowerCase();
+    const iconSize = viewMode === "grid" ? "w-6 h-6 sm:w-8 sm:h-8" : "w-5 h-5";
+
+    if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension)) {
+      return <ImageIcon className={`${iconSize} text-green-500`} />;
+    }
+    if (["mp4", "avi", "mov", "wmv", "flv"].includes(extension)) {
+      return <Video className={`${iconSize} text-purple-500`} />;
+    }
+    if (["mp3", "wav", "flac", "aac"].includes(extension)) {
+      return <Music className={`${iconSize} text-pink-500`} />;
+    }
+    if (["txt", "doc", "docx", "pdf"].includes(extension)) {
+      return <FileText className={`${iconSize} text-orange-500`} />;
+    }
+
+    return <File className={`${iconSize} text-gray-500`} />;
+  };
+
+  const formatFileSize = (size) => {
+    if (!size) return "";
+    const units = ["B", "KB", "MB", "GB"];
+    let unitIndex = 0;
+    let fileSize = Number.parseInt(size);
+
+    while (fileSize >= 1024 && unitIndex < units.length - 1) {
+      fileSize /= 1024;
+      unitIndex++;
+    }
+
+    return `${fileSize.toFixed(1)} ${units[unitIndex]}`;
+  };
 
   const openItem = () => {
     if (item.type === "directory") {
@@ -36,20 +90,28 @@ function ItemCard({
 
   const handleDelete = async (e) => {
     e.stopPropagation();
-    const res = await deleteFile_or_Directory(item);
-    if (res.success) {
-      // TOAST
-      console.log(res.message);
-      setActionDone(true);
-    } else {
-      // TOAST
-      console.log("Error:", res.message);
+    setIsDeleting(true);
+
+    try {
+      const res = await deleteFile_or_Directory(item);
+      if (res.success) {
+        console.log(res.message);
+        setActionDone(true);
+        setActiveDropdown(null);
+      } else {
+        console.log("Error:", res.message);
+      }
+    } catch (error) {
+      console.log("Delete error:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   const handleRename = (e) => {
     e.stopPropagation();
     setRenameModalData({ open: true, item });
+    setActiveDropdown(null);
   };
 
   const handleDropdownOpen = (e) => {
@@ -61,59 +123,82 @@ function ItemCard({
     <>
       <div
         onClick={openItem}
-        className="bg-white cursor-pointer rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 relative group"
+        className="group relative bg-white cursor-pointer rounded-lg border border-gray-200 p-3 hover:shadow-md hover:border-gray-300 transition-all duration-200"
       >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-3 w-56">
-            {item.type === "directory" ? (
-              <Folder className="w-8 h-8 text-blue-500" />
-            ) : (
-              <File className="w-8 h-8 text-gray-500" />
-            )}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <div className="flex-shrink-0 p-1.5 rounded-md bg-gray-50 group-hover:bg-gray-100 transition-colors">
+              {getFileIcon()}
+            </div>
+
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-medium text-gray-900 truncate">
+              <h3 className="text-sm font-medium text-gray-900 truncate group-hover:text-gray-700 transition-colors">
                 {item.name}
               </h3>
-              {item.type === "file" && (
-                <p className="text-xs text-gray-500">{item.size}</p>
+            </div>
+
+            <div className="hidden sm:flex items-center space-x-4 text-xs text-gray-500">
+              <span className="capitalize min-w-[50px]">
+                {item.type === "directory" ? "Folder" : "File"}
+              </span>
+              {item.type === "file" && item.size && (
+                <span className="min-w-[60px]">
+                  {formatFileSize(item.size)}
+                </span>
               )}
             </div>
           </div>
-          <div className="relative" onClick={(e) => e.stopPropagation()}>
+
+          {/* Actions dropdown - same as grid view */}
+          <div
+            className="relative flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={handleDropdownOpen}
-              className="p-1 rounded-full hover:bg-gray-100 transition-opacity"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              aria-label="More options"
             >
               <MoreVertical className="w-4 h-4 text-gray-500" />
             </button>
+
             {activeDropdown === item._id && (
-              <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-30 min-w-32">
-                {item.type === "file" && (
-                  <a
-                    href={`${URL}/file/${item._id}?action=download`}
-                    download
-                    onClick={(e) => e.stopPropagation()}
+              <>
+                <div
+                  className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[1px]"
+                  onClick={() => setActiveDropdown(null)}
+                />
+                <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-xl shadow-2xl py-2 z-50 min-w-[180px] animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200">
+                  {/* Same dropdown content as grid view */}
+                  {item.type === "file" && (
+                    <a
+                      href={`${URL}/file/${item._id}?action=download`}
+                      download
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download</span>
+                    </a>
+                  )}
+                  <button
+                    onClick={handleRename}
                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                   >
-                    <Download className="w-4 h-4" />
-                    <span>Download</span>
-                  </a>
-                )}
-                <button
-                  onClick={handleRename}
-                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  <span>Rename</span>
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Delete</span>
-                </button>
-              </div>
+                    <Edit2 className="w-4 h-4" />
+                    <span>Rename</span>
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
+                  </button>
+
+                  <div className="absolute -top-1 right-4 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
+                </div>
+              </>
             )}
           </div>
         </div>

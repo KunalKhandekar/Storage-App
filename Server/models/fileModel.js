@@ -22,6 +22,15 @@ const fileSchema = new Schema(
       ref: "User",
       required: true,
     },
+    // For GoogleDrive file
+    googleFileId: {
+      type: String,
+    },
+    // For GoogleDrive file
+    mimeType: {
+      type: String,
+    },
+    
   },
   {
     strict: "throw",

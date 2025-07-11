@@ -51,6 +51,12 @@ const userSchema = new Schema(
       type: Boolean,
       required: true,
     },
+    google_access_token: {
+      type: String,
+    },
+    google_refresh_token: {
+      type: String,
+    },
   },
   {
     strict: "throw",
