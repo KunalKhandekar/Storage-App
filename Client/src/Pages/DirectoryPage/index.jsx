@@ -6,6 +6,7 @@ import CreateModal from "./CreateModal";
 import Header from "./Header";
 import ItemCard from "./ItemCard";
 import UploadSection from "./UploadSection";
+import ImportDrive from "../../components/ImportDrive";
 
 const FileUploadApp = () => {
   const [files, setFiles] = useState([]);
@@ -45,12 +46,12 @@ const FileUploadApp = () => {
   });
 
   return (
-    <div className="min-h-fit max-w-6xl m-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-fit max-w-7xl m-auto">
       {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <main className="p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
+      <main className="p-6 bg-gray-50 max-w-6xl mx-4 lg:m-auto rounded-lg shadow-sm border border-gray-200">
         {/* Upload Progress */}
         <UploadSection
           setShowCreateModal={setShowCreateModal}

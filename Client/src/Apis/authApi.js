@@ -1,8 +1,26 @@
 import axios from "./axios";
 
-export const googleAuth = async (credential) => {
+export const googleAuth = async (code) => {
   try {
-    const response = await axios.post("/auth/google", credential);
+    const response = await axios.post("/auth/google", { code });
+    return response.data;
+  } catch (error) {
+    return error?.response?.data;
+  }
+};
+
+export const driveConnect = async (code) => {
+  try {
+    const response = await axios.post("/auth/google/drive/connect", { code });
+    return response.data;
+  } catch (error) {
+    return error?.response?.data;
+  }
+};
+
+export const driveProgress = async () => {
+  try {
+    const response = await axios.get("/auth/drive-progress");
     return response.data;
   } catch (error) {
     return error?.response?.data;

@@ -67,6 +67,12 @@ const validations = [
           canLoginWithPassword: {
             bsonType: "bool",
           },
+          google_access_token: {
+            bsonType: "string",
+          },
+          google_refresh_token: {
+            bsonType: "string",
+          },
           __v: {
             bsonType: "number",
           },
@@ -139,6 +145,12 @@ const validations = [
             bsonType: "objectId",
             description:
               "parentDirId must be a valid ObjectId referencing the parent directory",
+          },
+          googleFileId: {
+            bsonType: "string",
+          },
+          mimeType: {
+            bsonType: "string",
           },
           __v: {
             bsonType: "number",

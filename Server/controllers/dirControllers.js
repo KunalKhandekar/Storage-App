@@ -22,7 +22,7 @@ export const getDir = async (req, res, next) => {
         }).lean();
 
     if (!directoryData)
-       throw new CustomError(
+      throw new CustomError(
         "You are not authorized to make this action",
         StatusCodes.UNAUTHORIZED
       );
@@ -35,7 +35,11 @@ export const getDir = async (req, res, next) => {
       await Directory.find({ parentDirId: directoryData?._id }).lean()
     ).map((dir) => ({ ...dir, type: "directory" }));
 
-    return CustomSuccess.send(res, null, StatusCodes.OK, { ...directoryData, files, directory })
+    return CustomSuccess.send(res, null, StatusCodes.OK, {
+      ...directoryData,
+      files,
+      directory,
+    });
   } catch (error) {
     next(error);
   }
@@ -99,7 +103,7 @@ export const deleteDir = async (req, res, next) => {
     ).lean();
 
     let files = await File.find({ parentDirId: id })
-      .select("storedName")
+      .select("storedName googleFileId")
       .lean();
 
     for (const { _id } of directories) {
@@ -133,7 +137,12 @@ export const deleteDir = async (req, res, next) => {
 
     await Directory.deleteMany({ _id: { $in: includeThisDir } });
 
-    for (const { storedName } of files) {
+    for (const file of files) {
+      const { storedName, googleFileId } = file;
+      // Google file not stored in local storage.
+      if (googleFileId) {
+        continue;
+      }
       await rm(path.join(absolutePath, storedName));
     }
 
