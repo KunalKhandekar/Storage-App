@@ -7,6 +7,7 @@ import fileRoutes from "./routes/fileRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import otpRoutes from "./routes/otpRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import guestRoutes from "./routes/guestRoutes.js";
 import { connectDB } from "./config/db.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
@@ -32,6 +33,7 @@ app.use("/directory", checkAuth, dirRoutes);
 app.use("/user", userRoutes);
 app.use("/otp", otpRoutes);
 app.use("/auth", authRoutes);
+app.use("/guest", guestRoutes)
 
 // Error Handler Middleware with Custom Error Class.
 app.use(errorHandler);

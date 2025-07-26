@@ -6,6 +6,12 @@ import AdminView from "./Pages/AdminViewPage";
 import DirectoryView from "./Pages/DirectoryPage";
 import SettingsPage from "./Pages/SettingsPage";
 import { AdminUserView } from "./Pages/AdminUserView";
+import Dashboard from "./Pages/SharePage/Dashboard";
+import SharedWithMe from "./Pages/SharePage/SharedWithMe";
+import SharedByMe from "./Pages/SharePage/SharedByMe";
+import PermissionManager from "./Pages/SharePage/PermissionManager";
+import FileViewer from "./Pages/SharePage/FileViewer";
+import GuestFileAccess from "./components/GuestFileAccess";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +46,30 @@ const router = createBrowserRouter([
     path: "/users/:userId/:dirId?",
     element: <AdminUserView />,
   },
+  {
+    path: "/share",
+    element: <Dashboard />,
+  },
+  {
+    path: "/share/shared-with-me",
+    element: <SharedWithMe />,
+  },
+  {
+    path: "/share/shared-by-me",
+    element: <SharedByMe />,
+  },
+  {
+    path: "/share/manage/:fileId",
+    element: <PermissionManager />,
+  },
+  {
+    path: "/share/view/:fileId",
+    element: <FileViewer />,
+  },
+  {
+    path: "/guest/access/:fileId",
+    element: <GuestFileAccess/>,
+  }
 ]);
 
 const App = () => {

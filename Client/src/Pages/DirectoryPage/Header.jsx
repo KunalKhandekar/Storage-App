@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { Share2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserDetails } from "../../Apis/userApi";
@@ -31,7 +31,14 @@ const Header = () => {
           </div>
 
           {/* Right actions */}
-          <div className="flex items-center space-x-2 md:space-x-4">
+          <div className="flex items-center justify-center space-x-2 md:space-x-4">
+            <button
+                onClick={() => navigate("/share")}
+                className="flex items-center space-x-2 px-2 py-2 md:px-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 hover:border-gray-300"
+              >
+                <Share2 className="w-4 h-4" />
+                <span className="font-medium hidden sm:inline">Share Insights</span>
+              </button>
             {/* User Management Button */}
             {user.role !== "User" && (
               <button

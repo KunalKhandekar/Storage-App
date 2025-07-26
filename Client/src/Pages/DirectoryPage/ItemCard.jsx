@@ -9,6 +9,7 @@ import {
   ImageIcon,
   MoreVertical,
   Music,
+  Share2,
   Trash2,
   Video,
 } from "lucide-react";
@@ -23,7 +24,9 @@ function ItemCard({
   setActiveDropdown,
   setCurrentPath,
   setActionDone,
+  setShowShareModal,
   viewMode = "list",
+  setCurrentFile,
 }) {
   const navigate = useNavigate();
   const [renameModalData, setRenameModalData] = useState({
@@ -84,7 +87,7 @@ function ItemCard({
       setCurrentPath(item.name);
       navigate(`/directory/${item._id}`);
     } else {
-      window.location.href = `${URL}/file/${item._id}`;
+      window.open(`${URL}/file/${item._id}`, "_blank");
     }
   };
 
@@ -117,6 +120,13 @@ function ItemCard({
   const handleDropdownOpen = (e) => {
     e.stopPropagation();
     setActiveDropdown(activeDropdown === item._id ? null : item._id);
+  };
+
+  const handleShare = (e, file) => {
+    e.stopPropagation();
+    setShowShareModal(true);
+    setCurrentFile(file);
+    setActiveDropdown(null);
   };
 
   return (
@@ -171,15 +181,24 @@ function ItemCard({
                 <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-xl shadow-2xl py-2 z-50 min-w-[180px] animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200">
                   {/* Same dropdown content as grid view */}
                   {item.type === "file" && (
-                    <a
-                      href={`${URL}/file/${item._id}?action=download`}
-                      download
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Download</span>
-                    </a>
+                    <>
+                      <a
+                        href={`${URL}/file/${item._id}?action=download`}
+                        download
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Download</span>
+                      </a>
+                      <button
+                        onClick={(e) => handleShare(e, item)}
+                        className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                      >
+                        <Share2 className="w-4 h-4" />
+                        <span>Share</span>
+                      </button>
+                    </>
                   )}
                   <button
                     onClick={handleRename}
