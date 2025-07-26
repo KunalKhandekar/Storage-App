@@ -1,14 +1,29 @@
+import crypto from "crypto";
 import { Router } from "express";
 import multer from "multer";
 import path from "path";
-import crypto from "crypto";
-import validateRequest from "../middlewares/validateRequest.js";
 import {
+  changePermission,
+  changePermissionOfUser,
   deleteFile,
+  getDashboardInfo,
   getFileById,
+  getFileInfoById,
+  getSharedByMeFiles,
+  getSharedFileViaEmail,
+  getSharedFileViaLink,
+  getSharedWithMeFiles,
+  getUserAccessList,
   renameFile,
+  revokeUserAccess,
+  shareLinkToggle,
+  shareViaEmail,
+  shareViaLink,
   uploadFile,
 } from "../controllers/fileControllers.js";
+import { checkFileAccess } from "../middlewares/checkFileAccess.js";
+import { serveFile } from "../middlewares/serveFile.js";
+import validateRequest from "../middlewares/validateRequest.js";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "storage/"),
@@ -26,9 +41,11 @@ const upload = multer({ storage });
 const router = Router();
 
 router.param("id", validateRequest);
+router.param("fileId", validateRequest);
+router.param("userId", validateRequest);
 
 // GET file
-router.get("/:id", getFileById);
+router.get("/:id", getFileById, serveFile);
 
 // UPLOAD file(s)
 router.post("/upload", upload.single("myfiles"), uploadFile);
@@ -38,5 +55,31 @@ router.delete("/:id", deleteFile);
 
 // PATCH (rename) file
 router.patch("/:id", renameFile);
+
+// Share File Routes
+router.post("/share/:fileId/email", checkFileAccess, shareViaEmail);
+router.post("/share/:fileId/link", checkFileAccess, shareViaLink);
+router.patch("/share/:fileId/link/toggle", checkFileAccess, shareLinkToggle);
+router.patch(
+  "/share/:fileId/link/permission",
+  checkFileAccess,
+  changePermission
+);
+
+router.get("/share/access/:fileId/link", getSharedFileViaLink, serveFile);
+router.get("/share/access/:fileId/email", getSharedFileViaEmail, serveFile);
+router.get("/share/access/:fileId/list", checkFileAccess, getUserAccessList);
+router.get("/share/dashboard", getDashboardInfo);
+router.get("/share/by-me", getSharedByMeFiles);
+router.get("/share/with-me", getSharedWithMeFiles);
+router.get("/info/:fileId", checkFileAccess, getFileInfoById);
+
+// Update Permission.
+router.patch(
+  "/share/update/permission/:userId/:fileId",
+  changePermissionOfUser
+);
+// Revoke Access.
+router.patch("/share/access/revoke/:userId/:fileId", revokeUserAccess);
 
 export default router;

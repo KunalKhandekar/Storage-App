@@ -30,11 +30,43 @@ const fileSchema = new Schema(
     mimeType: {
       type: String,
     },
-    
+    // For File-Sharing
+    sharedViaLink: {
+      token: {
+        type: String,
+      },
+      enabled: {
+        type: Boolean,
+        default: false,
+      },
+      permission: {
+        type: String,
+        enum: ["viewer", "editor"],
+        default: "viewer",
+      },
+    },
+    sharedWith: [
+      {
+        userId: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+        permission: {
+          type: String,
+          enum: ["viewer", "editor"],
+          default: "viewer",
+        },
+        sharedAt: {
+          type: Date,
+          default: Date.now,
+        }
+      },
+    ],
   },
   {
     strict: "throw",
-  }
+    timestamps: true
+  },
 );
 
 const File = model("File", fileSchema);

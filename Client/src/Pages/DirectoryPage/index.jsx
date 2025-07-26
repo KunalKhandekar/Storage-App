@@ -7,15 +7,18 @@ import Header from "./Header";
 import ItemCard from "./ItemCard";
 import UploadSection from "./UploadSection";
 import ImportDrive from "../../components/ImportDrive";
+import ShareModal from "../../components/Modals/ShareModal";
 
 const FileUploadApp = () => {
   const [files, setFiles] = useState([]);
   const [directories, setDirectories] = useState([]);
   const [currentPath, setCurrentPath] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [directoryName, setDirectoryName] = useState("");
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [actionDone, setActionDone] = useState(false);
+  const [currentFile, setCurrentFile] = useState(null) 
   const { dirId } = useParams();
   const navigate = useNavigate();
 
@@ -74,6 +77,8 @@ const FileUploadApp = () => {
               activeDropdown={activeDropdown}
               setActiveDropdown={setActiveDropdown}
               setActionDone={setActionDone}
+              setShowShareModal={setShowShareModal}
+              setCurrentFile={setCurrentFile}
             />
           ))}
         </div>
@@ -102,6 +107,10 @@ const FileUploadApp = () => {
             setActionDone(true);
           }}
         />
+      )}
+
+      {showShareModal && (
+        <ShareModal closeModal={() => setShowShareModal(false)} error={null} isCompleted={false} currentFile={currentFile} />
       )}
 
       {/* Click outside to close dropdowns */}

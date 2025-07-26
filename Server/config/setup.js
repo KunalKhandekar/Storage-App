@@ -152,9 +152,51 @@ const validations = [
           mimeType: {
             bsonType: "string",
           },
+          sharedViaLink: {
+            bsonType: "object",
+            properties: {
+              token: {
+                bsonType: "string",
+              },
+              enabled: {
+                bsonType: "bool",
+              },
+              permission: {
+                bsonType: "string",
+                enum: ["viewer", "editor"],
+              },
+              modifiedAt: {
+                bsonType: "date",
+              }
+            },
+          },
+          sharedWith: {
+            bsonType: "array",
+            items: {
+              bsonType: "object",
+              properties: {
+                userId: {
+                  bsonType: "objectId",
+                },
+                permission: {
+                  bsonType: "string",
+                  enum: ["viewer", "editor"],
+                },
+                sharedAt: {
+                  bsonType: "date",
+                },
+              },
+            },
+          },
           __v: {
             bsonType: "number",
           },
+          createdAt: {
+            bsonType: "date"
+          },
+          updatedAt: {
+            bsonType: "date"
+          }
         },
       },
     },
