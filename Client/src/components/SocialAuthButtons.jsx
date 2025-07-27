@@ -2,15 +2,34 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { BsGithub } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { googleAuth } from "../Apis/authApi";
+import { useAuth } from "../Contexts/AuthContent";
+import { useModal } from "../Contexts/ModalContext";
+import { showSessionLimitExceedModal } from "../Utils/helpers";
 
 export default function SocialAuthButtons({ setError, githubURL }) {
   const navigate = useNavigate();
+  const { setIsAuth } = useAuth();
+  const { showModal, showConfirmModal, closeConfirmModal } = useModal();
   const googleLogin = useGoogleLogin({
-    onSuccess: async (res) => {
-      const { code } = res;
-      const result = await googleAuth(code);
-      if (result.success) navigate("/");
-      else setError(result.message);
+    onSuccess: async (response) => {
+      const { code } = response;
+      const res = await googleAuth(code);
+      if (res.success) {
+        setIsAuth(true);
+        navigate("/");
+      } else {
+        if (res?.details?.sessionLimitExceed) {
+          showSessionLimitExceedModal({
+            showModal,
+            showConfirmModal,
+            closeConfirmModal,
+            navigate,
+            setIsAuth,
+            token: res?.details?.temp_token,
+          });
+        }
+        setError(res.message);
+      }
     },
     onError: () => setError("Google login failed. Please try again."),
     ux_mode: "popup",

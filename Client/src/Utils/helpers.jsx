@@ -1,4 +1,16 @@
-import { Archive, Edit3, Eye, File, FileBoxIcon, FileText, Image, ImageIcon, ImageUp, Music, Video } from "lucide-react";
+import {
+  Archive,
+  Edit3,
+  Eye,
+  File,
+  FileBoxIcon,
+  FileText,
+  ImageIcon,
+  ImageUp,
+  Music,
+  Video,
+} from "lucide-react";
+import { regenerateSession } from "../Apis/authApi";
 
 export const UserAvatar = ({ user, size = "w-8 h-8" }) => (
   <div className={`${size} rounded-full overflow-hidden flex-shrink-0`}>
@@ -22,7 +34,6 @@ export const PermissionBadge = ({ permission }) => (
     <span className="capitalize">{permission}</span>
   </div>
 );
-
 
 export const FileIcon = ({ type, size = 24 }) => {
   const iconProps = { size, className: "text-gray-600" };
@@ -80,7 +91,6 @@ export const formatTime = (timeString) => {
   if (diffInDays < 365) return `${diffInMonths}mo ago`;
   return `${diffInYears}y ago`;
 };
-
 
 const getFileExtension = (name) => name.split(".").pop().toLowerCase();
 
@@ -158,4 +168,29 @@ export const renderFilePreview = (file, fileUrl) => {
         </div>
       );
   }
+};
+
+export const showSessionLimitExceedModal = ({
+  showModal,
+  showConfirmModal,
+  closeConfirmModal,
+  navigate,
+  setIsAuth,
+  token,
+}) => {
+  showConfirmModal(
+    "Session Limit Exceeded",
+    "You are already logged in on two devices. To continue, one of your previous sessions must be logged out. Would you like to force logout from the older sessions and continue here?",
+    async () => {
+      const res = await regenerateSession(token);
+      if (res.success) {
+        setIsAuth(true);
+        navigate("/");
+      } else {
+        showModal("Error", res.message || "Something went wrong.", "error");
+      }
+      closeConfirmModal();
+    },
+    "warning"
+  );
 };

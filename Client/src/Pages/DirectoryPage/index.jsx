@@ -2,12 +2,10 @@ import { Folder } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getItemList } from "../../Apis/file_Dir_Api";
+import ShareModal from "../../components/Modals/ShareModal";
 import CreateModal from "./CreateModal";
-import Header from "./Header";
 import ItemCard from "./ItemCard";
 import UploadSection from "./UploadSection";
-import ImportDrive from "../../components/ImportDrive";
-import ShareModal from "../../components/Modals/ShareModal";
 
 const FileUploadApp = () => {
   const [files, setFiles] = useState([]);
@@ -49,10 +47,7 @@ const FileUploadApp = () => {
   });
 
   return (
-    <div className="min-h-fit max-w-7xl m-auto">
-      {/* Header */}
-      <Header />
-
+    <div className="min-h-fit max-w-7xl m-auto mt-3">
       {/* Main Content */}
       <main className="p-6 bg-gray-50 max-w-6xl mx-4 lg:m-auto rounded-lg shadow-sm border border-gray-200">
         {/* Upload Progress */}

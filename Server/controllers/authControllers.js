@@ -10,6 +10,7 @@ import CustomError from "../utils/ErrorResponse.js";
 import { StatusCodes } from "http-status-codes";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import githubClient from "../services/githubAuthService.js";
+import { createSessionAndSetCookie } from "../utils/CreateSession.js";
 
 export const loginWithGoogle = async (req, res, next) => {
   const code = req.body.code;
@@ -55,22 +56,25 @@ export const loginWithGoogle = async (req, res, next) => {
         `@userId:{${userFound._id}}`,
         { RETURN: [] }
       );
+
       if (userSessions.total >= 2) {
-        await redisClient.del(userSessions.documents[0].id);
+        const loginToken = crypto.randomUUID();
+        await redisClient.set(
+          `temp_login_token:${loginToken}`,
+          JSON.stringify({
+            userId: userFound._id,
+          }),
+          { EX: 300 }
+        );
+        throw new CustomError("Session Limit Exceed", StatusCodes.CONFLICT, {
+          details: {
+            sessionLimitExceed: true,
+            temp_token: loginToken,
+          },
+        });
       }
 
-      const sessionID = crypto.randomUUID();
-      const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
-      await redisClient.json.set(`session:${sessionID}`, "$", {
-        userId: userFound._id,
-        rootDirId: userFound.rootDirId,
-      });
-      await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-      res.cookie("token", sessionID, {
-        httpOnly: true,
-        signed: true,
-        maxAge: sessionExpiry,
-      });
+      await createSessionAndSetCookie(userFound._id, res);
 
       return CustomSuccess.send(
         res,
@@ -200,21 +204,23 @@ export const loginWithGithub = async (req, res, next) => {
         { RETURN: [] }
       );
       if (userSessions.total >= 2) {
-        await redisClient.del(userSessions.documents[0].id);
+        const loginToken = crypto.randomUUID();
+        await redisClient.set(
+          `temp_login_token:${loginToken}`,
+          JSON.stringify({
+            userId: userFound._id,
+          }),
+          { EX: 300 }
+        );
+        throw new CustomError("Session Limit Exceed", StatusCodes.CONFLICT, {
+          details: {
+            sessionLimitExceed: true,
+            temp_token: loginToken,
+          },
+        });
       }
 
-      const sessionID = crypto.randomUUID();
-      const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
-      await redisClient.json.set(`session:${sessionID}`, "$", {
-        userId: userFound._id,
-        rootDirId: userFound.rootDirId,
-      });
-      await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-      res.cookie("token", sessionID, {
-        httpOnly: true,
-        signed: true,
-        maxAge: sessionExpiry,
-      });
+      await createSessionAndSetCookie(userFound._id, res);
 
       return res.redirect(`${process.env.CLIENT_URL}/`);
     }
@@ -294,4 +300,43 @@ export const getDriveProgress = async (req, res) => {
     downloaded,
     percentage,
   });
+};
+
+export const DeleteAndCreateSession = async (req, res, next) => {
+  const { temp_token } = req.body;
+  try {
+    if (!temp_token) {
+      throw new CustomError("Login token not found.", StatusCodes.BAD_REQUEST);
+    }
+
+    const isTokenStored = await redisClient.get(
+      `temp_login_token:${temp_token}`
+    );
+
+    if (!isTokenStored) {
+      throw new CustomError("Token is Invalid/Expired");
+    }
+
+    const { userId } = JSON.parse(isTokenStored);
+
+    const userSessions = await redisClient.ft.search(
+      "userIdIdx",
+      `@userId:{${userId}}`,
+      {
+        RETURN: [],
+      }
+    );
+
+    if (userSessions.total >= 2) {
+      await redisClient.del(userSessions.documents[0].id);
+    }
+
+    await createSessionAndSetCookie(userId, res);
+
+    await redisClient.del(`temp_login_token:${temp_token}`);
+
+    return CustomSuccess.send(res, "Session Created", StatusCodes.CREATED);
+  } catch (error) {
+    next(error);
+  }
 };

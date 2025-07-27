@@ -5,9 +5,14 @@ import LoginCredentialForm from "../../components/Forms/LoginCredentialForm";
 import OTPForm from "../../components/Forms/OTPForm";
 import SocialAuthButtons from "../../components/SocialAuthButtons";
 import StepProgress from "../../components/StepProgress";
+import { useAuth } from "../../Contexts/AuthContent";
+import { showSessionLimitExceedModal } from "../../Utils/helpers";
+import { useModal } from "../../Contexts/ModalContext";
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const { setIsAuth } = useAuth();
+  const { showModal, showConfirmModal, closeConfirmModal } = useModal();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -65,9 +70,19 @@ export default function LoginForm() {
     const { email, password, otp } = formData;
     const res = await login(email, password, otp);
     if (res.success) {
-      // TOAST
+      setIsAuth(true);
       navigate("/");
     } else {
+      if (res?.details?.sessionLimitExceed) {
+        showSessionLimitExceedModal({
+          showModal,
+          showConfirmModal,
+          closeConfirmModal,
+          navigate,
+          setIsAuth,
+          token: res?.details?.temp_token,
+        });
+      }
       setError(res.message);
     }
     setLoading(false);
@@ -84,7 +99,6 @@ export default function LoginForm() {
     setError("");
     setSuccess("");
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">

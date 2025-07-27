@@ -6,7 +6,7 @@ const FilePreviewModal = ({ file, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0  bg-black/30 bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 bg-black/30 bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div

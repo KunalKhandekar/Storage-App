@@ -12,64 +12,115 @@ import SharedByMe from "./Pages/SharePage/SharedByMe";
 import PermissionManager from "./Pages/SharePage/PermissionManager";
 import FileViewer from "./Pages/SharePage/FileViewer";
 import GuestFileAccess from "./components/GuestFileAccess";
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicOnlyRoute from "./components/PublicOnlyRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <DirectoryView />,
+    element: (
+      <ProtectedRoute>
+        <DirectoryView />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/directory/:dirId",
+    element: (
+      <ProtectedRoute>
+        <DirectoryView />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/settings",
+    element: (
+      <ProtectedRoute>
+        <SettingsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/users",
+    element: (
+      <ProtectedRoute>
+        <AdminView />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/users/:userId/:dirId?",
+    element: (
+      <ProtectedRoute>
+        <AdminUserView />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/share",
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/share/shared-with-me",
+    element: (
+      <ProtectedRoute>
+        <SharedWithMe />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/share/shared-by-me",
+    element: (
+      <ProtectedRoute>
+        <SharedByMe />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/share/manage/:fileId",
+    element: (
+      <ProtectedRoute>
+        <PermissionManager />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/share/view/:fileId",
+    element: (
+      <ProtectedRoute>
+        <FileViewer />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <PublicOnlyRoute>
+        <RegistrationForm />
+      </PublicOnlyRoute>
+    ),
+  },
+  {
+    path: "/login",
+    element: (
+      <PublicOnlyRoute>
+        <LoginForm />
+      </PublicOnlyRoute>
+    ),
+  },
+  {
+    path: "/guest/access/:fileId",
+    element: <GuestFileAccess />,
   },
   {
     path: "/auth/error",
     element: <AuthError />,
   },
-  {
-    path: "/directory/:dirId",
-    element: <DirectoryView />,
-  },
-  {
-    path: "/login",
-    element: <LoginForm />,
-  },
-  {
-    path: "/settings",
-    element: <SettingsPage />,
-  },
-  {
-    path: "/register",
-    element: <RegistrationForm />,
-  },
-  {
-    path: "/users",
-    element: <AdminView />,
-  },
-  {
-    path: "/users/:userId/:dirId?",
-    element: <AdminUserView />,
-  },
-  {
-    path: "/share",
-    element: <Dashboard />,
-  },
-  {
-    path: "/share/shared-with-me",
-    element: <SharedWithMe />,
-  },
-  {
-    path: "/share/shared-by-me",
-    element: <SharedByMe />,
-  },
-  {
-    path: "/share/manage/:fileId",
-    element: <PermissionManager />,
-  },
-  {
-    path: "/share/view/:fileId",
-    element: <FileViewer />,
-  },
-  {
-    path: "/guest/access/:fileId",
-    element: <GuestFileAccess/>,
-  }
 ]);
 
 const App = () => {

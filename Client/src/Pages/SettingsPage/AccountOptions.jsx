@@ -2,11 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { deleteAccount, disableAccount } from "../../Apis/userApi";
 import { Trash2 } from "lucide-react";
 import { useModal } from "../../Contexts/ModalContext";
+import { useAuth } from "../../Contexts/AuthContent";
 
 const AccountOptions = ({
   option, // 'delete' or 'disable'
 }) => {
   const navigate = useNavigate();
+  const { setIsAuth } = useAuth();
   const { showModal, showConfirmModal, closeConfirmModal } = useModal();
 
   const styles = {
@@ -43,7 +45,8 @@ const AccountOptions = ({
 
             if (res.success) {
               showModal("Account Deleted", "Your account has been deleted.");
-              setTimeout(() => navigate("/login"), 2000);
+              setIsAuth(false);
+              setTimeout(() => navigate("/login"), 1000);
             } else {
               showModal(
                 "Error",
@@ -68,14 +71,14 @@ const AccountOptions = ({
           "Are you sure you want to disable your account? This will hide your profile and stop notifications. You can reactivate it later by contacting our support team.",
           async () => {
             const res = await disableAccount();
-            console.log(res);
             if (res.success) {
               showModal(
                 "Account Disabled",
                 "Your account has been disabled. Contact support to reactivate.",
                 "success"
               );
-              setTimeout(() => navigate("/login"), 2000);
+              setIsAuth(false)
+              setTimeout(() => navigate("/login"), 1000);
             } else {
               showModal(
                 "Error",

@@ -15,6 +15,7 @@ import File from "../models/fileModel.js";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 import { absolutePath } from "../app.js";
+import { createSessionAndSetCookie } from "../utils/CreateSession.js";
 
 // Utility Function
 const canPerform = (actorRole, targetRole) => {
@@ -134,20 +135,23 @@ export const loginUser = async (req, res, next) => {
     );
 
     if (userSessions.total >= 2) {
-      await redisClient.del(userSessions.documents[0].id);
+      const loginToken = crypto.randomUUID();
+      await redisClient.set(
+        `temp_login_token:${loginToken}`,
+        JSON.stringify({
+          userId: user._id,
+        }),
+        { EX: 300 }
+      );
+      throw new CustomError("Session Limit Exceed", StatusCodes.CONFLICT, {
+        details: {
+          sessionLimitExceed: true,
+          temp_token: loginToken,
+        },
+      });
     }
 
-    const sessionID = crypto.randomUUID();
-    const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
-    await redisClient.json.set(`session:${sessionID}`, "$", {
-      userId: user._id,
-    });
-    await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-    res.cookie("token", sessionID, {
-      httpOnly: true,
-      signed: true,
-      maxAge: sessionExpiry,
-    });
+    await createSessionAndSetCookie(user._id, res);
 
     return CustomSuccess.send(res, "Logged in successful", StatusCodes.OK);
   } catch (error) {
@@ -566,7 +570,9 @@ export const getSpecificUserDirectory = async (req, res, next) => {
   const { userId, dirId } = req.params;
 
   try {
-    const targetUser = await User.findOne({_id: userId}).select("-password").lean(); 
+    const targetUser = await User.findOne({ _id: userId })
+      .select("-password")
+      .lean();
     const directoryData = dirId
       ? await Directory.findOne({
           _id: dirId,
