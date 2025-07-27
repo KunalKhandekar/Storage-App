@@ -212,12 +212,9 @@ export const loginWithGithub = async (req, res, next) => {
           }),
           { EX: 300 }
         );
-        throw new CustomError("Session Limit Exceed", StatusCodes.CONFLICT, {
-          details: {
-            sessionLimitExceed: true,
-            temp_token: loginToken,
-          },
-        });
+        return res.redirect(
+          `${process.env.CLIENT_URL}/auth/error?temp_token=${encodeURIComponent(loginToken)}`
+        );
       }
 
       await createSessionAndSetCookie(userFound._id, res);

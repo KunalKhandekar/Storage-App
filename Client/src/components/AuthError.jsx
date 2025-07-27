@@ -1,8 +1,28 @@
-import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { showSessionLimitExceedModal } from "../Utils/helpers";
+import { useAuth } from "../Contexts/AuthContent";
+import { useModal } from "../Contexts/ModalContext";
 
 export default function AuthError() {
   const [params] = useSearchParams();
   const message = params.get("message");
+  const loginToken = params.get("temp_token");
+  const navigate = useNavigate();
+  const { setIsAuth } = useAuth();
+  const { showModal, showConfirmModal, closeConfirmModal } = useModal();
+  useEffect(() => {
+    if (loginToken) {
+      showSessionLimitExceedModal({
+        showModal,
+        showConfirmModal,
+        closeConfirmModal,
+        navigate,
+        setIsAuth,
+        token: loginToken,
+      });
+    }
+  }, [loginToken]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-red-50 px-4">
