@@ -25,6 +25,7 @@ import {
 import checkAuth from "../middlewares/auth.js";
 import { checkRole } from "../middlewares/checkRole.js";
 import validateRequest from "../middlewares/validateRequest.js";
+import { DeleteAndCreateSession } from "../controllers/authControllers.js";
 
 const profileStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "profilePictures/"),
@@ -60,6 +61,7 @@ router.post("/updateProfile", checkAuth, upload.single("file"), updateProfile);
 router.patch("/disable", checkAuth, disableUser);
 router.delete("/delete", checkAuth, deleteUser);
 router.post("/:userId/changeRole", checkAuth, checkRole, changeRole);
+router.post("/session", DeleteAndCreateSession);
 
 router.get("/:userId/{:dirId}", checkAuth, checkRole, getSpecificUserDirectory);
 router.get("/:userId/file/:fileId", checkAuth, checkRole, getFile);

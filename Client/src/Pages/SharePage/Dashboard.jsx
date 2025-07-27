@@ -69,10 +69,10 @@ export default function Dashboard() {
               </div>
               <div className="absolute inset-0 w-16 h-16 mx-auto bg-blue-200 rounded-full animate-ping opacity-20"></div>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-base font-medium text-gray-900 mb-2">
               Loading Dashboard
             </h3>
-            <p className="text-gray-600">
+            <p className="text-sm text-gray-600">
               Fetching your latest file sharing activity...
             </p>
           </div>
@@ -89,15 +89,15 @@ export default function Dashboard() {
           <div className="text-center sm:text-left">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   File Sharing Dashboard
                 </h1>
-                <p className="text-gray-600 mt-2 text-sm sm:text-base">
+                <p className="text-gray-600 mt-2 text-xs sm:text-sm">
                   Manage your shared files and collaborations seamlessly
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <TrendingUp size={16} />
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <TrendingUp size={14} />
                 <span>Last updated: {new Date().toLocaleDateString()}</span>
               </div>
             </div>
@@ -111,29 +111,29 @@ export default function Dashboard() {
               <div className="relative p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors duration-300">
-                    <Share2 size={24} className="text-blue-600" />
+                    <Share2 size={20} className="text-blue-600" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">
                       {stats.sharedWithMe}
                     </p>
                   </div>
                 </div>
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 mb-1">
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">
                     Shared With Me
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-gray-600">
                     Files others have shared
                   </p>
                 </div>
                 <button
                   onClick={() => navigate("/share/shared-with-me")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all duration-200 group/btn"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all duration-200 group/btn"
                 >
                   View All Files
                   <ArrowRight
-                    size={16}
+                    size={14}
                     className="group-hover/btn:translate-x-1 transition-transform duration-200"
                   />
                 </button>
@@ -146,27 +146,27 @@ export default function Dashboard() {
               <div className="relative p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors duration-300">
-                    <Users size={24} className="text-green-600" />
+                    <Users size={20} className="text-green-600" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">
                       {stats.sharedByMe}
                     </p>
                   </div>
                 </div>
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 mb-1">
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">
                     Shared By Me
                   </h3>
-                  <p className="text-sm text-gray-600">Files you've shared</p>
+                  <p className="text-xs text-gray-600">Files you've shared</p>
                 </div>
                 <button
                   onClick={() => navigate("/share/shared-by-me")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 rounded-xl transition-all duration-200 group/btn"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-medium text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 rounded-xl transition-all duration-200 group/btn"
                 >
                   Manage Files
                   <Settings2
-                    size={16}
+                    size={14}
                     className="group-hover/btn:rotate-90 transition-transform duration-200"
                   />
                 </button>
@@ -179,20 +179,20 @@ export default function Dashboard() {
               <div className="relative p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 bg-purple-100 rounded-xl group-hover:bg-purple-200 transition-colors duration-300">
-                    <UserCheck size={24} className="text-purple-600" />
+                    <UserCheck size={20} className="text-purple-600" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">
                       {stats.totalUsers}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">Active users</p>
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">
                     Collaborators
                   </h3>
-                  <p className="text-sm text-gray-600">People you work with</p>
+                  <p className="text-xs text-gray-600">People you work with</p>
                 </div>
               </div>
             </div>
@@ -203,10 +203,10 @@ export default function Dashboard() {
             <div className="p-6 sm:p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                     Recent Activity
                   </h2>
-                  <p className="text-gray-600 text-sm sm:text-base">
+                  <p className="text-gray-600 text-xs sm:text-sm">
                     Your latest shared files and collaborations
                   </p>
                 </div>
@@ -218,12 +218,12 @@ export default function Dashboard() {
               {recentFiles.length === 0 ? (
                 <div className="text-center py-12 sm:py-16">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Clock size={32} className="text-gray-400" />
+                    <Clock size={28} className="text-gray-400" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3">
                     No recent activity
                   </h3>
-                  <p className="text-gray-500 text-sm sm:text-base max-w-md mx-auto">
+                  <p className="text-gray-500 text-xs sm:text-sm max-w-md mx-auto">
                     Your shared files and collaborations will appear here once
                     you start sharing.
                   </p>
@@ -237,13 +237,13 @@ export default function Dashboard() {
                     >
                       <div className="flex items-center space-x-3 mb-4 sm:mb-0">
                         <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-gray-100 transition-colors duration-200">
-                          <FileIcon type={file.fileType} size={20} />
+                          <FileIcon type={file.fileType} size={18} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="text-sm font-medium text-gray-900 truncatee">
+                          <h3 className="text-sm font-medium text-gray-900 truncate">
                             {file.name}
                           </h3>
-                          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                          <p className="text-xs text-gray-500 mt-1">
                             {file.type === "sharedWithMe"
                               ? `Shared by ${file.sharedBy.name}`
                               : file.isSharedViaLink
@@ -256,7 +256,7 @@ export default function Dashboard() {
                       </div>
 
                       <div className="flex items-center justify-between sm:justify-end gap-4">
-                        <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
                           {formatTime(file.latestTime)}
                         </span>
                         <button
@@ -267,16 +267,16 @@ export default function Dashboard() {
                               handleManagePermissions(file);
                             }
                           }}
-                          className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 group/btn"
+                          className="flex items-center gap-2 px-3 sm:px-4 py-2 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 group/btn"
                         >
                           {file.type === "sharedWithMe" ? (
                             <>
-                              <Eye size={16} />
+                              <Eye size={14} />
                               <span className="hidden sm:inline">View</span>
                             </>
                           ) : (
                             <>
-                              <Settings size={16} />
+                              <Settings size={14} />
                               <span className="hidden sm:inline">Manage</span>
                             </>
                           )}
@@ -292,10 +292,10 @@ export default function Dashboard() {
           {/* Quick Actions */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-6 sm:p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                 Quick Actions
               </h2>
-              <p className="text-gray-600 text-sm sm:text-base">
+              <p className="text-gray-600 text-xs sm:text-sm">
                 Common tasks to manage your files
               </p>
             </div>
@@ -307,18 +307,18 @@ export default function Dashboard() {
                   className="group flex items-center space-x-4 p-4 sm:p-6 border border-gray-100 rounded-xl hover:shadow-md hover:shadow-blue-100/50 transition-all duration-200 text-left hover:border-blue-200 bg-gradient-to-r from-white to-blue-50/30"
                 >
                   <div className="p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors duration-200">
-                    <Share2 size={24} className="text-blue-600" />
+                    <Share2 size={20} className="text-blue-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
+                    <h3 className="font-medium text-gray-900 mb-1 text-sm">
                       View Shared Files
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
+                    <p className="text-xs text-gray-600">
                       Access files others have shared with you
                     </p>
                   </div>
                   <ArrowRight
-                    size={20}
+                    size={18}
                     className="text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200"
                   />
                 </button>
@@ -328,18 +328,18 @@ export default function Dashboard() {
                   className="group flex items-center space-x-4 p-4 sm:p-6 border border-gray-100 rounded-xl hover:shadow-md hover:shadow-green-100/50 transition-all duration-200 text-left hover:border-green-200 bg-gradient-to-r from-white to-green-50/30"
                 >
                   <div className="p-3 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors duration-200">
-                    <Settings size={24} className="text-green-600" />
+                    <Settings size={20} className="text-green-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
+                    <h3 className="font-medium text-gray-900 mb-1 text-sm">
                       Manage Sharing
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
+                    <p className="text-xs text-gray-600">
                       Control access permissions for your files
                     </p>
                   </div>
                   <ArrowRight
-                    size={20}
+                    size={18}
                     className="text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all duration-200"
                   />
                 </button>

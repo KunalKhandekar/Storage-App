@@ -9,7 +9,8 @@ import {
   Filter,
   Search,
   Share2,
-  Shield
+  Shield,
+  Users
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -97,60 +98,72 @@ export default function SharedWithMe() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Header */}
-          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <button
-                onClick={() => navigate("/share")}
-                className="group p-2 sm:p-2.5 hover:bg-white hover:shadow-md rounded-lg sm:rounded-xl transition-all duration-200 border border-transparent hover:border-gray-200"
-              >
-                <ArrowLeft size={18} className="sm:w-5 sm:h-5 text-gray-600 group-hover:text-gray-900" />
-              </button>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
-                  Shared With Me
-                </h1>
-                <p className="text-gray-600 text-xs sm:text-sm lg:text-base mt-0.5 sm:mt-1 truncate">
-                  Files others have shared with you
-                </p>
+          {/* Enhanced Header */}
+          <div className="bg-white/70 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <button
+                  onClick={() => navigate("/share")}
+                  className="group p-2 sm:p-2.5 hover:bg-white hover:shadow-md rounded-xl transition-all duration-200 border border-transparent hover:border-gray-200"
+                >
+                  <ArrowLeft size={16} className="sm:w-5 sm:h-5 text-gray-600 group-hover:text-gray-900" />
+                </button>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Users size={18} className="text-blue-600" />
+                    </div>
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                      Files Shared with Me
+                    </h1>
+                  </div>
+                  <p className="text-gray-600 text-xs sm:text-sm mt-0.5 sm:mt-1 truncate ml-11">
+                    Access files others have shared with you
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center justify-between sm:justify-end gap-2 text-xs sm:text-sm text-gray-500">
-              <Share2 size={14} className="sm:w-4 sm:h-4" />
-              <span className="whitespace-nowrap">{finalFilteredFiles?.length || 0} files available</span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs sm:text-sm font-medium">
+                  <Share2 size={14} />
+                  <span>{finalFilteredFiles?.length || 0} files</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Last updated: {new Date().toLocaleDateString()}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Search and Filter */}
+          {/* Enhanced Search and Filter */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1 relative">
               <Search
-                size={18}
-                className="sm:w-5 sm:h-5 absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={16}
+                className="sm:w-4 sm:h-4 absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
               />
               <input
                 type="text"
                 placeholder="Search files or people..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200 text-sm sm:text-base"
+                className="w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200 text-sm placeholder:text-gray-400"
               />
             </div>
             <div className="relative">
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="appearance-none w-full sm:w-auto px-4 py-2.5 sm:py-3 pr-10 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200 text-sm sm:text-base font-medium text-gray-700"
+                className="appearance-none w-full sm:w-auto px-4 py-2.5 sm:py-3 pr-10 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200 text-sm font-medium text-gray-700"
               >
                 <option value="all">All Files ({getFilterCount("all")})</option>
                 <option value="viewer">View Only ({getFilterCount("viewer")})</option>
                 <option value="editor">Can Edit ({getFilterCount("editor")})</option>
               </select>
               <ChevronDown
-                size={16}
+                size={14}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
               />
             </div>
@@ -168,7 +181,7 @@ export default function SharedWithMe() {
                     : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
                 }`}
               >
-                <Filter size={12} />
+                <Filter size={10} />
                 {filterType === "all" ? "All" : filterType === "viewer" ? "View Only" : "Can Edit"}
                 <span className="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full text-xs">
                   {getFilterCount(filterType)}
@@ -182,12 +195,12 @@ export default function SharedWithMe() {
             {finalFilteredFiles.length === 0 ? (
               <div className="text-center py-12 sm:py-16 lg:py-20 px-4">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                  <Share2 size={32} className="sm:w-10 sm:h-10 text-gray-400" />
+                  <Users size={28} className="sm:w-8 sm:h-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                   {searchTerm || filter !== "all" ? "No files found" : "No files shared with you"}
                 </h3>
-                <p className="text-gray-500 max-w-sm sm:max-w-md mx-auto text-sm sm:text-base leading-relaxed">
+                <p className="text-gray-500 max-w-sm sm:max-w-md mx-auto text-xs sm:text-sm leading-relaxed">
                   {searchTerm
                     ? `No files match "${searchTerm}". Try a different search term.`
                     : filter !== "all"
@@ -199,19 +212,19 @@ export default function SharedWithMe() {
               finalFilteredFiles.map((file) => (
                 <div
                   key={file._id}
-                  className="group bg-white border border-gray-200 rounded-xl sm:rounded-2xl hover:shadow-lg hover:shadow-gray-100/50 transition-all duration-300 overflow-hidden"
+                  className="group bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl sm:rounded-2xl hover:shadow-lg hover:shadow-blue-100/50 hover:bg-white transition-all duration-300 overflow-hidden"
                 >
                   <div className="p-4 sm:p-6">
                     {/* Mobile Layout */}
                     <div className="block sm:hidden space-y-4">
                       <div className="flex items-start space-x-3">
                         <div className="p-2.5 bg-gray-50 rounded-lg group-hover:bg-gray-100 transition-colors duration-200">
-                          <FileIcon type={file.fileType} size={20} />
+                          <FileIcon type={file.fileType} size={18} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <h3
-                              className="text-sm font-semibold text-gray-900 line-clamp-2 leading-tight"
+                              className="text-sm font-medium text-gray-900 line-clamp-2 leading-tight"
                               title={file.name}
                             >
                               {file.name}
@@ -224,27 +237,27 @@ export default function SharedWithMe() {
                             <span className="font-medium">{file.size}</span>
                             <span>•</span>
                             <span className="flex items-center gap-1">
-                              <Clock size={12} />
+                              <Clock size={10} />
                               {formatTime(file.latestTime)}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <UserAvatar user={file.sharedBy} size="w-7 h-7" />
+                              <UserAvatar user={file.sharedBy} size="w-6 h-6" />
                               <span className="text-xs text-gray-600 truncate">{file.sharedBy.name}</span>
                             </div>
                             <button
                               onClick={() => handleViewFile(file)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200"
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200"
                             >
                               {file.permission === "editor" ? (
                                 <>
-                                  <Edit3 size={14} />
+                                  <Edit3 size={12} />
                                   <span>Edit</span>
                                 </>
                               ) : (
                                 <>
-                                  <Eye size={14} />
+                                  <Eye size={12} />
                                   <span>View</span>
                                 </>
                               )}
@@ -258,41 +271,41 @@ export default function SharedWithMe() {
                     <div className="hidden sm:flex sm:items-center sm:justify-between">
                       <div className="flex items-center space-x-4 flex-1 min-w-0">
                         <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-gray-100 transition-colors duration-200">
-                          <FileIcon type={file.fileType} size={24} />
+                          <FileIcon type={file.fileType} size={20} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-base lg:text-lg font-semibold text-gray-900 truncate" title={file.name}>
+                            <h3 className="text-sm lg:text-base font-medium text-gray-900 truncate" title={file.name}>
                               {file.name}
                             </h3>
                             <PermissionBadge permission={file.permission} />
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
                             <span>Shared by {file.sharedBy.name}</span>
                             <span>•</span>
                             <span className="font-medium">{file.size}</span>
                             <span>•</span>
                             <span className="flex items-center gap-1">
-                              <Clock size={14} />
+                              <Clock size={12} />
                               {formatTime(file.latestTime)}
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <UserAvatar user={file.sharedBy} size="w-10 h-10" />
+                        <UserAvatar user={file.sharedBy} size="w-8 h-8" />
                         <button
                           onClick={() => handleViewFile(file)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200"
+                          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200"
                         >
                           {file.permission === "editor" ? (
                             <>
-                              <Edit3 size={16} />
+                              <Edit3 size={14} />
                               <span className="hidden md:inline">Edit</span>
                             </>
                           ) : (
                             <>
-                              <Eye size={16} />
+                              <Eye size={14} />
                               <span className="hidden md:inline">View</span>
                             </>
                           )}

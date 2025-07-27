@@ -177,15 +177,15 @@ export default function PermissionManager() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
             File not found
           </h3>
-          <p className="text-gray-500 mb-4">
+          <p className="text-xs sm:text-sm text-gray-500 mb-4">
             The file you're looking for doesn't exist or has been removed.
           </p>
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             Go Back
           </button>
@@ -195,60 +195,61 @@ export default function PermissionManager() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Header */}
-          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="group p-2 sm:p-2.5 hover:bg-white hover:shadow-md rounded-lg sm:rounded-xl transition-all duration-200 border border-transparent hover:border-gray-200"
-              >
-                <ArrowLeft
-                  size={18}
-                  className="sm:w-5 sm:h-5 text-gray-600 group-hover:text-gray-900"
-                />
-              </button>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
-                  Manage Permissions
-                </h1>
-                <p
-                  className="text-gray-600 text-xs sm:text-sm lg:text-base mt-0.5 sm:mt-1 truncate"
-                  title={file.name}
+          {/* Enhanced Header */}
+          <div className="bg-white/70 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="group p-2 sm:p-2.5 hover:bg-white hover:shadow-md rounded-xl transition-all duration-200 border border-transparent hover:border-gray-200"
                 >
-                  {file.name}
-                </p>
+                  <ArrowLeft size={16} className="sm:w-5 sm:h-5 text-gray-600 group-hover:text-gray-900" />
+                </button>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Settings size={18} className="text-blue-600" />
+                    </div>
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                      Manage Permissions
+                    </h1>
+                  </div>
+                  <p className="text-gray-600 text-xs sm:text-sm mt-0.5 sm:mt-1 truncate ml-11" title={file.name}>
+                    {file.name}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
-              <Settings size={14} className="sm:w-4 sm:h-4" />
-              <span className="whitespace-nowrap">
-                {sharedUsers.length} users
-              </span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs sm:text-sm font-medium">
+                  <Users size={14} />
+                  <span>{sharedUsers.length} users</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Last updated: {new Date().toLocaleDateString()}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* File Info */}
-          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
             <div className="p-4 sm:p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-gray-50 rounded-xl">
-                  <FileIcon type={file.fileType} size={32} />
+                  <FileIcon type={file.fileType} size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3
-                    className="font-semibold text-gray-900 text-base sm:text-lg truncate"
-                    title={file.name}
-                  >
+                  <h3 className="font-medium text-gray-900 text-sm lg:text-base truncate" title={file.name}>
                     {file.name}
                   </h3>
-                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                     <span className="font-medium">{file.size}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
-                      <Clock size={14} />
+                      <Clock size={12} />
                       Modified {formatTime(file.updatedAt)}
                     </span>
                   </div>
@@ -258,15 +259,15 @@ export default function PermissionManager() {
           </div>
 
           {/* Link Sharing Card */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
             {/* Header */}
             <div className="p-4 sm:p-6 border-b border-gray-100">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                   <Link size={18} className="text-blue-600" />
                 </div>
-                <span>Link Sharing</span>
-              </h3>
+                <h3 className="text-sm lg:text-base font-medium text-gray-900">Link Sharing</h3>
+              </div>
             </div>
 
             {/* Content */}
@@ -276,9 +277,9 @@ export default function PermissionManager() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     <Globe size={18} className="text-gray-400 flex-shrink-0" />
-                    <p className="font-medium text-gray-900">Share with link</p>
+                    <p className="font-medium text-gray-900 text-sm">Share with link</p>
                   </div>
-                  <p className="text-sm text-gray-500 ml-6 sm:ml-6">
+                  <p className="text-xs text-gray-500 ml-6 sm:ml-6">
                     {linkSharing.enabled
                       ? "Anyone with the link can access this file"
                       : "Link sharing is currently disabled"}
@@ -321,7 +322,7 @@ export default function PermissionManager() {
                     />
                     <button
                       onClick={handleCopyLink}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
+                      className={`flex items-center justify-center gap-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
                         copySuccess
                           ? "bg-green-100 text-green-700 border border-green-200"
                           : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 active:bg-blue-200"
@@ -343,7 +344,7 @@ export default function PermissionManager() {
 
                   {/* Permission Badge */}
                   <div className="flex items-center gap-2 pt-2">
-                    <span className="text-sm text-gray-600">Permission:</span>
+                    <span className="text-xs text-gray-600">Permission:</span>
                     <PermissionBadge
                       permission={linkSharing.permission || "View Only"}
                     />
@@ -354,116 +355,134 @@ export default function PermissionManager() {
           </div>
 
           {/* Shared Users */}
-          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-gray-100">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 rounded-lg">
-                  <Users size={20} className="text-green-600" />
+                  <Users size={18} className="text-green-600" />
                 </div>
-                <span>Shared Users</span>
-                <span className="text-sm font-normal text-gray-500">
+                <h3 className="text-sm lg:text-base font-medium text-gray-900">
+                  Shared Users
+                </h3>
+                <span className="text-xs font-normal text-gray-500">
                   ({sharedUsers.length})
                 </span>
-              </h3>
+              </div>
             </div>
 
             <div className="divide-y divide-gray-100">
               {sharedUsers.length === 0 ? (
-                <div className="text-center py-12 sm:py-16">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Users size={32} className="text-gray-400" />
+                <div className="text-center py-12 sm:py-16 px-4">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                    <Users size={28} className="sm:w-8 sm:h-8 text-gray-400" />
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                     No users shared
                   </h4>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 max-w-sm sm:max-w-md mx-auto text-xs sm:text-sm leading-relaxed">
                     This file hasn't been shared with any specific users yet.
                   </p>
                 </div>
               ) : (
                 sharedUsers.map((share) => (
-                  <div key={share.userId._id} className="p-4 sm:p-6">
-                    {/* Mobile Layout */}
-                    <div className="block sm:hidden space-y-4">
-                      <div className="flex items-start gap-3">
-                        <UserAvatar user={share.userId} size="w-12 h-12" />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 truncate">
-                            {share.userId.name}
-                          </h4>
-                          <p className="text-sm text-gray-500 truncate">
-                            {share.userId.email}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Shared {formatTime(share.sharedAt)}
-                          </p>
+                  <div key={share.userId._id} className="group bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300">
+                    <div className="p-4 sm:p-6">
+                      {/* Mobile Layout */}
+                      <div className="block sm:hidden space-y-4">
+                        <div className="flex items-start space-x-3">
+                          <div className="p-2.5 bg-gray-50 rounded-lg group-hover:bg-gray-100 transition-colors duration-200">
+                            <UserAvatar user={share.userId} size="w-6 h-6" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-gray-900 line-clamp-2 leading-tight" title={share.userId.name}>
+                              {share.userId.name}
+                            </h4>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-3">
+                              <span>{share.userId.email}</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Clock size={10} />
+                                Shared {formatTime(share.sharedAt)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <PermissionBadge permission={share.permission} />
+                              <div className="flex items-center gap-2">
+                                <select
+                                  value={share.permission}
+                                  onChange={(e) =>
+                                    handleUpdatePermission(
+                                      share.userId._id,
+                                      e.target.value
+                                    )
+                                  }
+                                  disabled={loading}
+                                  className="px-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                >
+                                  <option value="viewer">View Only</option>
+                                  <option value="editor">Can Edit</option>
+                                </select>
+                                <button
+                                  onClick={() => handleRevokeAccess(share.userId._id)}
+                                  disabled={loading}
+                                  className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                  title="Revoke access"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={share.permission}
-                          onChange={(e) =>
-                            handleUpdatePermission(
-                              share.userId._id,
-                              e.target.value
-                            )
-                          }
-                          disabled={loading}
-                          className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                        >
-                          <option value="viewer">View Only</option>
-                          <option value="editor">Can Edit</option>
-                        </select>
-                        <button
-                          onClick={() => handleRevokeAccess(share.userId._id)}
-                          disabled={loading}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                          title="Revoke access"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
 
-                    {/* Desktop Layout */}
-                    <div className="hidden sm:flex sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-4">
-                        <UserAvatar user={share.userId} size="w-12 h-12" />
-                        <div className="min-w-0">
-                          <h4 className="font-semibold text-gray-900 truncate">
-                            {share.userId.name}
-                          </h4>
-                          <p className="text-sm text-gray-500 truncate">
-                            {share.userId.email}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            Shared {formatTime(share.sharedAt)}
-                          </p>
+                      {/* Desktop Layout */}
+                      <div className="hidden sm:flex sm:items-center sm:justify-between">
+                        <div className="flex items-center space-x-4 flex-1 min-w-0">
+                          <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-gray-100 transition-colors duration-200">
+                            <UserAvatar user={share.userId} size="w-8 h-8" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="text-sm lg:text-base font-medium text-gray-900 truncate" title={share.userId.name}>
+                                {share.userId.name}
+                              </h4>
+                              <PermissionBadge permission={share.permission} />
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span>{share.userId.email}</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Clock size={12} />
+                                Shared {formatTime(share.sharedAt)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <select
-                          value={share.permission}
-                          onChange={(e) =>
-                            handleUpdatePermission(
-                              share.userId._id,
-                              e.target.value
-                            )
-                          }
-                          disabled={loading}
-                          className="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 min-w-[120px]"
-                        >
-                          <option value="viewer">View Only</option>
-                          <option value="editor">Can Edit</option>
-                        </select>
-                        <button
-                          onClick={() => handleRevokeAccess(share.userId._id)}
-                          disabled={loading}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                          title="Revoke access"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <select
+                            value={share.permission}
+                            onChange={(e) =>
+                              handleUpdatePermission(
+                                share.userId._id,
+                                e.target.value
+                              )
+                            }
+                            disabled={loading}
+                            className="px-4 py-2 text-xs font-medium border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 min-w-[120px]"
+                          >
+                            <option value="viewer">View Only</option>
+                            <option value="editor">Can Edit</option>
+                          </select>
+                          <button
+                            onClick={() => handleRevokeAccess(share.userId._id)}
+                            disabled={loading}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Revoke access"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -476,10 +495,10 @@ export default function PermissionManager() {
 
       {/* Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 bg-opacity-20 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-xl">
             <Loader2 size={20} className="animate-spin text-blue-600" />
-            <span className="text-gray-700">Updating permissions...</span>
+            <span className="text-gray-700 text-sm">Updating permissions...</span>
           </div>
         </div>
       )}

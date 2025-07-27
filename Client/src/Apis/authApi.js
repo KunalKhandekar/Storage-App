@@ -97,3 +97,22 @@ export const logoutAll = async () => {
     return error?.response?.data;
   }
 };
+
+export const isAuthenticated = async () => {
+  try {
+    const response = await axios.get("/user");
+    return { success: true, ...response.data };
+  } catch (error) {
+    return error?.response?.data;
+  }
+}
+export const regenerateSession = async (login_token) => {
+  try {
+    const response = await axios.post("/user/session", {
+      temp_token: login_token
+    });
+    return response?.data;
+  } catch (error) {
+    return error?.response?.data;
+  }
+}

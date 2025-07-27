@@ -1,7 +1,7 @@
 import { Share2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserDetails } from "../../Apis/userApi";
+import { getUserDetails } from "../Apis/userApi";
 
 const Header = () => {
   const [user, setUser] = useState({});
@@ -22,11 +22,11 @@ const Header = () => {
   }, [navigate]);
 
   return (
-    <div className="sticky top-0 z-50 mb-3 bg-white rounded-lg shadow-sm border border-gray-200 w-full">
+    <div className="sticky top-0 z-50 bg-white rounded-lg shadow-sm border border-gray-200 w-full">
       <header className="px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Title */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 cursor-pointer" onClick={() => navigate("/")}>
             <h1 className="text-xl font-semibold text-gray-900">File Manager</h1>
           </div>
 

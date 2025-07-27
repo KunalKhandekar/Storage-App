@@ -5,9 +5,11 @@ import CredentialsForm from "../../components/Forms/CredentialsForm";
 import OTPForm from "../../components/Forms/OTPForm";
 import SocialAuthButtons from "../../components/SocialAuthButtons";
 import { googleAuth, register, sendOTP } from "../../Apis/authApi";
+import { useAuth } from "../../Contexts/AuthContent";
 
 export default function RegistrationForm() {
   const navigate = useNavigate();
+  const { setIsAuth } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -57,8 +59,9 @@ export default function RegistrationForm() {
     const res = await register(name, email, password, otp);
     setLoading(false);
 
-    if (res.success) navigate("/login");
-    else setError(res.message);
+    if (res.success) {
+      navigate("/login");
+    } else setError(res.message);
   };
 
   const handleResendOTP = async () => {
@@ -75,8 +78,10 @@ export default function RegistrationForm() {
 
   const handleGoogleSuccess = async (res) => {
     const result = await googleAuth(res);
-    if (result.success) navigate("/");
-    else setError(result.message);
+    if (result.success) {
+      setIsAuth(true);
+      navigate("/");
+    } else setError(result.message);
   };
 
   const handleGoogleError = () =>

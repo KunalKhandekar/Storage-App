@@ -1,18 +1,15 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { getUserDirectory } from "../../Apis/adminApi";
-import { useEffect, useState } from "react";
-import { useModal } from "../../Contexts/ModalContext";
 import {
+  ChevronRight,
+  Eye,
   File,
   Folder,
-  Download,
-  Eye,
-  Home,
-  ChevronRight,
-  User,
-  ArrowLeft,
+  Home
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { getUserDirectory } from "../../Apis/adminApi";
 import FilePreviewModal from "../../components/Modals/FilePreviewModal";
+import { useModal } from "../../Contexts/ModalContext";
 import Header from "../AdminViewPage/Sections/Header";
 
 export const AdminUserView = () => {
@@ -137,7 +134,7 @@ export const AdminUserView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="bg-gray-50 pt-5">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <Header currentUser={targetUser} goTo={"/users"} backTo={"Panel"} />

@@ -2,15 +2,18 @@ import { LogOut } from "lucide-react";
 import { logout, logoutAll } from "../../Apis/authApi";
 import { useModal } from "../../Contexts/ModalContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Contexts/AuthContent";
 
 const LogoutOptions = () => {
   const navigate = useNavigate();
+  const { setIsAuth } = useAuth();
   const { showModal, showConfirmModal, closeConfirmModal } = useModal();
-  
+
   const handleLogout = async () => {
     const res = await logout();
     if (res.success) {
       showModal("Success", "Logged out successfully!", "success");
+      setIsAuth(false);
       setTimeout(() => navigate("/login"), 1500);
     } else {
       showModal("Error", "Logout failed", "error");
@@ -25,7 +28,8 @@ const LogoutOptions = () => {
         const res = await logoutAll();
         if (res.success) {
           showModal("Success", "Logged out from all devices!", "success");
-          setTimeout(() => navigate("/login"), 1500);
+          setIsAuth(false);
+          setTimeout(() => navigate("/login"), 1000);
           closeConfirmModal();
         } else {
           showModal("Error", "Failed to logout all.", "error");
