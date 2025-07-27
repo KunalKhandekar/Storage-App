@@ -3,7 +3,6 @@ import UserProfile from "../UserProfile";
 
 const Header = ({ currentUser, goTo, backTo }) => {
   const navigate = useNavigate();
-  console.log(currentUser);
   return (
     <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0">
