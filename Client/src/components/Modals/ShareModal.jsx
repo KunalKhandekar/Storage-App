@@ -219,7 +219,6 @@ const ShareModal = ({ isCompleted, error, closeModal, currentFile }) => {
   };
 
   const handleSendInvites = async () => {
-    console.log(selectedUsers);
     const res = await shareWithEmail(currentFile._id, selectedUsers);
     if (res.success) {
       if (res.data.response.length === 0) {

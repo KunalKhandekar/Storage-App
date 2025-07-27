@@ -98,7 +98,6 @@ function ItemCard({
     try {
       const res = await deleteFile_or_Directory(item);
       if (res.success) {
-        console.log(res.message);
         setActionDone(true);
         setActiveDropdown(null);
       } else {

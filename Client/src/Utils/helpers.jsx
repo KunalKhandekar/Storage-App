@@ -73,8 +73,6 @@ export const formatDate = (dateString) => {
 export const formatTime = (timeString) => {
   const date = new Date(timeString);
   const now = new Date();
-  console.log("Parsed date:", date);
-  console.log("Now:", now);
 
   const diffInMs = now - date;
   const diffInMinutes = Math.floor(diffInMs / (1000 * 60));

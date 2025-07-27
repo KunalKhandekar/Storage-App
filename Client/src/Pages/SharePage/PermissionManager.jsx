@@ -22,12 +22,18 @@ import {
   revokeAccess,
   toggleLink,
 } from "../../Apis/shareApi";
-import { FileIcon, formatTime, PermissionBadge, UserAvatar } from "../../Utils/helpers";
-
+import {
+  FileIcon,
+  formatTime,
+  PermissionBadge,
+  UserAvatar,
+} from "../../Utils/helpers";
+import { useModal } from "../../Contexts/ModalContext";
 
 export default function PermissionManager() {
   const navigate = useNavigate();
   const { fileId } = useParams();
+  const { showModal, showConfirmModal, closeConfirmModal } = useModal();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
@@ -71,20 +77,32 @@ export default function PermissionManager() {
   const handleUpdatePermission = async (userId, newPermission) => {
     setLoading(true);
     try {
-      const response = await changePermissionOfUserApi(
-        fileId,
-        userId,
-        newPermission
+      const selectedUser = sharedUsers.find((u) => u.userId._id === userId)?.userId;
+
+      showConfirmModal(
+        "Change User Permission",
+        `Are you sure you want to change ${selectedUser?.name}'s permission to "${newPermission}"? This will immediately update their access level.`,
+        async () => {
+          const res = await changePermissionOfUserApi(
+            fileId,
+            userId,
+            newPermission
+          );
+          if (res.success) {
+            setSharedUsers((users) =>
+              users.map((share) =>
+                share.userId._id === userId
+                  ? { ...share, permission: newPermission }
+                  : share
+              )
+            );
+          } else {
+            showModal("Error", res.message || "Something went wrong.", "error");
+          }
+          closeConfirmModal();
+        },
+        "warning"
       );
-      if (response.success) {
-        setSharedUsers((users) =>
-          users.map((share) =>
-            share.userId._id === userId
-              ? { ...share, permission: newPermission }
-              : share
-          )
-        );
-      }
     } catch (error) {
       console.error("Failed to update permission:", error);
     } finally {
@@ -95,12 +113,23 @@ export default function PermissionManager() {
   const handleRevokeAccess = async (userId) => {
     setLoading(true);
     try {
-      const response = await revokeAccess(fileId, userId);
-      if (response.success) {
-        setSharedUsers((users) =>
-          users.filter((share) => share.userId._id !== userId)
-        );
-      }
+      const selectedUser = sharedUsers.find((u) => u.userId._id === userId)?.userId;
+      showConfirmModal(
+        "Revoke Access",
+        `Are you sure you want to revoke ${selectedUser?.name}'s access? They will no longer be able to view or interact with this file.`,
+        async () => {
+          const res = await revokeAccess(fileId, userId);
+          if (res.success) {
+            setSharedUsers((users) =>
+              users.filter((share) => share.userId._id !== userId)
+            );
+          } else {
+            showModal("Error", res.message || "Something went wrong.", "error");
+          }
+          closeConfirmModal();
+        },
+        "warning"
+      );
     } catch (error) {
       console.error("Failed to revoke access:", error);
     } finally {
@@ -206,7 +235,10 @@ export default function PermissionManager() {
                   onClick={() => navigate(-1)}
                   className="group p-2 sm:p-2.5 hover:bg-white hover:shadow-md rounded-xl transition-all duration-200 border border-transparent hover:border-gray-200"
                 >
-                  <ArrowLeft size={16} className="sm:w-5 sm:h-5 text-gray-600 group-hover:text-gray-900" />
+                  <ArrowLeft
+                    size={16}
+                    className="sm:w-5 sm:h-5 text-gray-600 group-hover:text-gray-900"
+                  />
                 </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-3 mb-1">
@@ -217,7 +249,10 @@ export default function PermissionManager() {
                       Manage Permissions
                     </h1>
                   </div>
-                  <p className="text-gray-600 text-xs sm:text-sm mt-0.5 sm:mt-1 truncate ml-11" title={file.name}>
+                  <p
+                    className="text-gray-600 text-xs sm:text-sm mt-0.5 sm:mt-1 truncate ml-11"
+                    title={file.name}
+                  >
                     {file.name}
                   </p>
                 </div>
@@ -242,7 +277,10 @@ export default function PermissionManager() {
                   <FileIcon type={file.fileType} size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 text-sm lg:text-base truncate" title={file.name}>
+                  <h3
+                    className="font-medium text-gray-900 text-sm lg:text-base truncate"
+                    title={file.name}
+                  >
                     {file.name}
                   </h3>
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
@@ -266,7 +304,9 @@ export default function PermissionManager() {
                 <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                   <Link size={18} className="text-blue-600" />
                 </div>
-                <h3 className="text-sm lg:text-base font-medium text-gray-900">Link Sharing</h3>
+                <h3 className="text-sm lg:text-base font-medium text-gray-900">
+                  Link Sharing
+                </h3>
               </div>
             </div>
 
@@ -277,7 +317,9 @@ export default function PermissionManager() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     <Globe size={18} className="text-gray-400 flex-shrink-0" />
-                    <p className="font-medium text-gray-900 text-sm">Share with link</p>
+                    <p className="font-medium text-gray-900 text-sm">
+                      Share with link
+                    </p>
                   </div>
                   <p className="text-xs text-gray-500 ml-6 sm:ml-6">
                     {linkSharing.enabled
@@ -385,7 +427,10 @@ export default function PermissionManager() {
                 </div>
               ) : (
                 sharedUsers.map((share) => (
-                  <div key={share.userId._id} className="group bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300">
+                  <div
+                    key={share.userId._id}
+                    className="group bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300"
+                  >
                     <div className="p-4 sm:p-6">
                       {/* Mobile Layout */}
                       <div className="block sm:hidden space-y-4">
@@ -394,7 +439,10 @@ export default function PermissionManager() {
                             <UserAvatar user={share.userId} size="w-6 h-6" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium text-gray-900 line-clamp-2 leading-tight" title={share.userId.name}>
+                            <h4
+                              className="text-sm font-medium text-gray-900 line-clamp-2 leading-tight"
+                              title={share.userId.name}
+                            >
                               {share.userId.name}
                             </h4>
                             <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-3">
@@ -423,7 +471,9 @@ export default function PermissionManager() {
                                   <option value="editor">Can Edit</option>
                                 </select>
                                 <button
-                                  onClick={() => handleRevokeAccess(share.userId._id)}
+                                  onClick={() =>
+                                    handleRevokeAccess(share.userId._id)
+                                  }
                                   disabled={loading}
                                   className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                                   title="Revoke access"
@@ -444,7 +494,10 @@ export default function PermissionManager() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2">
-                              <h4 className="text-sm lg:text-base font-medium text-gray-900 truncate" title={share.userId.name}>
+                              <h4
+                                className="text-sm lg:text-base font-medium text-gray-900 truncate"
+                                title={share.userId.name}
+                              >
                                 {share.userId.name}
                               </h4>
                               <PermissionBadge permission={share.permission} />
@@ -498,7 +551,9 @@ export default function PermissionManager() {
         <div className="fixed inset-0 bg-black/30 bg-opacity-20 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-xl">
             <Loader2 size={20} className="animate-spin text-blue-600" />
-            <span className="text-gray-700 text-sm">Updating permissions...</span>
+            <span className="text-gray-700 text-sm">
+              Updating permissions...
+            </span>
           </div>
         </div>
       )}

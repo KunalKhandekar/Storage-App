@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await isAuthenticated();
       if (res.success) {
-        console.log({ res, time: Date.now() });
         setIsAuth(true);
         setUser(res.data);
       } else {

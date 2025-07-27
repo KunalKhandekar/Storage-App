@@ -5,7 +5,6 @@ import AuthLoader from "./AuthLoader";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuth } = useAuth();
-  console.log({ isAuth, time: Date.now() });
 
   if (isAuth === null) {
     return <AuthLoader />;
