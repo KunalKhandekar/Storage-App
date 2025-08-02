@@ -3,7 +3,9 @@ import RoleBadge from "./RoleBadge";
 import RoleChangeDropdown from "./RoleChangeDropdown";
 import StatusBadge from "./StatusBadge";
 import UserActions from "./UserActions";
-import {UserAvatar} from "../../Utils/helpers";
+import { UserAvatar } from "../../Utils/helpers";
+import { getUserPermissions } from "../../Utils/getUserPermissions";
+import { FaEye } from "react-icons/fa"; // 👈 Import Eye icon
 
 const UserTableRow = ({
   user,
@@ -14,6 +16,7 @@ const UserTableRow = ({
   onRoleChange,
 }) => {
   const navigate = useNavigate();
+  const { canViewDirectory } = getUserPermissions(currentUser.role);
 
   return (
     <tr
@@ -21,7 +24,7 @@ const UserTableRow = ({
         user.isDeleted ? "bg-red-50" : ""
       }`}
     >
-      <td className="px-3 sm:px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => navigate(`/users/${user._id}`)}>
+      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div className="flex-shrink-0">
             <UserAvatar user={user} />
@@ -78,7 +81,18 @@ const UserTableRow = ({
         />
       </td>
 
-      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
+        {canViewDirectory(user) && (
+          <button
+            onClick={() => navigate(`/users/${user._id}`)}
+            className="flex items-center justify-center p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition duration-150"
+            title="View User"
+            aria-label={`View details of ${user.name}`}
+          >
+            <FaEye className="w-4 h-4" />
+          </button>
+        )}
+
         <UserActions
           user={user}
           currentUserRole={currentUser.role}

@@ -155,7 +155,7 @@ export const useUsers = () => {
     const userName = user ? user.name || user.email : "this user";
 
     showConfirmModal(
-      "Confirm Recovery",
+      "Confirm Change Role",
       `Are you sure you want to change the role of ${userName} to ${role} ?`,
       async () => {
         const res = await changeRole(userId, role);
