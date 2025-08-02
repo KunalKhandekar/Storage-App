@@ -1,8 +1,12 @@
 import {
+  ArrowLeft,
   ArrowRight,
   Clock,
   Eye,
   Loader2,
+  MoveLeft,
+  MoveRight,
+  PhoneOutgoingIcon,
   Settings,
   Settings2,
   Share2,
@@ -14,6 +18,7 @@ import { useEffect, useState } from "react";
 import { FileIcon, formatTime } from "../../Utils/helpers";
 import { getShareDashboardInfo } from "../../Apis/shareApi";
 import { useNavigate } from "react-router-dom";
+import { GiIncomingRocket } from "react-icons/gi";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -210,7 +215,6 @@ export default function Dashboard() {
                     Your latest shared files and collaborations
                   </p>
                 </div>
-                
               </div>
             </div>
 
@@ -230,60 +234,82 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {recentFiles.map((file) => (
-                    <div
-                      key={`${file._id}-${file.type}`}
-                      className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border border-gray-100 rounded-xl hover:shadow-md hover:shadow-gray-100/50 transition-all duration-200 hover:border-gray-200 bg-gradient-to-r from-white to-gray-50/30"
-                    >
-                      <div className="flex items-center space-x-3 mb-4 sm:mb-0">
-                        <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-gray-100 transition-colors duration-200">
-                          <FileIcon type={file.fileType} size={18} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="text-sm font-medium text-gray-900 truncate">
-                            {file.name}
-                          </h3>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {file.type === "sharedWithMe"
-                              ? `Shared by ${file.sharedBy.name}`
-                              : file.isSharedViaLink
-                              ? "Shared with everyone by link"
-                              : `Shared with ${
-                                  file.sharedWith?.length || 0
-                                } people`}
-                          </p>
-                        </div>
-                      </div>
+                  {recentFiles.map((file) => {
+                    const isIncoming = file.type === "sharedWithMe";
+                    const iconClass = `w-4 h-4 ${
+                      isIncoming
+                        ? "text-green-600 rotate-[-5deg]"
+                        : "text-blue-600 rotate-[5deg]"
+                    }`;
+                    const boxClass = `p-2 rounded-md transition-colors duration-200 group-hover:bg-opacity-80 ${
+                      isIncoming ? "bg-green-100" : "bg-blue-100"
+                    }`;
+                    return (
+                      <div
+                        key={`${file._id}-${file.type}`}
+                        className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border border-gray-100 rounded-xl hover:shadow-md hover:shadow-gray-100/50 transition-all duration-200 hover:border-gray-200 bg-gradient-to-r from-white to-gray-50/30"
+                      >
+                        <div className="flex items-center space-x-3 mb-4 sm:mb-0">
+                          <div
+                            className={`p-2 rounded-md shadow-sm transition-all duration-200 group ${
+                              file.type === "sharedWithMe"
+                                ? "bg-green-100 hover:bg-green-200"
+                                : "bg-blue-100 hover:bg-blue-200"
+                            }`}
+                          >
+                            {file.type === "sharedWithMe" ? (
+                              <ArrowLeft className="text-green-600 w-4 h-4 rotate-[-20deg] transition-transform duration-200" />
+                            ) : (
+                              <ArrowRight className="text-blue-600 w-4 h-4 rotate-[-20deg] transition-transform duration-200" />
+                            )}
+                          </div>
 
-                      <div className="flex items-center justify-between sm:justify-end gap-4">
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
-                          {formatTime(file.latestTime)}
-                        </span>
-                        <button
-                          onClick={() => {
-                            if (file.type === "sharedWithMe") {
-                              handleViewFile(file);
-                            } else {
-                              handleManagePermissions(file);
-                            }
-                          }}
-                          className="flex items-center gap-2 px-3 sm:px-4 py-2 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 group/btn"
-                        >
-                          {file.type === "sharedWithMe" ? (
-                            <>
-                              <Eye size={14} />
-                              <span className="hidden sm:inline">View</span>
-                            </>
-                          ) : (
-                            <>
-                              <Settings size={14} />
-                              <span className="hidden sm:inline">Manage</span>
-                            </>
-                          )}
-                        </button>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-sm font-medium text-gray-900 truncate">
+                              {file.name}
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {file.type === "sharedWithMe"
+                                ? `Shared by ${file.sharedBy.name}`
+                                : file.isSharedViaLink
+                                ? "Shared with everyone by link"
+                                : `Shared with ${
+                                    file.sharedWith?.length || 0
+                                  } people`}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-4">
+                          <span className="text-xs text-gray-500 whitespace-nowrap">
+                            {formatTime(file.latestTime)}
+                          </span>
+                          <button
+                            onClick={() => {
+                              if (file.type === "sharedWithMe") {
+                                handleViewFile(file);
+                              } else {
+                                handleManagePermissions(file);
+                              }
+                            }}
+                            className="flex items-center gap-2 px-3 sm:px-4 py-2 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 group/btn"
+                          >
+                            {file.type === "sharedWithMe" ? (
+                              <>
+                                <Eye size={14} />
+                                <span className="hidden sm:inline">View</span>
+                              </>
+                            ) : (
+                              <>
+                                <Settings size={14} />
+                                <span className="hidden sm:inline">Manage</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

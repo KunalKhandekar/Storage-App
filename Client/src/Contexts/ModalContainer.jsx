@@ -24,6 +24,7 @@ const Modals = () => {
         message={confirmModal.message}
         type={confirmModal.type}
       />
+
     </>
   );
 };

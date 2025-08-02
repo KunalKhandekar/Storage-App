@@ -1,4 +1,4 @@
-import UserAvatar from "./UserAvatar";
+import {UserAvatar} from "../../Utils/helpers";
 import RoleBadge from "./RoleBadge";
 
 const UserProfile = ({ user }) => {

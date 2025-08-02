@@ -12,15 +12,36 @@ import {
 } from "lucide-react";
 import { regenerateSession } from "../Apis/authApi";
 
-export const UserAvatar = ({ user, size = "w-8 h-8" }) => (
-  <div className={`${size} rounded-full overflow-hidden flex-shrink-0`}>
-    <img
-      src={user.picture || "/placeholder.svg"}
-      alt={user.name}
-      className="w-full h-full object-cover"
-    />
-  </div>
-);
+import { useState } from "react";
+
+export const UserAvatar = ({ user, size = "w-8 h-8" }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const getInitials = (name = "") => {
+    return name
+      .split(" ")
+      ?.map((part) => part[0]?.toUpperCase())
+      .slice(0, 2)
+      .join("");
+  };
+
+  return (
+    <div
+      className={`${size} rounded-full overflow-hidden flex items-center justify-center bg-gray-300 text-sm font-medium text-white`}
+    >
+      {!imageError && user.picture ? (
+        <img
+          src={user.picture}
+          alt={user.name}
+          className="w-full h-full object-cover"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <span>{getInitials(user.name)}</span>
+      )}
+    </div>
+  );
+};
 
 export const PermissionBadge = ({ permission }) => (
   <div
