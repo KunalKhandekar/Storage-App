@@ -42,7 +42,7 @@ export default function SharedByMe() {
   }, [])
 
   const handleViewFile = (file) => {
-    navigate(`/share/view/${file._id}`, { state: {file, route: `/file/${file._id}`} })
+    navigate(`/share/view/${file._id}`, { state: {file, route: `/file/${file._id}`, type: "SharedByMe"} })
   }
 
   const handleManagePermissions = (file) => {

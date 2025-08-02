@@ -561,3 +561,15 @@ export const getSharedWithMeFiles = async (req, res, next) => {
     next(error);
   }
 };
+
+export const renameFileByEditor = async (req, res, next) => {
+  const file = req.file;
+  const { name } = req.body;
+  try {
+    file.name = name;
+    await file.save();
+    return CustomSuccess.send(res, null, StatusCodes.OK, { name: file.name });
+  } catch (error) {
+    next(error);
+  }
+};

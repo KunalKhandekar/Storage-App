@@ -15,6 +15,7 @@ import {
   getSharedWithMeFiles,
   getUserAccessList,
   renameFile,
+  renameFileByEditor,
   revokeUserAccess,
   shareLinkToggle,
   shareViaEmail,
@@ -24,6 +25,7 @@ import {
 import { checkFileAccess } from "../middlewares/checkFileAccess.js";
 import { serveFile } from "../middlewares/serveFile.js";
 import validateRequest from "../middlewares/validateRequest.js";
+import { checkFileShared } from "../middlewares/checkFIleShared.js";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "storage/"),
@@ -81,5 +83,8 @@ router.patch(
 );
 // Revoke Access.
 router.patch("/share/access/revoke/:userId/:fileId", revokeUserAccess);
+
+// Editor -> Rename file
+router.patch("/share/edit/:fileId", checkFileShared, renameFileByEditor);
 
 export default router;

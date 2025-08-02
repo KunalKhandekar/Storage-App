@@ -110,7 +110,7 @@ export const getFilePermisssionInfo = async (fileId) => {
   } catch (error) {
     return error?.response?.data;
   }
-}
+};
 
 export const getSharedByMeFiles = async () => {
   try {
@@ -119,7 +119,7 @@ export const getSharedByMeFiles = async () => {
   } catch (error) {
     return error?.response?.data;
   }
-}
+};
 
 export const getSharedWithMeFiles = async () => {
   try {
@@ -128,4 +128,24 @@ export const getSharedWithMeFiles = async () => {
   } catch (error) {
     return error?.response?.data;
   }
-}
+};
+
+export const renameFileAsEditor = async (file, newName) => {
+  try {
+    const response = await axios.patch(`/file/share/edit/${file._id}`, {
+      name: newName,
+    });
+    return response?.data;
+  } catch (error) {
+    return error?.response?.data;
+  }
+};
+
+export const getFileInfoByType = async (fileType, fileId) => {
+  try {
+    const response = await axios.get(`/file/share/info/${fileId}`);
+    return response?.data;
+  } catch (error) {
+    return error?.response?.data;
+  }
+};

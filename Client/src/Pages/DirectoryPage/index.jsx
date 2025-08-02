@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getItemList } from "../../Apis/file_Dir_Api";
 import ShareModal from "../../components/Modals/ShareModal";
-import CreateModal from "./CreateModal";
+import CreateFolderModal from "./CreateModal";
 import ItemCard from "./ItemCard";
 import UploadSection from "./UploadSection";
 
@@ -93,14 +93,13 @@ const FileUploadApp = () => {
 
       {/* Create Modal */}
       {showCreateModal && (
-        <CreateModal
+        <CreateFolderModal
           onClose={() => setShowCreateModal(false)}
-          setDirectoryName={setDirectoryName}
-          directoryName={directoryName.trim()}
           onCreate={() => {
             setShowCreateModal(false);
             setActionDone(true);
           }}
+          dirId={dirId}
         />
       )}
 

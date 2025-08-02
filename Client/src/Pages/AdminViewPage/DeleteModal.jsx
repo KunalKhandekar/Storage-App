@@ -1,4 +1,4 @@
-import UserAvatar from './UserAvatar';
+import {UserAvatar} from '../../Utils/helpers'
 import RoleBadge from './RoleBadge';
 
 const DeleteModal = ({ isOpen, user, role, onClose, onDelete }) => {
@@ -44,7 +44,7 @@ const DeleteModal = ({ isOpen, user, role, onClose, onDelete }) => {
         <div className="p-6">
           <div className="mb-6">
             <div className="flex items-center space-x-3 mb-3">
-              <UserAvatar user={user} size="large" />
+              <UserAvatar user={user} />
               <div>
                 <p className="font-medium text-gray-900">{user.name}</p>
                 <p className="text-sm text-gray-500">{user.email}</p>

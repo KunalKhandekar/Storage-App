@@ -3,7 +3,7 @@ import RoleBadge from "./RoleBadge";
 import RoleChangeDropdown from "./RoleChangeDropdown";
 import StatusBadge from "./StatusBadge";
 import UserActions from "./UserActions";
-import UserAvatar from "./UserAvatar";
+import {UserAvatar} from "../../Utils/helpers";
 
 const UserTableRow = ({
   user,
@@ -24,7 +24,7 @@ const UserTableRow = ({
       <td className="px-3 sm:px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => navigate(`/users/${user._id}`)}>
         <div className="flex items-center">
           <div className="flex-shrink-0">
-            <UserAvatar user={user} size="small" isDeleted={user.isDeleted} />
+            <UserAvatar user={user} />
           </div>
           <div className="ml-2 sm:ml-4">
             <div

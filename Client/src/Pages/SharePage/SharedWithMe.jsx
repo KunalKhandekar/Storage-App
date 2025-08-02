@@ -61,7 +61,7 @@ export default function SharedWithMe() {
   }, [sharedWithMeFiles, searchTerm, filter])
 
   const handleViewFile = (file) => {
-    navigate(`/share/view/${file._id}`, { state: { file } })
+    navigate(`/share/view/${file._id}`, { state: { file,  type: "SharedWithMe" } })
   }
 
   const getFilterCount = (filterType) => {
