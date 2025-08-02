@@ -6,6 +6,14 @@ export const getUserPermissions = (currentUserRole) => {
     SuperAdmin: 4,
   };
 
+  const canViewDirectory = (user) => {
+    const currentUserLevel = roleHierarchy[currentUserRole] || 0;
+    const targetUserLevel = roleHierarchy[user.role] || 0;
+
+    if (currentUserLevel > targetUserLevel) return true;
+    return false;
+  };
+
   const isLogoutDisabled = (user) => {
     if (!user.isLoggedIn) return true;
 
@@ -76,6 +84,7 @@ export const getUserPermissions = (currentUserRole) => {
   };
 
   return {
+    canViewDirectory,
     isLogoutDisabled,
     getLogoutTooltip,
     canDelete,
