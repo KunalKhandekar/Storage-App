@@ -1,7 +1,6 @@
 import { Camera, Save, Upload, User } from "lucide-react";
 import { UpdateUserSettings } from "../../Apis/userApi";
 import { useModal } from "../../Contexts/ModalContext";
-import useUserSettings from "../../hooks/useUserSettings";
 
 const ProfileSettings = ({
   profileData,

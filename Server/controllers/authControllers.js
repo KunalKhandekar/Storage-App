@@ -110,15 +110,7 @@ export const loginWithGoogle = async (req, res, next) => {
       }
     );
 
-    const sessionID = crypto.randomUUID();
-    const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
-    await redisClient.json.set(`session:${sessionID}`, "$", { userId });
-    await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-    res.cookie("token", sessionID, {
-      httpOnly: true,
-      signed: true,
-      maxAge: sessionExpiry,
-    });
+    await createSessionAndSetCookie(userId, res);
 
     await mongooseSession.commitTransaction();
     return CustomSuccess.send(
@@ -249,15 +241,7 @@ export const loginWithGithub = async (req, res, next) => {
       }
     );
 
-    const sessionID = crypto.randomUUID();
-    const sessionExpiry = 7 * 24 * 60 * 60 * 1000;
-    await redisClient.json.set(`session:${sessionID}`, "$", { userId });
-    await redisClient.expire(`session:${sessionID}`, sessionExpiry / 1000);
-    res.cookie("token", sessionID, {
-      httpOnly: true,
-      signed: true,
-      maxAge: sessionExpiry,
-    });
+    await createSessionAndSetCookie(userId, res);
 
     await mongooseSession.commitTransaction();
 

@@ -16,6 +16,7 @@ import { rm } from "node:fs/promises";
 import path from "node:path";
 import { absolutePath } from "../app.js";
 import { createSessionAndSetCookie } from "../utils/CreateSession.js";
+import { sharedWithMeFiles } from "../services/shareService.js";
 
 // Utility Function
 const canPerform = (actorRole, targetRole) => {
@@ -341,6 +342,12 @@ export const hardDeleteUser = async (req, res, next) => {
 
     // delete all folder of the user
     await Directory.deleteMany({ userId: user._id });
+
+    // remove the user from sharedWith Arrays if exist.
+    await File.updateMany(
+      { "sharedWith.userId": user._id },
+      { $pull: { sharedWith: { userId: user._id } } }
+    );
 
     // delete the user Data itself
     await user.deleteOne();

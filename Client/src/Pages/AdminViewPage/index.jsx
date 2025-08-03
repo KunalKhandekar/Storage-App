@@ -4,7 +4,7 @@ import { useUsers } from "../../hooks/useUsers";
 import DeleteModal from "./DeleteModal";
 import ErrorDisplay from "./ErrorDisplay";
 import LoadingSpinner from "./LoadingSpinner";
-import Header from "./Sections/Header";
+import Header from "../../components/AdminHeader";
 import Statistics from "./Sections/Statistics";
 import UserTable from "./Sections/UserTable";
 

@@ -27,9 +27,10 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
         setProgressMap
       );
       setActionDone(true);
-      // TOAST
+      // TODO: toast
       console.log("All files uploaded successfully");
     } catch (err) {
+      // TODO: toast
       console.error("Some uploads failed");
     }
   };
