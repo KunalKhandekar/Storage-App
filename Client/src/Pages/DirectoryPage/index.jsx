@@ -6,32 +6,38 @@ import ShareModal from "../../components/Modals/ShareModal";
 import CreateFolderModal from "./CreateModal";
 import ItemCard from "./ItemCard";
 import UploadSection from "./UploadSection";
+import DirectoryShimmer from "../../components/ShimmerUI/DirectoryShimmer";
 
-const FileUploadApp = () => {
+const DirectoryPage = () => {
   const [files, setFiles] = useState([]);
   const [directories, setDirectories] = useState([]);
   const [currentPath, setCurrentPath] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [directoryName, setDirectoryName] = useState("");
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [actionDone, setActionDone] = useState(false);
-  const [currentFile, setCurrentFile] = useState(null) 
+  const [currentFile, setCurrentFile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { dirId } = useParams();
   const navigate = useNavigate();
 
   const fetchDirectoryItems = async () => {
-    const res = await getItemList(dirId);
-    if (res.success) {
-      const { files, directory, name } = res.data;
-      setFiles(files);
-      setDirectories(directory);
-      setCurrentPath(name);
-      // TOAST
-    } else {
-      // TOAST
-      console.log(res.message);
-      navigate("/login");
+    setLoading(true);
+    try {
+      const res = await getItemList(dirId);
+      if (res.success) {
+        const { files, directory, name } = res.data;
+        setFiles(files);
+        setDirectories(directory);
+        setCurrentPath(name);
+      } else {
+        console.log(res.message);
+        navigate("/login");
+      }
+    } catch (error) {
+      // TODO: toast
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,6 +51,10 @@ const FileUploadApp = () => {
     if (a.type === "file" && b.type === "directory") return 1;
     return a.name.localeCompare(b.name);
   });
+
+  if(loading) {
+      return <DirectoryShimmer />
+  }
 
   return (
     <div className="min-h-fit max-w-7xl m-auto mt-3">
@@ -104,10 +114,15 @@ const FileUploadApp = () => {
       )}
 
       {showShareModal && (
-        <ShareModal closeModal={() => setShowShareModal(false)} error={null} isCompleted={false} currentFile={currentFile} />
+        <ShareModal
+          closeModal={() => setShowShareModal(false)}
+          error={null}
+          isCompleted={false}
+          currentFile={currentFile}
+        />
       )}
 
-      {/* Click outside to close dropdowns */}
+      {/* DropDown */}
       {activeDropdown && (
         <div
           className="fixed inset-0 z-10"
@@ -120,4 +135,4 @@ const FileUploadApp = () => {
   );
 };
 
-export default FileUploadApp;
+export default DirectoryPage;

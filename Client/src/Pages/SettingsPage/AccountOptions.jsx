@@ -5,7 +5,7 @@ import { useModal } from "../../Contexts/ModalContext";
 import { useAuth } from "../../Contexts/AuthContent";
 
 const AccountOptions = ({
-  option, // 'delete' or 'disable'
+  option,
 }) => {
   const navigate = useNavigate();
   const { setIsAuth } = useAuth();

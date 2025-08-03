@@ -235,15 +235,6 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-4">
                   {recentFiles.map((file) => {
-                    const isIncoming = file.type === "sharedWithMe";
-                    const iconClass = `w-4 h-4 ${
-                      isIncoming
-                        ? "text-green-600 rotate-[-5deg]"
-                        : "text-blue-600 rotate-[5deg]"
-                    }`;
-                    const boxClass = `p-2 rounded-md transition-colors duration-200 group-hover:bg-opacity-80 ${
-                      isIncoming ? "bg-green-100" : "bg-blue-100"
-                    }`;
                     return (
                       <div
                         key={`${file._id}-${file.type}`}

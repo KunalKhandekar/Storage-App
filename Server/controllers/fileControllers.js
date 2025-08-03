@@ -418,13 +418,13 @@ export const getUserAccessList = async (req, res, next) => {
 export const getDashboardInfo = async (req, res, next) => {
   const currentUser = req.user;
   try {
-    let sharedByMe = await sharedByMeFiles(currentUser._id);
+    let sharedByMe = await sharedByMeFiles(currentUser._id) || [];
     sharedByMe = sharedByMe.map((f) => ({
       ...f,
       type: "sharedByMe",
     }));
 
-    let sharedWithMe = await sharedWithMeFiles(currentUser._id);
+    let sharedWithMe = await sharedWithMeFiles(currentUser._id) || [];
     sharedWithMe = sharedWithMe.map((f) => ({
       ...f,
       type: "sharedWithMe",
@@ -432,9 +432,9 @@ export const getDashboardInfo = async (req, res, next) => {
     }));
 
     const collaborators = new Set([
-      ...sharedWithMe.map((file) => file.userId._id.toString()),
+      ...sharedWithMe.map((file) => file?.userId?._id.toString()),
       ...sharedByMe.flatMap((file) =>
-        file.sharedWith.map((u) => u.userId._id.toString())
+        file?.sharedWith?.map((u) => u?.userId?._id.toString())
       ),
     ]);
 
@@ -455,10 +455,10 @@ export const getDashboardInfo = async (req, res, next) => {
           sharedWith: file?.sharedWith?.map((u) => {
             return {
               user: {
-                _id: u.userId._id,
-                name: u.userId.name,
-                email: u.userId.email,
-                picture: u.userId.picture,
+                _id: u.userId?._id,
+                name: u.userId?.name,
+                email: u.userId?.email,
+                picture: u.userId?.picture,
               },
               permission: u.permission,
               sharedAt: u.sharedAt,
@@ -468,10 +468,10 @@ export const getDashboardInfo = async (req, res, next) => {
             u?.userId?._id.equals(currentUser._id)
           )?.permission,
           sharedBy: {
-            _id: file.userId._id,
-            name: file.userId.name,
-            email: file.userId.email,
-            picture: file.userId.picture,
+            _id: file.userId?._id,
+            name: file.userId?.name,
+            email: file.userId?.email,
+            picture: file.userId?.picture,
           },
           latestTime: new Date(file.updatedAt),
           type: file.type,
@@ -513,10 +513,10 @@ export const getSharedByMeFiles = async (req, res, next) => {
           sharedWith: file.sharedWith.map((u) => {
             return {
               user: {
-                _id: u.userId._id,
-                name: u.userId.name,
-                email: u.userId.email,
-                picture: u.userId.picture,
+                _id: u.userId?._id,
+                name: u.userId?.name,
+                email: u.userId?.email,
+                picture: u.userId?.picture,
               },
               permission: u.permission,
               sharedAt: u.sharedAt,
@@ -546,10 +546,10 @@ export const getSharedWithMeFiles = async (req, res, next) => {
             u.userId._id.equals(currentUser._id)
           ).permission,
           sharedBy: {
-            _id: file.userId._id,
-            name: file.userId.name,
-            email: file.userId.email,
-            picture: file.userId.picture,
+            _id: file.userId?._id,
+            name: file.userId?.name,
+            email: file.userId?.email,
+            picture: file.userId?.picture,
           },
           latestTime: new Date(file.updatedAt),
           fileType: path.extname(file.name),
