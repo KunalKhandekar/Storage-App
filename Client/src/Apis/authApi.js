@@ -18,15 +18,6 @@ export const driveConnect = async (code) => {
   }
 };
 
-export const driveProgress = async () => {
-  try {
-    const response = await axios.get("/auth/drive-progress");
-    return response.data;
-  } catch (error) {
-    return error?.response?.data;
-  }
-};
-
 export const sendOTP = async (email, action, password) => {
   try {
     const response = await axios.post("/otp/send-otp", {
@@ -42,7 +33,7 @@ export const sendOTP = async (email, action, password) => {
 
 export const register = async (name, email, password, otp) => {
   try {
-    const response = await axios.post("/user/register", {
+    const response = await axios.post("/auth/register", {
       name,
       email,
       password,
@@ -56,7 +47,7 @@ export const register = async (name, email, password, otp) => {
 
 export const login = async (email, password, otp) => {
   try {
-    const response = await axios.post("/user/login", { email, password, otp });
+    const response = await axios.post("/auth/login", { email, password, otp });
     return response.data;
   } catch (error) {
     return error?.response?.data;
@@ -113,7 +104,7 @@ export const isAuthenticated = async () => {
 
 export const regenerateSession = async (login_token) => {
   try {
-    const response = await axios.post("/user/session", {
+    const response = await axios.post("/auth/session", {
       temp_token: login_token,
     });
     return response?.data;

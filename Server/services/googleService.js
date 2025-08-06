@@ -192,7 +192,6 @@ export const saveFolder = async (folderData, drive, parentFolderId, userId) => {
         userId,
       });
     }
-    await redisClient.hIncrBy(`drive-sync:${userId}`, "downloaded", 1);
   }
 
   for (const subFolder of folders) {

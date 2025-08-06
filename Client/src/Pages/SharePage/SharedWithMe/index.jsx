@@ -69,7 +69,7 @@ export default function SharedWithMe() {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Header */}
-          <Header />
+          <Header finalFilteredFiles={finalFilteredFiles}/>
 
           {/* Search and Filter */}
           <SearchAndFilter
