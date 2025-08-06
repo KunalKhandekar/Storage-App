@@ -11,6 +11,7 @@ export default function CredentialsForm({ formData, handleChange }) {
           value={formData.name}
           onChange={handleChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+          required
         />
       </div>
 
@@ -24,6 +25,7 @@ export default function CredentialsForm({ formData, handleChange }) {
           value={formData.email}
           onChange={handleChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+          required
         />
       </div>
 
@@ -37,6 +39,7 @@ export default function CredentialsForm({ formData, handleChange }) {
           value={formData.password}
           onChange={handleChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+          required
         />
       </div>
     </>

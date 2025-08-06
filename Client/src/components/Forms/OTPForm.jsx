@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 export default function OTPForm({
   formData,
   handleChange,
@@ -5,6 +7,12 @@ export default function OTPForm({
   handleResendOTP,
   loading,
 }) {
+
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, [])  
   return (
     <>
       <div className="text-center p-4 bg-blue-50 rounded-lg">
@@ -22,6 +30,7 @@ export default function OTPForm({
           Verification Code
         </label>
         <input
+        ref={inputRef}
           id="otp"
           type="text"
           name="otp"
@@ -35,12 +44,14 @@ export default function OTPForm({
 
       <div className="flex justify-between items-center text-sm">
         <button
+          type="button"
           onClick={handleBackToCredentials}
           className="text-indigo-600 font-medium"
         >
           ← Back to Details
         </button>
         <button
+          type="button"
           onClick={handleResendOTP}
           disabled={loading}
           className="text-indigo-600 font-medium"

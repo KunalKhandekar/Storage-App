@@ -35,25 +35,39 @@ export default function LoginForm() {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.password) {
-      setError("Please enter both email and password");
+
+    const { email, password } = formData;
+
+    // Basic validation
+    if (!email || !password) {
+      setError("Please enter both email and password.");
       return;
     }
 
-    setLoading(true);
-    setError("");
-    setSuccess("");
+    try {
+      setLoading(true);
+      setError("");
+      setSuccess("");
 
-    const res = await sendOTP(formData.email, "login");
+      // Verify and Send OTP
+      const res = await sendOTP(email, "login", password);
 
-    if (res.success) {
-      setSuccess("Verification code sent to your email!");
-      setCurrentStep("otp");
-    } else {
-      setError(res.message);
+      if (res.success) {
+        setSuccess("Verification code sent to your email!");
+        setCurrentStep("otp");
+      } else {
+        const message = res?.details
+          ? res.details.map((d) => d.message).join(",\n")
+          : res.message || "Something went wrong. Please try again.";
+
+        setError(message);
+      }
+    } catch (err) {
+      console.error("OTP send error:", err);
+      setError("Something went wrong while sending OTP.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleOTPVerification = async (e) => {
@@ -83,6 +97,7 @@ export default function LoginForm() {
           token: res?.details?.temp_token,
         });
       }
+
       setError(res.message);
     }
     setLoading(false);
@@ -120,7 +135,14 @@ export default function LoginForm() {
           <StepProgress currentStep={currentStep} />
 
           <div>
-            <div className="space-y-6">
+            <form
+              className="space-y-6"
+              onSubmit={
+                currentStep === "credentials"
+                  ? handleSendOTP
+                  : handleOTPVerification
+              }
+            >
               {/* Step 1: Credentials */}
               {currentStep === "credentials" && (
                 <LoginCredentialForm
@@ -131,17 +153,16 @@ export default function LoginForm() {
 
               {/* Step 2: OTP Verification */}
               {currentStep === "otp" && (
-                <>
-                  <OTPForm
-                    formData={formData}
-                    handleChange={handleChange}
-                    handleBackToCredentials={handleBackToCredentials}
-                    handleResendOTP={handleResendOTP}
-                    loading={loading}
-                  />
-                </>
+                <OTPForm
+                  formData={formData}
+                  handleChange={handleChange}
+                  handleBackToCredentials={handleBackToCredentials}
+                  handleResendOTP={handleResendOTP}
+                  loading={loading}
+                />
               )}
 
+              {/* Success & Error messages */}
               {success && (
                 <div className="bg-green-100 text-green-700 px-4 py-3 rounded">
                   {success}
@@ -153,14 +174,9 @@ export default function LoginForm() {
                 </div>
               )}
 
-              {/* Action Button */}
+              {/* Submit Button */}
               <button
-                type="button"
-                onClick={
-                  currentStep === "credentials"
-                    ? handleSendOTP
-                    : handleOTPVerification
-                }
+                type="submit"
                 disabled={loading}
                 className={`w-full py-3 rounded-lg text-white font-medium ${
                   loading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
@@ -178,7 +194,7 @@ export default function LoginForm() {
                   "Verify & Login"
                 )}
               </button>
-            </div>
+            </form>
           </div>
 
           {/* Divider and Google Login - Only show on credentials step */}

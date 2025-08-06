@@ -25,6 +25,7 @@ export const loginValidations = z.object({
 export const otpMiddlewareValidation = z.object({
   email: z.string().email("Provide a valid email"),
   action: z.string().min(1, "Action type is required"),
+  password: z.string().min(3, "Password should be at least 3 characters long").optional(),
 });
 
 // Verify OTP Validation
