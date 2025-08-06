@@ -264,9 +264,7 @@ export const getSharedFileViaEmail = async (req, res, next) => {
     if (!file) {
       throw new CustomError("File not found", StatusCodes.NOT_FOUND);
     }
-
-    console.log({ sharedWith: file.sharedWith, userId: req.user._id });
-
+    
     const hasAccess = file.sharedWith.find((u) =>
       u.userId.equals(req.user._id)
     );

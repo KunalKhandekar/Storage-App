@@ -29,10 +29,32 @@ export default function RegistrationForm() {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.name || !formData.password) {
-      setError("Please fill in all fields");
+    const { email, name, password } = formData;
+
+    if (!email || !name || !password) {
+      setError("Please fill in all fields.");
       return;
     }
+
+    // Check name length
+    if (name.length <= 3) {
+      setError("Name must be more than 3 characters.");
+      return;
+    }
+
+    // Validate email format using regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // Check password length
+    if (password.length <= 3) {
+      setError("Password is too short. Please create a longer password.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -101,7 +123,12 @@ export default function RegistrationForm() {
 
         <StepProgress currentStep={currentStep} />
 
-        <form className="space-y-6">
+        <form
+          className="space-y-6"
+          onSubmit={
+            currentStep === "credentials" ? handleSendOTP : handleFinalSubmit
+          }
+        >
           {currentStep === "credentials" ? (
             <CredentialsForm formData={formData} handleChange={handleChange} />
           ) : (
@@ -124,11 +151,8 @@ export default function RegistrationForm() {
               {error}
             </div>
           )}
-
           <button
-            onClick={
-              currentStep === "credentials" ? handleSendOTP : handleFinalSubmit
-            }
+            type="submit"
             disabled={loading}
             className={`w-full py-3 rounded-lg text-white font-medium ${
               loading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"

@@ -96,7 +96,7 @@ export const loginUser = async (req, res, next) => {
   try {
     const parsed = loginValidations.safeParse(req.body);
     if (!parsed.success) {
-      throw new CustomError("Invalid input data", StatusCodes.BAD_REQUEST, {
+      throw new CustomError("Invalid or Expired OTP.", StatusCodes.BAD_REQUEST, {
         details: parsed.error.issues,
       });
     }
@@ -400,7 +400,7 @@ export const getSettingDetails = async (req, res, next) => {
 };
 
 export const setPasswordForManualLogin = async (req, res, next) => {
-  console.log({ body: req.body });
+
   const { password } = req.body;
   try {
     const hashedPassword = await hash(password, 10);
