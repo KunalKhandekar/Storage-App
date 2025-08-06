@@ -1,59 +1,35 @@
 import { Folder } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getItemList } from "../../Apis/file_Dir_Api";
 import ShareModal from "../../components/Modals/ShareModal";
 import CreateFolderModal from "./CreateModal";
 import ItemCard from "./ItemCard";
 import UploadSection from "./UploadSection";
 import DirectoryShimmer from "../../components/ShimmerUI/DirectoryShimmer";
+import useDirectory from "../../hooks/useDirectory";
 
 const DirectoryPage = () => {
-  const [files, setFiles] = useState([]);
-  const [directories, setDirectories] = useState([]);
-  const [currentPath, setCurrentPath] = useState("");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const [actionDone, setActionDone] = useState(false);
-  const [currentFile, setCurrentFile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const { dirId } = useParams();
-  const navigate = useNavigate();
+  const {
+    allItems,
+    currentPath,
+    loading,
+    showCreateModal,
+    showShareModal,
+    currentFile,
+    activeDropdown,
+    dirId,
+    handleCreateModalClose,
+    handleCreateSuccess,
+    handleShareModalClose,
+    handleDropdownClose,
+    handleActionComplete,
+    setCurrentPath,
+    setActiveDropdown,
+    setShowShareModal,
+    setCurrentFile,
+    setShowCreateModal
+  } = useDirectory();
 
-  const fetchDirectoryItems = async () => {
-    setLoading(true);
-    try {
-      const res = await getItemList(dirId);
-      if (res.success) {
-        const { files, directory, name } = res.data;
-        setFiles(files);
-        setDirectories(directory);
-        setCurrentPath(name);
-      } else {
-        console.log(res.message);
-        navigate("/login");
-      }
-    } catch (error) {
-      // TODO: toast
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDirectoryItems();
-    setActionDone(false);
-  }, [actionDone, dirId]);
-
-  const allItems = [...directories, ...files].sort((a, b) => {
-    if (a.type === "directory" && b.type === "file") return -1;
-    if (a.type === "file" && b.type === "directory") return 1;
-    return a.name.localeCompare(b.name);
-  });
-
-  if(loading) {
-      return <DirectoryShimmer />
+  if (loading) {
+    return <DirectoryShimmer />;
   }
 
   return (
@@ -63,7 +39,7 @@ const DirectoryPage = () => {
         {/* Upload Progress */}
         <UploadSection
           setShowCreateModal={setShowCreateModal}
-          setActionDone={setActionDone}
+          setActionDone={handleActionComplete}
         />
 
         <div className="flex items-center space-x-4">
@@ -81,7 +57,7 @@ const DirectoryPage = () => {
               setCurrentPath={setCurrentPath}
               activeDropdown={activeDropdown}
               setActiveDropdown={setActiveDropdown}
-              setActionDone={setActionDone}
+              setActionDone={handleActionComplete}
               setShowShareModal={setShowShareModal}
               setCurrentFile={setCurrentFile}
             />
@@ -104,32 +80,22 @@ const DirectoryPage = () => {
       {/* Create Modal */}
       {showCreateModal && (
         <CreateFolderModal
-          onClose={() => setShowCreateModal(false)}
-          onCreate={() => {
-            setShowCreateModal(false);
-            setActionDone(true);
-          }}
+          onClose={handleCreateModalClose}
+          onCreate={handleCreateSuccess}
           dirId={dirId}
         />
       )}
 
       {showShareModal && (
         <ShareModal
-          closeModal={() => setShowShareModal(false)}
-          error={null}
-          isCompleted={false}
+          closeModal={handleShareModalClose}
           currentFile={currentFile}
         />
       )}
 
       {/* DropDown */}
       {activeDropdown && (
-        <div
-          className="fixed inset-0 z-10"
-          onClick={() => {
-            setActiveDropdown(null);
-          }}
-        />
+        <div className="fixed inset-0 z-10" onClick={handleDropdownClose} />
       )}
     </div>
   );

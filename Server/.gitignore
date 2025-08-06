@@ -1,4 +1,4 @@
-/node_modules
-/package-lock.json
-/storage
-/profilePictures
+node_modules
+package-lock.json
+storage
+profilePictures

@@ -1,73 +1,26 @@
-import { ChevronRight, Eye, File, Folder, Home } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getUserDirectory } from "../../Apis/adminApi";
+import { File, Folder } from "lucide-react";
 import FilePreviewModal from "../../components/Modals/FilePreviewModal";
-import { useModal } from "../../Contexts/ModalContext";
 import Header from "../../components/AdminHeader";
 import { ItemCard } from "./ItemCard";
 import Breadcrumb from "./BreadCrumb";
+import useAdminUserView from "../../hooks/useAdminUserView";
 
 export const AdminUserView = () => {
-  const navigate = useNavigate();
-  const { userId, dirId } = useParams();
-  const { showModal } = useModal();
-  const [directories, setDirectories] = useState([]);
-  const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPath, setCurrentPath] = useState([]);
-  const [targetUser, setTargetUser] = useState({});
-  const [previewFile, setPreviewFile] = useState(null);
-
-  const fetchDirectory = async (targetDirId = dirId || "") => {
-    setLoading(true);
-    try {
-      const res = await getUserDirectory(userId, targetDirId);
-      if (res.success) {
-        setDirectories(res.data.directories || []);
-        setFiles(res.data.files || []);
-        setTargetUser(res.data.targetUser || {});
-      } else {
-        showModal(
-          "Error",
-          res.message || "Failed to fetch user directory",
-          "error"
-        );
-        navigate("/users");
-      }
-    } catch (error) {
-      showModal("Error", "An error occurred while fetching directory", "error");
-      navigate("/users");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDirectoryClick = (directory) => {
-    setCurrentPath((prev) => [
-      ...prev,
-      { id: directory._id, name: directory.name },
-    ]);
-    navigate(`/users/${userId}/${directory._id}`);
-    fetchDirectory(directory._id);
-  };
-
-  const handleBreadcrumbClick = async (index) => {
-    if (index === -1) {
-      setCurrentPath([]);
-      navigate(`/users/${userId}`);
-      fetchDirectory("");
-    } else {
-      const targetPath = currentPath[index];
-      setCurrentPath((prev) => prev.slice(0, index + 1));
-      await fetchDirectory(targetPath.id);
-      navigate(`/users/${userId}/${targetPath.id}`);
-    }
-  };
-
-  useEffect(() => {
-    fetchDirectory();
-  }, [dirId]);
+  const {
+    directories,
+    files,
+    loading,
+    currentPath,
+    targetUser,
+    previewFile,
+    hasDirectories,
+    hasFiles,
+    isEmpty,
+    handleDirectoryClick,
+    handleBreadcrumbClick,
+    closeFilePreview,
+    setPreviewFile,
+  } = useAdminUserView();
 
   if (loading) {
     return (
@@ -94,7 +47,7 @@ export const AdminUserView = () => {
         {/* Main Content */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           {/* Directories Section */}
-          {directories.length > 0 && (
+          {hasDirectories && (
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-lg font-medium mb-4 text-gray-900 flex items-center">
                 <Folder className="w-5 h-5 mr-2 text-blue-600" />
@@ -115,7 +68,7 @@ export const AdminUserView = () => {
           )}
 
           {/* Files Section */}
-          {files.length > 0 && (
+          {hasFiles && (
             <div className="p-6">
               <h2 className="text-lg font-medium mb-4 text-gray-900 flex items-center">
                 <File className="w-5 h-5 mr-2 text-gray-600" />
@@ -123,14 +76,19 @@ export const AdminUserView = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {files.map((file) => (
-                  <ItemCard key={file._id} item={file} type="file" />
+                  <ItemCard 
+                    key={file._id} 
+                    item={file} 
+                    type="file"
+                    setPreviewFile={setPreviewFile}
+                  />
                 ))}
               </div>
             </div>
           )}
 
           {/* Empty State */}
-          {directories.length === 0 && files.length === 0 && (
+          {isEmpty && (
             <div className="p-12 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Folder className="w-8 h-8 text-gray-400" />
@@ -148,7 +106,7 @@ export const AdminUserView = () => {
       {previewFile && (
         <FilePreviewModal
           file={previewFile}
-          onClose={() => setPreviewFile(null)}
+          onClose={closeFilePreview}
         />
       )}
     </div>

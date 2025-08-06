@@ -17,6 +17,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteFile_or_Directory } from "../../Apis/file_Dir_Api";
 import RenameModal from "./RenameModal";
+import { useModal } from "../../Contexts/ModalContext";
 
 function ItemCard({
   item,
@@ -33,7 +34,7 @@ function ItemCard({
     open: false,
     item: null,
   });
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { showConfirmModal, closeConfirmModal, showModal } = useModal();
 
   const URL = "http://localhost:4000";
 
@@ -93,21 +94,27 @@ function ItemCard({
 
   const handleDelete = async (e) => {
     e.stopPropagation();
-    setIsDeleting(true);
 
-    try {
-      const res = await deleteFile_or_Directory(item);
-      if (res.success) {
-        setActionDone(true);
-        setActiveDropdown(null);
-      } else {
-        console.log("Error:", res.message);
-      }
-    } catch (error) {
-      console.log("Delete error:", error);
-    } finally {
-      setIsDeleting(false);
-    }
+    showConfirmModal(
+      "Delete "+ item.type,
+      `Are you sure you want to delete ${item.type} ?`,
+      async () => {
+        try {
+          const res = await deleteFile_or_Directory(item);
+          if (res.success) {
+            showModal("Success", `${item.type} has been deleted !`, "success");
+            setActionDone(true);
+            setActiveDropdown(null);
+            closeConfirmModal();
+          } else {
+            showModal("Error", "Failed to delete " + item.type, "error");
+          }
+        } catch (error) {
+          showModal("Error", "Failed to delete " + item.type, "error");
+        }
+      },
+      "warning"
+    );
   };
 
   const handleRename = (e) => {

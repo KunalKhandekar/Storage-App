@@ -9,18 +9,16 @@ import {
   Share2,
   User,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { renameFileAsEditor } from "../../Apis/shareApi";
 import { formatTime, renderFilePreview } from "../../Utils/helpers";
 import RenameModal from "../DirectoryPage/RenameModal";
-import { renameFileAsEditor } from "../../Apis/shareApi";
 
 export default function FileViewer() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fileId } = useParams();
   const [file, setFile] = useState(location.state?.file);
-  const [fileType, _] = useState(location.state?.type);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isRenameModal, setIsRenameModal] = useState(false);
@@ -82,7 +80,7 @@ export default function FileViewer() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
           <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-            {/* Enhanced Header */}
+            {/* Header */}
             <div className="bg-white/70 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6 shadow-sm">
               <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center space-x-3 sm:space-x-4">

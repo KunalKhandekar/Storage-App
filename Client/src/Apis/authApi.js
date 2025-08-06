@@ -106,6 +106,7 @@ export const isAuthenticated = async () => {
     return error?.response?.data;
   }
 }
+
 export const regenerateSession = async (login_token) => {
   try {
     const response = await axios.post("/user/session", {
