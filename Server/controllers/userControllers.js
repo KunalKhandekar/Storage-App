@@ -1,163 +1,19 @@
-import mongoose, { Types } from "mongoose";
-import redisClient from "../config/redis.js";
-import Directory from "../models/dirModel.js";
-import User from "../models/userModel.js";
-import {
-  loginValidations,
-  registerValidations,
-} from "../validators/authSchema.js";
-import CustomError from "../utils/ErrorResponse.js";
-import { StatusCodes } from "http-status-codes";
-import CustomSuccess from "../utils/SuccessResponse.js";
-import OTP from "../models/otpModel.js";
 import { hash } from "bcrypt";
-import File from "../models/fileModel.js";
+import { StatusCodes } from "http-status-codes";
 import { rm } from "node:fs/promises";
 import path from "node:path";
-import { absolutePath } from "../app.js";
-import { createSessionAndSetCookie } from "../utils/CreateSession.js";
-import { sharedWithMeFiles } from "../services/shareService.js";
+import { absolutePath, rootPath } from "../app.js";
+import redisClient from "../config/redis.js";
+import Directory from "../models/dirModel.js";
+import File from "../models/fileModel.js";
+import User from "../models/userModel.js";
+import CustomError from "../utils/ErrorResponse.js";
+import CustomSuccess from "../utils/SuccessResponse.js";
 
 // Utility Function
 const canPerform = (actorRole, targetRole) => {
   const hierarchy = ["User", "Manager", "Admin", "SuperAdmin"];
   return hierarchy.indexOf(actorRole) > hierarchy.indexOf(targetRole);
-};
-
-export const registerUser = async (req, res, next) => {
-  const session = await mongoose.startSession();
-  let transactionStarted = false;
-  try {
-    const parsed = registerValidations.safeParse(req.body);
-    if (!parsed.success) {
-      throw new CustomError("Invalid input data", StatusCodes.BAD_REQUEST, {
-        details: parsed.error.errors,
-      });
-    }
-
-    const { name, email, password, otp } = parsed.data;
-
-    const userFound = await User.findOne({ email }).lean();
-    if (userFound) {
-      throw new CustomError("User already eixst", StatusCodes.CONFLICT);
-    }
-
-    const isValid = await OTP.findOne({ email, otp }).lean();
-    if (!isValid) {
-      throw new CustomError("Invalid or Expired OTP.", StatusCodes.BAD_REQUEST);
-    }
-
-    await OTP.deleteOne({ email });
-
-    const rootDirId = new Types.ObjectId();
-    const userId = new Types.ObjectId();
-
-    session.startTransaction();
-    transactionStarted = true;
-
-    await Directory.create(
-      [
-        {
-          _id: rootDirId,
-          name: `root-${email}`,
-          userId,
-          parentDirId: null,
-        },
-      ],
-      { session }
-    );
-
-    await User.create(
-      [
-        {
-          _id: userId,
-          name,
-          email,
-          password,
-          rootDirId,
-          canLoginWithPassword: true,
-          createdWith: "email",
-        },
-      ],
-      { session }
-    );
-
-    await session.commitTransaction();
-    return CustomSuccess.send(res, "User registered", StatusCodes.CREATED);
-  } catch (error) {
-    if (transactionStarted) await session.abortTransaction();
-    next(error);
-  } finally {
-    session.endSession();
-  }
-};
-
-export const loginUser = async (req, res, next) => {
-  try {
-    const parsed = loginValidations.safeParse(req.body);
-    if (!parsed.success) {
-      throw new CustomError("Invalid or Expired OTP.", StatusCodes.BAD_REQUEST, {
-        details: parsed.error.issues,
-      });
-    }
-
-    const { email, password, otp } = parsed.data;
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      throw new CustomError(
-        "Invalid email or password",
-        StatusCodes.UNAUTHORIZED
-      );
-    }
-
-    if (!(await user.comparePassword(password))) {
-      throw new CustomError(
-        "Invalid email or password",
-        StatusCodes.UNAUTHORIZED
-      );
-    }
-
-    const isValid = await OTP.findOne({ email, otp }).lean();
-    if (!isValid) {
-      throw new CustomError("Invalid or Expired OTP.", StatusCodes.BAD_REQUEST);
-    }
-
-    await OTP.deleteOne({ email });
-
-    // Session management logic
-    const userSessions = await redisClient.ft.search(
-      "userIdIdx",
-      `@userId:{${user._id}}`,
-      {
-        RETURN: [],
-      }
-    );
-
-    if (userSessions.total >= 2) {
-      const loginToken = crypto.randomUUID();
-      await redisClient.set(
-        `temp_login_token:${loginToken}`,
-        JSON.stringify({
-          userId: user._id,
-        }),
-        { EX: 300 }
-      );
-      throw new CustomError("Session Limit Exceed", StatusCodes.CONFLICT, {
-        details: {
-          sessionLimitExceed: true,
-          temp_token: loginToken,
-        },
-      });
-    }
-
-    await createSessionAndSetCookie(user._id, res);
-
-    return CustomSuccess.send(res, "Logged in successful", StatusCodes.OK);
-  } catch (error) {
-    next(error);
-  }
 };
 
 export const getUserInfo = (req, res) => {
@@ -400,7 +256,6 @@ export const getSettingDetails = async (req, res, next) => {
 };
 
 export const setPasswordForManualLogin = async (req, res, next) => {
-
   const { password } = req.body;
   try {
     const hashedPassword = await hash(password, 10);
@@ -452,6 +307,12 @@ export const updateProfile = async (req, res, next) => {
       user.name = name;
     }
     if (req.file && req.file.filename) {
+      // Delete the old Image
+      if (user.picture.includes("profilePictures")) {
+        await rm(
+          `${rootPath}/profilePictures/${user.picture.split("/").pop()}`
+        );
+      }
       user.picture = `${process.env.BASE_URL}/profilePictures/${req.file.filename}`;
     }
     await user.save();

@@ -10,15 +10,28 @@ import {
 
 const router = Router();
 
+["id", "parentDirId"].forEach((param) => router.param(param, validateRequest));
+
+// GET /directory/:id
+// Desc    -> Retrieve directory information.
+// Params  -> { id: string }
 router.get("/{:id}", getDir);
 
+// POST /directory/:parentDirId?
+// Desc    -> Create a directory inside a parent directory.
+// Params  -> { parentDirId?: string }
+// Headers -> { dirname: string }
 router.post("/{:parentDirId}", createDir);
 
+// PATCH /directory/:id
+// Desc   -> Update the directory name.
+// Params -> { id: string }
+// Body   -> { name: string }
 router.patch("/:id", updateDir);
 
+// DELETE /directory/:id
+// Desc   -> Delete a directory by ID.
+// Params -> { id: string }
 router.delete("/:id", deleteDir);
-
-router.param("id", validateRequest);
-router.param("parentDirId", validateRequest);
 
 export default router;

@@ -121,7 +121,7 @@ export const shareViaEmail = async (req, res, next) => {
 
   try {
     let response = [];
-    for (const { email, _id, name, permission } of users) {
+    for (const { email, name, permission } of users) {
       const user = await User.findOne({ email }).lean();
 
       if (!user) {
@@ -300,25 +300,14 @@ export const changePermission = async (req, res, next) => {
 };
 
 export const changePermissionOfUser = async (req, res, next) => {
+  const file = req.file;
   const { permission } = req.body;
-  const { userId, fileId } = req.params;
-  const currentUser = req.user;
+  const { userId } = req.params;
   try {
-    const file = await File.findById(fileId).select("userId sharedWith");
 
-    // validation that only owner can change the permission.
-    const isOwner = file.userId.equals(currentUser._id);
-
-    if (!isOwner) {
-      throw new CustomError(
-        "You are not authorized to make this action.",
-        StatusCodes.UNAUTHORIZED
-      );
-    }
-
-    // Checking if the given user exist in the list.
+    // Checking if the given user exist in the shared list.
     const collaborator = file.sharedWith.find(
-      (c) => c.userId.toString() === userId
+      (c) => c.userId._id.toString() === userId
     );
     if (!collaborator) {
       throw new CustomError(
@@ -342,24 +331,12 @@ export const changePermissionOfUser = async (req, res, next) => {
 };
 
 export const revokeUserAccess = async (req, res, next) => {
-  const { userId, fileId } = req.params;
-  const currentUser = req.user;
+  const { userId } = req.params;
+  const file = req.file;
   try {
-    const file = await File.findById(fileId).select("userId sharedWith");
-
-    // validation that only owner can change the permission.
-    const isOwner = file.userId.equals(currentUser._id);
-
-    if (!isOwner) {
-      throw new CustomError(
-        "You are not authorized to make this action.",
-        StatusCodes.UNAUTHORIZED
-      );
-    }
-
     // Checking if the given user exist in the list.
     const collaborator = file.sharedWith.find(
-      (c) => c.userId.toString() === userId
+      (c) => c.userId._id.toString() === userId
     );
     if (!collaborator) {
       throw new CustomError(
@@ -369,7 +346,7 @@ export const revokeUserAccess = async (req, res, next) => {
     }
 
     file.sharedWith = file.sharedWith.filter(
-      (c) => c.userId.toString() !== userId
+      (c) => c.userId._id.toString() !== userId
     );
     await file.save();
 

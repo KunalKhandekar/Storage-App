@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import CustomError from "../utils/ErrorResponse.js";
 import File from "../models/fileModel.js";
 
-export const checkFileAccess = async (req, res, next) => {
+export const checkFileAccess = async (req, _, next) => {
   const { fileId } = req.params;
   try {
     const file = await File.findById(fileId).populate("sharedWith.userId");

@@ -1,14 +1,13 @@
-// redisClient.js
 import { createClient } from "redis";
 
 const redisClient = createClient({
   url: "redis://127.0.0.1:6379",
   socket: {
-    connectTimeout: 5000, // 10s timeout
+    connectTimeout: 10000, // 10s timeout
     reconnectStrategy: (retries) => {
       if (retries > 5) {
-        console.error("❌ Redis reconnect failed after 5 retries");
-        return new Error("Redis reconnect failed");
+        console.error("Redis reconnect failed after 5 retries");
+        return new Error("Redis reconnet failed");
       }
       console.log(`🔁 Redis retry #${retries}`);
       return 1000 * retries;
@@ -27,8 +26,7 @@ try {
   await redisClient.connect();
   console.log("✅ Redis Connected");
 } catch (err) {
-  console.error("❌ Initial Redis connection failed:", err.message);
-  // Optionally continue running app or exit
+  console.error("Initial Redis connection failed:", err.message);
 }
 
 // Custom function to delete multiple sessions by userId
@@ -44,7 +42,7 @@ redisClient.deleteManySessions = async function (userId) {
       await this.del(id);
     }
   } catch (err) {
-    console.error("❌ Error deleting sessions for user:", err.message);
+    console.error("Error deleting sessions for user:", err.message);
   }
 };
 
