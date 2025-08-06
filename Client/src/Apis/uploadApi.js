@@ -36,7 +36,6 @@ const uploadFile = (file, dirId, setProgressMap) => {
 };
 
 // Uploads 5 files at a time, waits until they finish, then moves to the next 5.
-// Much more stable and predictable behavior.
 export const uploadInBatches = async (
   files,
   batchSize = MAX_CONCURRENT_UPLOADS,

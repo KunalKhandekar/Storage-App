@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Check,
   ChevronDown,
@@ -23,242 +21,32 @@ import {
   shareWithEmail,
   toggleLink,
 } from "../../Apis/shareApi";
-import { UserAvatar } from "../../Utils/helpers";
+import { formatDate, PermissionBadge, UserAvatar } from "../../Utils/helpers";
+import { useShareModal } from "../../hooks/useShareModal";
 
-// Mock API functions - replace with your actual API calls
-const mockApis = {
-  generateShareLinkApi: async (fileId, permission) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return {
-      success: true,
-      data: {
-        link: `https://example.com/share/${fileId}?permission=${permission}`,
-        permission,
-      },
-    };
-  },
-
-  getSharedUserAccessList: async (fileId) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return {
-      success: true,
-      data: {
-        availableUser: [
-          { id: 1, name: "John Doe", email: "john@example.com", avatar: "JD" },
-          {
-            id: 2,
-            name: "Jane Smith",
-            email: "jane@example.com",
-            avatar: "JS",
-          },
-          { id: 3, name: "Bob Wilson", email: "bob@example.com", avatar: "BW" },
-        ],
-        sharedUser: [
-          {
-            id: 4,
-            name: "Alice Johnson",
-            email: "alice@example.com",
-            avatar: "AJ",
-            permission: "editor",
-            sharedAt: "2024-01-15",
-          },
-          {
-            id: 5,
-            name: "Mike Brown",
-            email: "mike@example.com",
-            avatar: "MB",
-            permission: "viewer",
-            sharedAt: "2024-01-10",
-          },
-        ],
-      },
-    };
-  },
-
-  toggleLink: async (fileId, enabled) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return {
-      success: true,
-      data: { permission: enabled ? "viewer" : null },
-    };
-  },
-
-  changePermissionApi: async (fileId, permission) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return {
-      success: true,
-      data: { permission },
-    };
-  },
-};
-
-const ShareModal = ({ isCompleted, error, closeModal, currentFile }) => {
-  // Tab and UI state
-  const [activeTab, setActiveTab] = useState("link");
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-
-  // Link sharing state
-  const [isLinkEnabled, setIsLinkEnabled] = useState(false);
-  const [shareLink, setShareLink] = useState("");
-  const [linkPermission, setLinkPermission] = useState("viewer");
-  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  // User management state
-  const [availableUsers, setAvailableUsers] = useState([]);
-  const [sharedUsers, setSharedUsers] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-
-  // Initialize data when modal opens
-  useEffect(() => {
-    initializeModalData();
-  }, [currentFile._id]);
-
-  const initializeModalData = async () => {
-    setIsLoadingUsers(true);
-    try {
-      // Load shared users data
-      await loadSharedUsers();
-      // Generate initial share link
-      await generateShareLink("viewer");
-    } catch (error) {
-      console.error("Failed to initialize modal data:", error);
-    } finally {
-      setIsLoadingUsers(false);
-    }
-  };
-
-  const loadSharedUsers = async () => {
-    try {
-      const response = await getSharedUserAccessList(currentFile._id);
-      if (response.success) {
-        setAvailableUsers(response.data.availableUsers);
-        setSharedUsers(response.data.sharedUsers);
-      }
-    } catch (error) {
-      console.error("Failed to load shared users:", error);
-    }
-  };
-
-  const generateShareLink = async (permission) => {
-    setIsGeneratingLink(true);
-    try {
-      const response = await generateShareLinkApi(currentFile._id, permission);
-      if (response.success) {
-        setShareLink(response.data.link);
-        setLinkPermission(response.data.permission);
-        setIsLinkEnabled(response.data.enabled);
-      }
-    } catch (error) {
-      console.error("Failed to generate share link:", error);
-      setShareLink("");
-    } finally {
-      setIsGeneratingLink(false);
-    }
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy link:", error);
-    }
-  };
-
-  const handleToggleLink = async () => {
-    const newState = !isLinkEnabled;
-    setIsLinkEnabled(newState);
-
-    try {
-      const response = await toggleLink(currentFile._id, newState);
-      if (response.success) {
-        setLinkPermission(response.data.permission);
-      }
-    } catch (error) {
-      console.error("Failed to toggle link:", error);
-      setIsLinkEnabled(!newState); // Revert on error
-    }
-  };
-
-  const handleChangeLinkPermission = async (newPermission) => {
-    if (linkPermission === newPermission) return;
-
-    try {
-      const response = await changePermissionApi(
-        currentFile._id,
-        newPermission
-      );
-      if (response.success) {
-        setLinkPermission(response.data.permission);
-      }
-    } catch (error) {
-      console.error("Failed to change permission:", error);
-    }
-  };
-
-  const handleSelectUser = (user) => {
-    if (!selectedUsers.find((u) => u._id === user._id)) {
-      setSelectedUsers((prev) => [...prev, { ...user, permission: "viewer" }]);
-    }
-    setShowUserDropdown(false);
-  };
-
-  const removeSelectedUser = (userId) => {
-    setSelectedUsers((prev) => prev.filter((u) => u._id !== userId));
-  };
-
-  const updateUserPermission = (userId, newPermission) => {
-    setSelectedUsers((prev) =>
-      prev.map((user) =>
-        user._id === userId ? { ...user, permission: newPermission } : user
-      )
-    );
-  };
-
-  const handleSendInvites = async () => {
-    const res = await shareWithEmail(currentFile._id, selectedUsers);
-    if (res.success) {
-      if (res.data.response.length === 0) {
-        setSelectedUsers([]);
-        loadSharedUsers();
-      } else {
-        console.log(res.data.response);
-      }
-    }
-  };
-
-  const getFilteredAvailableUsers = () => {
-    return availableUsers.filter(
-      (user) =>
-        !selectedUsers.find((selected) => selected._id === user._id) &&
-        !sharedUsers.find((shared) => shared._id === user._id)
-    );
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const PermissionBadge = ({ permission }) => (
-    <div
-      className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-        permission === "editor"
-          ? "bg-orange-100 text-orange-700"
-          : "bg-blue-100 text-blue-700"
-      }`}
-    >
-      {permission === "editor" ? <Edit3 size={10} /> : <Eye size={10} />}
-      <span className="capitalize">{permission}</span>
-    </div>
-  );
-
+const ShareModal = ({ closeModal, currentFile }) => {
+ const {
+    activeTab,
+    setActiveTab,
+    showUserDropdown,
+    setShowUserDropdown,
+    isLinkEnabled,
+    shareLink,
+    linkPermission,
+    isGeneratingLink,
+    copied,
+    sharedUsers,
+    selectedUsers,
+    isLoadingUsers,
+    handleCopyLink,
+    handleToggleLink,
+    handleChangeLinkPermission,
+    handleSelectUser,
+    removeSelectedUser,
+    updateUserPermission,
+    handleSendInvites,
+    getFilteredAvailableUsers,
+  } = useShareModal(currentFile);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

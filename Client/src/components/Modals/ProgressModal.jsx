@@ -1,6 +1,6 @@
 import { AlertCircle, CheckCircle, Loader2, X } from "lucide-react";
 
-const ProgressModal = ({ closeModal, isCompleted, error }) => {
+const ProgressModal = ({ closeModal, isCompleted, error, onComplete }) => {
   const getStatusIcon = () => {
     if (isCompleted)
       return <CheckCircle className="w-10 h-10 text-emerald-500" />;
@@ -23,13 +23,12 @@ const ProgressModal = ({ closeModal, isCompleted, error }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      {/* Enhanced backdrop with better blur */}
+      
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-500 ease-out"
-        onClick={!isCompleted && !error ? undefined : closeModal}
       />
 
-      {/* Modern modal container */}
+     
       <div className="relative w-full max-w-md bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 transform transition-all duration-500 ease-out scale-100 animate-in zoom-in-95 fade-in">
         {/* Close button - only show for error state */}
         {error && (
@@ -88,7 +87,7 @@ const ProgressModal = ({ closeModal, isCompleted, error }) => {
         <div className="text-center">
           {isCompleted ? (
             <button
-              onClick={closeModal}
+              onClick={onComplete}
               className="group relative bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-emerald-500/25 transition-all duration-200 transform hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/30 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50"
             >
               <span className="relative z-10">Done</span>

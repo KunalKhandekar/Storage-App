@@ -103,7 +103,7 @@ export const getFileInfo = async (fileId) => {
   }
 };
 
-export const getFilePermisssionInfo = async (fileId) => {
+export const getFilePermissionInfo = async (fileId) => {
   try {
     const response = await axios.get(`/file/info/${fileId}`);
     return response?.data;
@@ -141,11 +141,3 @@ export const renameFileAsEditor = async (file, newName) => {
   }
 };
 
-export const getFileInfoByType = async (fileType, fileId) => {
-  try {
-    const response = await axios.get(`/file/share/info/${fileId}`);
-    return response?.data;
-  } catch (error) {
-    return error?.response?.data;
-  }
-};

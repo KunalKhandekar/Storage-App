@@ -15,7 +15,6 @@ const ImportDrive = ({ setActionDone }) => {
       const { code } = res;
       // Start animation
       setIsModalOpen(true);
-      setIsLoading(true);
       setError("");
       setIsCompleted(false);
 
@@ -23,20 +22,15 @@ const ImportDrive = ({ setActionDone }) => {
         const result = await driveConnect(code);
         if (result.success) {
           setIsCompleted(true);
-          setIsLoading(false);
-          setActionDone(true);
         } else {
           setError(result.message || "Drive connection failed.");
-          setIsLoading(false);
         }
       } catch (err) {
         setError("Failed to connect to Google Drive");
-        setIsLoading(false);
       }
     },
     onError: () => {
       setError("Google login failed. Please try again.");
-      setIsLoading(false);
     },
     ux_mode: "popup",
     flow: "auth-code",
@@ -50,7 +44,6 @@ const ImportDrive = ({ setActionDone }) => {
     setIsModalOpen(false);
     setError("");
     setIsCompleted(false);
-    setIsLoading(false);
   };
 
   return (
@@ -74,6 +67,10 @@ const ImportDrive = ({ setActionDone }) => {
           closeModal={closeModal}
           error={error}
           isCompleted={isCompleted}
+          onComplete={() => {
+            setActionDone(true);
+            closeModal();
+          }}
         />
       )}
     </>
