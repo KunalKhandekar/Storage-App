@@ -169,12 +169,10 @@ export const usePermissionManager = () => {
     }
   };
 
-
   const handleGoBack = () => {
     navigate(-1);
   };
 
-  
   useEffect(() => {
     fetchFilePermissionInfo();
   }, [fileId]);

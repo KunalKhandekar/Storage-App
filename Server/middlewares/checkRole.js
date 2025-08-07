@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import CustomError from "../utils/ErrorResponse.js";
 
-export const checkRole = (req, res, next) => {
+export const checkRole = (req, _, next) => {
   const { role } = req.user;
 
   if (!["Manager", "Admin", "SuperAdmin"].includes(role)) {

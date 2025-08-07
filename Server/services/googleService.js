@@ -1,13 +1,7 @@
 import { OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
-import path from "path";
-import { absolutePath } from "../app.js";
-import fs from "node:fs";
-import { pipeline } from "node:stream/promises";
-import CustomSuccess from "../utils/SuccessResponse.js";
 import Directory from "../models/dirModel.js";
 import File from "../models/fileModel.js";
-import redisClient from "../config/redis.js";
 import User from "../models/userModel.js";
 
 export const client = new OAuth2Client(
