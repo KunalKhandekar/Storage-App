@@ -2,155 +2,35 @@ import { StatusCodes } from "http-status-codes";
 import mongoose, { Types } from "mongoose";
 import redisClient from "../config/redis.js";
 import Directory from "../models/dirModel.js";
-import OTP from "../models/otpModel.js";
 import User from "../models/userModel.js";
 import githubClient from "../services/githubAuthService.js";
 import {
   connectGoogleDrive,
   verifyGoogleCode,
 } from "../services/googleService.js";
+import { AuthServices } from "../services/index.js";
 import { createSessionAndSetCookie } from "../utils/CreateSession.js";
 import CustomError from "../utils/ErrorResponse.js";
+import { setCookie } from "../utils/setCookie.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
-import {
-  loginValidations,
-  registerValidations,
-} from "../validators/authSchema.js";
+import { validateLoginInputs } from "../validators/validateLoginInputs.js";
+import { validateRegisterInput } from "../validators/validateRegisterInputs.js";
 
 export const registerUser = async (req, res, next) => {
-  const session = await mongoose.startSession();
-  let transactionStarted = false;
   try {
-    const parsed = registerValidations.safeParse(req.body);
-    if (!parsed.success) {
-      throw new CustomError("Invalid input data", StatusCodes.BAD_REQUEST, {
-        details: parsed.error.errors,
-      });
-    }
-
-    const { name, email, password, otp } = parsed.data;
-
-    const userFound = await User.findOne({ email }).lean();
-    if (userFound) {
-      throw new CustomError("User already eixst", StatusCodes.CONFLICT);
-    }
-
-    const isValid = await OTP.findOne({ email, otp }).lean();
-    if (!isValid) {
-      throw new CustomError("Invalid or Expired OTP.", StatusCodes.BAD_REQUEST);
-    }
-
-    await OTP.deleteOne({ email });
-
-    const rootDirId = new Types.ObjectId();
-    const userId = new Types.ObjectId();
-
-    session.startTransaction();
-    transactionStarted = true;
-
-    await Directory.create(
-      [
-        {
-          _id: rootDirId,
-          name: `root-${email}`,
-          userId,
-          parentDirId: null,
-        },
-      ],
-      { session }
-    );
-
-    await User.create(
-      [
-        {
-          _id: userId,
-          name,
-          email,
-          password,
-          rootDirId,
-          canLoginWithPassword: true,
-          createdWith: "email",
-        },
-      ],
-      { session }
-    );
-
-    await session.commitTransaction();
+    const parsedData = validateRegisterInput(req.body);
+    await AuthServices.RegisterUserService(parsedData);
     return CustomSuccess.send(res, "User registered", StatusCodes.CREATED);
   } catch (error) {
-    if (transactionStarted) await session.abortTransaction();
     next(error);
-  } finally {
-    session.endSession();
   }
 };
 
 export const loginUser = async (req, res, next) => {
   try {
-    const parsed = loginValidations.safeParse(req.body);
-    if (!parsed.success) {
-      throw new CustomError(
-        "Invalid or Expired OTP.",
-        StatusCodes.BAD_REQUEST,
-        {
-          details: parsed.error.issues,
-        }
-      );
-    }
-
-    const { email, password, otp } = parsed.data;
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      throw new CustomError(
-        "Invalid email or password",
-        StatusCodes.UNAUTHORIZED
-      );
-    }
-
-    if (!(await user.comparePassword(password))) {
-      throw new CustomError(
-        "Invalid email or password",
-        StatusCodes.UNAUTHORIZED
-      );
-    }
-
-    const isValid = await OTP.findOne({ email, otp }).lean();
-    if (!isValid) {
-      throw new CustomError("Invalid or Expired OTP.", StatusCodes.BAD_REQUEST);
-    }
-
-    await OTP.deleteOne({ email });
-
-    // Session management logic
-    const userSessions = await redisClient.ft.search(
-      "userIdIdx",
-      `@userId:{${user._id}}`,
-      {
-        RETURN: [],
-      }
-    );
-
-    if (userSessions.total >= 2) {
-      const loginToken = crypto.randomUUID();
-      await redisClient.set(
-        `temp_login_token:${loginToken}`,
-        JSON.stringify({
-          userId: user._id,
-        }),
-        { EX: 300 }
-      );
-      throw new CustomError("Session Limit Exceed", StatusCodes.CONFLICT, {
-        details: {
-          sessionLimitExceed: true,
-          temp_token: loginToken,
-        },
-      });
-    }
-
-    await createSessionAndSetCookie(user._id, res);
-
+    const parsedData = validateLoginInputs(req.body);
+    const { sessionID, sessionExpiry } = await AuthServices.LoginUserService(parsedData);
+    setCookie(res, sessionID, sessionExpiry);
     return CustomSuccess.send(res, "Logged in successful", StatusCodes.OK);
   } catch (error) {
     next(error);
