@@ -1,17 +1,16 @@
 import { rm } from "fs/promises";
 import { StatusCodes } from "http-status-codes";
 import path from "path";
-import { uuidv4 } from "zod/v4";
 import { absolutePath } from "../app.js";
 import Directory from "../models/dirModel.js";
 import File from "../models/fileModel.js";
 import User from "../models/userModel.js";
-import CustomError from "../utils/ErrorResponse.js";
-import CustomSuccess from "../utils/SuccessResponse.js";
 import {
   sharedByMeFiles,
   sharedWithMeFiles,
 } from "../services/shareService.js";
+import CustomError from "../utils/ErrorResponse.js";
+import CustomSuccess from "../utils/SuccessResponse.js";
 
 export const uploadFile = async (req, res, next) => {
   try {
