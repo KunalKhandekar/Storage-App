@@ -16,7 +16,7 @@ export const registerUserService = async (data) => {
     session.startTransaction();
     transactionStarted = true;
 
-    await createUserWithRootDir(name, email, password, true, "email", session);
+    await createUserWithRootDir(name, email, true, "email", session, password);
     await session.commitTransaction();
   } catch (error) {
     if (transactionStarted) await session.abortTransaction();
