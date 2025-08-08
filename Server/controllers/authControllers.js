@@ -39,115 +39,17 @@ export const loginUser = async (req, res, next) => {
 
 export const loginWithGoogle = async (req, res, next) => {
   const code = req.body.code;
-  const mongooseSession = await mongoose.startSession();
-  let transactionStarted = false;
 
   try {
-    const userData = await verifyGoogleCode(code);
-    const { email, name, picture } = userData;
-    const userFound = await User.findOne({ email });
-
-    if (userFound) {
-      if (userFound.isDeleted) {
-        throw new CustomError(
-          "This account has been deactivated or deleted. Please contact support for recovery.",
-          StatusCodes.FORBIDDEN
-        );
-      }
-
-      if (
-        userFound.createdWith !== "email" &&
-        userFound.createdWith !== "google"
-      ) {
-        throw new CustomError(
-          `This email is already registered using ${userFound.createdWith}. Please login with ${userFound.createdWith}.`,
-          StatusCodes.FORBIDDEN
-        );
-      }
-
-      if (userFound.createdWith === "email") {
-        userFound.createdWith = "google";
-        await userFound.save();
-      }
-
-      if (userFound.picture.includes("api.dicebear.com")) {
-        userFound.picture = picture;
-        await userFound.save();
-      }
-
-      // Session limiting
-      const userSessions = await redisClient.ft.search(
-        "userIdIdx",
-        `@userId:{${userFound._id}}`,
-        { RETURN: [] }
-      );
-
-      if (userSessions.total >= 2) {
-        const loginToken = crypto.randomUUID();
-        await redisClient.set(
-          `temp_login_token:${loginToken}`,
-          JSON.stringify({
-            userId: userFound._id,
-          }),
-          { EX: 300 }
-        );
-        throw new CustomError("Session Limit Exceed", StatusCodes.CONFLICT, {
-          details: {
-            sessionLimitExceed: true,
-            temp_token: loginToken,
-          },
-        });
-      }
-
-      await createSessionAndSetCookie(userFound._id, res);
-
-      return CustomSuccess.send(
-        res,
-        "Logged in with Google successfully.",
-        StatusCodes.OK
-      );
-    }
-
-    // Register new Google user
-    const rootDirId = new Types.ObjectId();
-    const userId = new Types.ObjectId();
-    mongooseSession.startTransaction();
-    transactionStarted = true;
-
-    await Directory.create(
-      [{ _id: rootDirId, name: `root-${email}`, userId, parentDirId: null }],
-      { session: mongooseSession }
-    );
-    await User.create(
-      [
-        {
-          _id: userId,
-          name,
-          picture,
-          email,
-          rootDirId,
-          canLoginWithPassword: false,
-          createdWith: "google",
-        },
-      ],
-      {
-        session: mongooseSession,
-      }
-    );
-
-    await createSessionAndSetCookie(userId, res);
-
-    await mongooseSession.commitTransaction();
+    const { sessionExpiry, sessionID } = await AuthServices.LoginWithGoogleService(code) 
+    setCookie(res, sessionID, sessionExpiry);
     return CustomSuccess.send(
       res,
-      "New account created with Google and logged in.",
+      "Logged in Successfull",
       StatusCodes.OK
     );
   } catch (error) {
-    if (transactionStarted) await mongooseSession.abortTransaction();
     next(error);
-  } finally {
-    mongooseSession.endSession();
   }
 };
 

@@ -5,10 +5,11 @@ import User from "../../models/userModel.js";
 export const createUserWithRootDir = async (
   name,
   email,
-  password,
   canLoginWithPassword,
   createdWith,
-  session
+  session,
+  password, // optional for social logins,
+  picture, // optional for normal login.
 ) => {
   const rootDirId = new Types.ObjectId();
   const userId = new Types.ObjectId();
@@ -25,18 +26,18 @@ export const createUserWithRootDir = async (
     { session }
   );
 
-  await User.create(
-    [
-      {
-        _id: userId,
-        name,
-        email,
-        password,
-        rootDirId,
-        canLoginWithPassword,
-        createdWith,
-      },
-    ],
-    { session }
-  );
+  const userPayload = {
+    _id: userId,
+    name,
+    email,
+    rootDirId,
+    canLoginWithPassword,
+    createdWith,
+    ...(password && { password }),
+    ...(picture && { picture }),
+  };
+
+  await User.create([userPayload], { session });
+
+  return userId;
 };
