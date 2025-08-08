@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import { verifyGoogleCode } from "../googleService.js";
-import { findAndValidateGoogleUser } from "./findAndValidateGoogleUser.js";
+import { findAndValidateOAuthUser } from "./findAndValidateOAuthUser.js";
 import { handleExistingUser } from "./handleExistingUser.js";
-import { registerNewGoogleUser } from "./registerNewGoogleUser.js";
+import { registerNewOAuthUser } from "./registerNewOAuthUser.js";
 
 export const loginWithGoogleService = async (code) => {
   const mongooseSession = await mongoose.startSession();
@@ -10,7 +10,7 @@ export const loginWithGoogleService = async (code) => {
   try {
     const { email, name, picture } = await verifyGoogleCode(code);
 
-    const existingUser = await findAndValidateGoogleUser(email, picture);
+    const existingUser = await findAndValidateOAuthUser("google", email, picture);
 
     if (existingUser) {
       return await handleExistingUser(existingUser._id);
@@ -19,7 +19,8 @@ export const loginWithGoogleService = async (code) => {
     mongooseSession.startTransaction();
     transactionStarted = true;
 
-    const sessionInfo = await registerNewGoogleUser(
+    const sessionInfo = await registerNewOAuthUser(
+      "google",
       name,
       email,
       picture,

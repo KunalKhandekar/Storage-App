@@ -1,12 +1,18 @@
 import { createRedisSession } from "./createRedisSession.js";
 import { createUserWithRootDir } from "./createUserWithRootDir.js";
 
-export const registerNewGoogleUser = async (name, email, picture, mongooseSession) => {
+export const registerNewOAuthUser = async (
+  provider,
+  name,
+  email,
+  picture,
+  mongooseSession
+) => {
   const userId = await createUserWithRootDir(
     name,
     email,
     false,
-    "google",
+    provider,
     mongooseSession,
     undefined,
     picture
