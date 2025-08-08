@@ -1,16 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import mongoose, { Types } from "mongoose";
-import redisClient from "../config/redis.js";
-import Directory from "../models/dirModel.js";
-import User from "../models/userModel.js";
 import githubClient from "../services/githubAuthService.js";
 import {
-  connectGoogleDrive,
-  verifyGoogleCode,
+  connectGoogleDrive
 } from "../services/googleService.js";
 import { AuthServices } from "../services/index.js";
-import { createSessionAndSetCookie } from "../utils/CreateSession.js";
-import CustomError from "../utils/ErrorResponse.js";
 import { setCookie } from "../utils/setCookie.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import { validateLoginInputs } from "../validators/validateLoginInputs.js";

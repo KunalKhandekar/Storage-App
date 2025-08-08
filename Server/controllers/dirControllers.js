@@ -1,45 +1,18 @@
-import { rm } from "node:fs/promises";
-import path from "node:path";
-import { absolutePath } from "../app.js";
-import Directory from "../models/dirModel.js";
-import File from "../models/fileModel.js";
 import { StatusCodes } from "http-status-codes";
-import CustomError from "../utils/ErrorResponse.js";
+import { DirectoryServices } from "../services/index.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
 
 export const getDir = async (req, res, next) => {
   const { id } = req.params;
+  const userId = req.user._id;
 
   try {
-    const directoryData = id
-      ? await Directory.findOne({
-          _id: id,
-          userId: req.user._id,
-        }).lean()
-      : await Directory.findOne({
-          userId: req.user._id,
-          parentDirId: null,
-        }).lean();
+    const directoryData = await DirectoryServices.GetDirectoryDataService(
+      userId,
+      id
+    );
 
-    if (!directoryData)
-      throw new CustomError(
-        "You are not authorized to make this action",
-        StatusCodes.UNAUTHORIZED
-      );
-
-    const files = (
-      await File.find({ parentDirId: directoryData?._id }).lean()
-    ).map((file) => ({ ...file, type: "file" }));
-
-    const directory = (
-      await Directory.find({ parentDirId: directoryData?._id }).lean()
-    ).map((dir) => ({ ...dir, type: "directory" }));
-
-    return CustomSuccess.send(res, null, StatusCodes.OK, {
-      ...directoryData,
-      files,
-      directory,
-    });
+    return CustomSuccess.send(res, null, StatusCodes.OK, directoryData);
   } catch (error) {
     next(error);
   }
@@ -47,16 +20,10 @@ export const getDir = async (req, res, next) => {
 
 export const updateDir = async (req, res, next) => {
   const { id } = req.params;
-  const user = req.user;
+  const userId = req.user._id;
   const { name } = req.body;
-
   try {
-    await Directory.findOneAndUpdate(
-      { _id: id, userId: user._id },
-      { $set: { name } },
-      { new: true, runValidators: true }
-    );
-
+    await DirectoryServices.UpdateDirectoryDataService(userId, id, name);
     return CustomSuccess.send(res, "Directory renamed", StatusCodes.OK);
   } catch (error) {
     next(error);
@@ -69,24 +36,17 @@ export const createDir = async (req, res, next) => {
   const { dirname } = req.headers;
 
   try {
-    const dirObj = await Directory.findOne({
-      _id: parentDirId,
-      userId: req.user._id,
-    }).lean();
-
-    if (!dirObj)
-      throw new CustomError(
-        "You are not authorized to make this action",
-        StatusCodes.UNAUTHORIZED
-      );
-    const dir = new Directory({
-      name: dirname,
+    const directory = await DirectoryServices.CreateDirectoryService(
       parentDirId,
-      userId: dirObj.userId,
-    });
-
-    await dir.save();
-    return CustomSuccess.send(res, "Directory created", StatusCodes.OK);
+      user._id,
+      dirname
+    );
+    return CustomSuccess.send(
+      res,
+      "Directory created",
+      StatusCodes.OK,
+      directory
+    );
   } catch (error) {
     next(error);
   }
@@ -94,60 +54,9 @@ export const createDir = async (req, res, next) => {
 
 export const deleteDir = async (req, res, next) => {
   const { id } = req.params;
-  const user = req.user;
-
-  const deleteDirectory = async (id) => {
-    let directories = await Directory.find(
-      { parentDirId: id },
-      { projection: { _id: 1 } }
-    ).lean();
-
-    let files = await File.find({ parentDirId: id })
-      .select("storedName googleFileId")
-      .lean();
-
-    for (const { _id } of directories) {
-      const { directories: childDirs, files: childFiles } =
-        await deleteDirectory(_id);
-      files = [...files, ...childFiles];
-      directories = [...directories, ...childDirs];
-    }
-
-    return { directories, files };
-  };
-
+  const userId = req.user._id;
   try {
-    const dirObj = await Directory.findOne(
-      {
-        _id: id,
-        userId: user._id,
-      },
-      { projection: { _id: 1 } }
-    ).lean();
-
-    if (!dirObj)
-      throw new CustomError(
-        "You are not authorized to make this action",
-        StatusCodes.UNAUTHORIZED
-      );
-
-    const { files, directories } = await deleteDirectory(id);
-
-    const includeThisDir = [...(directories?.map((dir) => dir._id) || []), id];
-
-    await Directory.deleteMany({ _id: { $in: includeThisDir } });
-
-    for (const file of files) {
-      const { storedName, googleFileId } = file;
-      // Google file not stored in local storage.
-      if (googleFileId) {
-        continue;
-      }
-      await rm(path.join(absolutePath, storedName));
-    }
-
-    await File.deleteMany({ _id: { $in: files?.map((file) => file._id) } });
-
+    await DirectoryServices.DeleteDirectoryService(id, userId);
     return CustomSuccess.send(res, "Directory deleted", StatusCodes.OK);
   } catch (error) {
     next(error);
