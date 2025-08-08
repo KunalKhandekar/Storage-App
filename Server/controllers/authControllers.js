@@ -102,36 +102,9 @@ export const connectToDrive = async (req, res, next) => {
 export const DeleteAndCreateSession = async (req, res, next) => {
   const { temp_token } = req.body;
   try {
-    if (!temp_token) {
-      throw new CustomError("Login token not found.", StatusCodes.BAD_REQUEST);
-    }
-
-    const isTokenStored = await redisClient.get(
-      `temp_login_token:${temp_token}`
-    );
-
-    if (!isTokenStored) {
-      throw new CustomError("Token is Invalid/Expired");
-    }
-
-    const { userId } = JSON.parse(isTokenStored);
-
-    const userSessions = await redisClient.ft.search(
-      "userIdIdx",
-      `@userId:{${userId}}`,
-      {
-        RETURN: [],
-      }
-    );
-
-    if (userSessions.total >= 2) {
-      await redisClient.del(userSessions.documents[0].id);
-    }
-
-    await createSessionAndSetCookie(userId, res);
-
-    await redisClient.del(`temp_login_token:${temp_token}`);
-
+    const { sessionExpiry, sessionID } =
+      await AuthServices.RefreshUserSessionService(temp_token);
+    setCookie(res, sessionID, sessionExpiry);
     return CustomSuccess.send(res, "Session Created", StatusCodes.CREATED);
   } catch (error) {
     next(error);

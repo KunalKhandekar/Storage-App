@@ -10,7 +10,11 @@ export const loginWithGoogleService = async (code) => {
   try {
     const { email, name, picture } = await verifyGoogleCode(code);
 
-    const existingUser = await findAndValidateOAuthUser("google", email, picture);
+    const existingUser = await findAndValidateOAuthUser(
+      "google",
+      email,
+      picture
+    );
 
     if (existingUser) {
       return await handleExistingUser(existingUser._id);
