@@ -8,7 +8,7 @@ import Directory from "../../models/dirModel.js";
 import File from "../../models/fileModel.js";
 import { hash } from "bcrypt";
 import path from "node:path";
-import { getDirectoryDataService } from "../Directory/getDirectoryDataService.js";
+import { DirectoryServices }  from "../index.js";
 import { canPerform } from "../../utils/canPerform.js"
 
 const logoutUserService = async (token) => {
@@ -296,7 +296,7 @@ const getSpecificUserDirectoryService = async (userId, dirId) => {
     .select("-password")
     .lean();
   const { _id, directory, files, name, parentDirId } =
-    await getDirectoryDataService(userId, dirId);
+    await DirectoryServices.GetDirectoryDataService(userId, dirId);
   return {
     files: files,
     directories: directory,
