@@ -5,6 +5,7 @@ import { absolutePath } from "../../app.js";
 import Directory from "../../models/dirModel.js";
 import File from "../../models/fileModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
+import { collectDirectoryContents } from "./collectDirectoryContents.js";
 
 const getDirectoryDataService = async (userId, dirId = null) => {
   try {
