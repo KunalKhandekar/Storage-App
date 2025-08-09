@@ -130,7 +130,7 @@ export const getSharedWithMeFiles = async () => {
   }
 };
 
-export const renameFileAsEditor = async (file, newName) => {
+export const renameFileSharedViaEmail = async (file, newName) => {
   try {
     const response = await axios.patch(`/file/share/edit/${file._id}`, {
       name: newName,
@@ -141,3 +141,13 @@ export const renameFileAsEditor = async (file, newName) => {
   }
 };
 
+export const renameFileSharedViaLink = async (file, newName) => {
+  try {
+    const response = await axios.patch(`/file/share/edit/${file._id}/link`, {
+      name: newName,
+    });
+    return response?.data;
+  } catch (error) {
+    return error?.response?.data;
+  }
+};

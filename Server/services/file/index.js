@@ -170,10 +170,12 @@ const getFileInfoService = async (fileId) => {
   const url = `${process.env.BASE_URL}/guest/file/view/${file._id}?token=${file.sharedViaLink.token}`;
 
   return {
+    _id: file._id,
     url,
     name: file.name,
     sharedBy: file.userId.name,
     isAccessible: file.sharedViaLink.enabled,
+    permission: file.sharedViaLink.permission,
   };
 };
 
@@ -266,7 +268,6 @@ const getUserAccessListService = async (fileId, userId) => {
 const renameFileByEditorService = async (file, name) => {
   file.name = name;
   await file.save();
-
   return file.name;
 };
 

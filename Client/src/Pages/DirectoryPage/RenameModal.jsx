@@ -38,6 +38,7 @@ export default function RenameModal({ item, onClose, onRename, ApiFunc = renameF
 
     setIsSubmitting(true);
     try {
+      console.log(item);
       const res = await ApiFunc(item, newName.trim());
       if (res.success) {
         onRename(res);

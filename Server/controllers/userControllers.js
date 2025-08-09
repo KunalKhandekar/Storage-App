@@ -139,7 +139,6 @@ export const updateProfile = async (req, res, next) => {
     await UserServices.UpdateProfileService(userId, file, name);
     return CustomSuccess.send(res, "Profile Updated.", StatusCodes.OK);
   } catch (error) {
-    console.log(error);
     next(error);
   }
 };

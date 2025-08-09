@@ -355,7 +355,7 @@ export const getSharedWithMeFiles = async (req, res, next) => {
   }
 };
 
-export const renameFileByEditor = async (req, res, next) => {
+export const renameFileSharedViaEmail = async (req, res, next) => {
   const file = req.file;
   const { name } = req.body;
   try {
@@ -368,3 +368,14 @@ export const renameFileByEditor = async (req, res, next) => {
     next(error);
   }
 };
+
+export const renameFileSharedViaLink = async (req, res, next) => {
+  const file = req.file;
+  const { name } = req.body;
+  try {
+    const newFileName = await FileServices.RenameFileByEditorService(file, name);
+    return CustomSuccess.send(res, null, StatusCodes.OK, { name: newFileName });
+  } catch (error) {
+    next(error);
+  }
+}

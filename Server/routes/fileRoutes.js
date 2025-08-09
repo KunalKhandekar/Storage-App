@@ -13,15 +13,16 @@ import {
   getSharedWithMeFiles,
   getUserAccessList,
   renameFile,
-  renameFileByEditor,
+  renameFileSharedViaEmail,
+  renameFileSharedViaLink,
   revokeUserAccess,
   shareLinkToggle,
   shareViaEmail,
   shareViaLink,
-  uploadFile,
+  uploadFile
 } from "../controllers/fileControllers.js";
 import { checkFileAccess } from "../middlewares/checkFileAccess.js";
-import { checkFileShared } from "../middlewares/checkFIleShared.js";
+import { checkFileSharedViaEmail, checkFileSharedViaLink } from "../middlewares/checkFileShared.js";
 import { serveFile } from "../middlewares/serveFile.js";
 import validateRequest from "../middlewares/validateRequest.js";
 import { fileStorage } from "../utils/MulterSetup.js";
@@ -142,9 +143,15 @@ router.get("/share/with-me", getSharedWithMeFiles);
 // ---------------- Editor Routes -------------------------
 
 // PATCH /file/share/edit/:fileId
-// Desc -> Rename a file (allowed for editors).
+// Desc -> Rename a file shared through Mail (allowed for editors).
 // Params -> { fileId }
 // Body -> { name: string }
-router.patch("/share/edit/:fileId", checkFileShared, renameFileByEditor);
+router.patch("/share/edit/:fileId", checkFileSharedViaEmail, renameFileSharedViaEmail);
+
+// PATCH /file/share/edit/:fileId/link
+// Desc -> Rename a file shared through Link (allowed for editors).
+// Params -> { fileId }
+// Body -> { name: string }
+router.patch("/share/edit/:fileId/link", checkFileSharedViaLink, renameFileSharedViaLink)
 
 export default router;
