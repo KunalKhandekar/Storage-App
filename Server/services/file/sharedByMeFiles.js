@@ -1,4 +1,4 @@
-import File from "../models/fileModel.js";
+import File from "../../models/fileModel.js";
 
 export const sharedByMeFiles = async (currentUserId) => {
   const sharedByMe = await File.find({
@@ -21,12 +21,4 @@ export const sharedByMeFiles = async (currentUserId) => {
     );
     return { ...f, latestTime };
   });
-};
-
-export const sharedWithMeFiles = async (currentUserId) => {
-  return await File.find({
-    "sharedWith.userId": currentUserId,
-  })
-    .populate("userId sharedWith.userId")
-    .lean();
 };

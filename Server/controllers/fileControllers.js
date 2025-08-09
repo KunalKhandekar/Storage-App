@@ -1,67 +1,37 @@
-import { rm } from "fs/promises";
 import { StatusCodes } from "http-status-codes";
 import path from "path";
-import { absolutePath } from "../app.js";
-import Directory from "../models/dirModel.js";
-import File from "../models/fileModel.js";
-import User from "../models/userModel.js";
-import {
-  sharedByMeFiles,
-  sharedWithMeFiles,
-} from "../services/shareService.js";
-import CustomError from "../utils/ErrorResponse.js";
+import { sharedByMeFiles } from "../services/file/sharedByMeFiles.js";
+import { sharedWithMeFiles } from "../services/file/sharedWithMeFiles.js";
+import { FileServices } from "../services/index.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
 
 export const uploadFile = async (req, res, next) => {
+  const file = req.file;
+  const parentDirId = req.headers.parentdirid || req.user.rootDirId;
+  const userId = req.user._id;
   try {
-    if (!req.file) {
-      throw new CustomError("No files uploaded", StatusCodes.BAD_REQUEST);
-    }
-
-    const { originalname, storedName } = req.file;
-    const parentDirId = req.headers.parentdirid || req.user.rootDirId;
-
-    const parentDirectory = await Directory.findOne({
-      _id: parentDirId,
-      userId: req.user._id,
-    }).lean();
-
-    if (!parentDirectory) {
-      await rm(path.join(absolutePath, storedName));
-      throw new CustomError(
-        "You are not authorized to make this action",
-        StatusCodes.UNAUTHORIZED
-      );
-    }
-
-    await File.create({
-      storedName,
-      userId: req.user._id,
-      name: originalname,
-      parentDirId: parentDirectory._id,
-    });
-
-    return CustomSuccess.send(res, "File uploaded", StatusCodes.CREATED);
+    const newFile = await FileServices.UploadFileService(
+      file,
+      parentDirId,
+      userId
+    );
+    return CustomSuccess.send(
+      res,
+      "File uploaded",
+      StatusCodes.CREATED,
+      newFile
+    );
   } catch (error) {
     next(error);
   }
 };
 
 export const getFileById = async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user._id;
   try {
-    const { id } = req.params;
-
-    const fileObj = await File.findOne({
-      _id: id,
-      userId: req.user._id,
-    });
-
-    if (!fileObj) {
-      throw new CustomError("File not found", StatusCodes.NOT_FOUND);
-    }
-
-    req.file = fileObj;
-
+    const file = await FileServices.GetFileService(id, userId);
+    req.file = file;
     next();
   } catch (error) {
     next(error);
@@ -71,19 +41,10 @@ export const getFileById = async (req, res, next) => {
 export const renameFile = async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.body;
-
-  const fileObj = await File.findOne({
-    _id: id,
-    userId: req.user._id,
-  }).lean();
-
-  if (!fileObj) {
-    throw new CustomError("File not found", StatusCodes.NOT_FOUND);
-  }
-
+  const userId = req.user._id;
   try {
-    await File.updateOne({ _id: fileObj._id }, { $set: { name } }).lean();
-    return CustomSuccess.send(res, "File renamed", StatusCodes.OK);
+    const renamedFile = await FileServices.RenameFileService(id, userId, name);
+    return CustomSuccess.send(res, "File renamed", StatusCodes.OK, renamedFile);
   } catch (error) {
     next(error);
   }
@@ -91,61 +52,21 @@ export const renameFile = async (req, res, next) => {
 
 export const deleteFile = async (req, res, next) => {
   const { id } = req.params;
-
-  const fileObj = await File.findOne({
-    _id: id,
-    userId: req.user._id,
-  });
-
-  if (!fileObj) {
-    throw new CustomError("File not found", StatusCodes.NOT_FOUND);
-  }
-
+  const userId = req.user._id;
   try {
-    await File.deleteOne({ _id: fileObj._id });
-    if (!fileObj.googleFileId) {
-      await rm(path.join(absolutePath, fileObj.storedName));
-    }
-    return CustomSuccess.send(res, "File deleted", StatusCodes.OK);
+    const deletedFile = await FileServices.DeleteFileService(id, userId);
+    return CustomSuccess.send(res, "File deleted", StatusCodes.OK, deletedFile);
   } catch (error) {
     next(error);
   }
 };
 
 // Share File Controllers
-// route -> /file/share/:fileId/email
 export const shareViaEmail = async (req, res, next) => {
   const file = req.file;
   const { users } = req.body;
-
   try {
-    let response = [];
-    for (const { email, name, permission } of users) {
-      const user = await User.findOne({ email }).lean();
-
-      if (!user) {
-        response.push(
-          `${name} -> ${email} is not registered, file cannot be shared.`
-        );
-        continue;
-      }
-
-      const alreadyShared = file.sharedWith.find(
-        (u) => u.userId.toString() === user._id.toString()
-      );
-
-      if (alreadyShared) {
-        response.push(`${name} -> File already shared with ${email}.`);
-        continue;
-      }
-
-      file.sharedWith.push({
-        permission,
-        userId: user._id,
-      });
-    }
-    await file.save();
-
+    const response = await FileServices.ShareViaEmailService(users, file);
     return CustomSuccess.send(
       res,
       "File Shared with selected user.",
@@ -161,32 +82,13 @@ export const shareViaLink = async (req, res, next) => {
   const file = req.file;
   const { permission } = req.body;
   try {
-    if (file.sharedViaLink.token) {
-      return CustomSuccess.send(
-        res,
-        "Link generated for file.",
-        StatusCodes.OK,
-        {
-          link: `${process.env.CLIENT_URL}/guest/access/${file._id}?token=${file.sharedViaLink.token}`,
-          permission: file.sharedViaLink.permission,
-          enabled: file.sharedViaLink.enabled,
-        }
-      );
-    }
-
-    file.sharedViaLink = {
-      enabled: false,
-      permission,
-      token: crypto.randomUUID(),
-    };
-
-    await file.save();
-
-    return CustomSuccess.send(res, "Link generated for file.", StatusCodes.OK, {
-      link: `${process.env.CLIENT_URL}/guest/access/${file._id}?token=${file.sharedViaLink.token}`,
-      permission: file.sharedViaLink.permission,
-      enabled: file.sharedViaLink.enabled,
-    });
+    const linkInfo = await FileServices.ShareviaLinkService(file, permission);
+    return CustomSuccess.send(
+      res,
+      "Link generated for file.",
+      StatusCodes.OK,
+      linkInfo
+    );
   } catch (error) {
     next(error);
   }
@@ -196,11 +98,10 @@ export const shareLinkToggle = async (req, res, next) => {
   const file = req.file;
   const { enabled } = req.body;
   try {
-    file.sharedViaLink.enabled = enabled;
-    await file.save();
-
+    const permission = await FileServices.ShareLinkToggleService(file, enabled);
     return CustomSuccess.send(res, null, StatusCodes.OK, {
-      permission: file.sharedViaLink.permission,
+      permission,
+      enabled,
     });
   } catch (error) {
     next(error);
@@ -211,25 +112,7 @@ export const getSharedFileViaLink = async (req, res, next) => {
   const { fileId } = req.params;
   const { token } = req.query;
   try {
-    const file = await File.findById(fileId).lean();
-    if (!file) {
-      throw new CustomError("File not found", StatusCodes.NOT_FOUND);
-    }
-
-    if (!file.sharedViaLink.enabled) {
-      throw new CustomError(
-        "File access has been disabled by the user.",
-        StatusCodes.CONFLICT
-      );
-    }
-
-    if (file.sharedViaLink.token !== token) {
-      throw new CustomError(
-        "File Access token is Invalid",
-        StatusCodes.CONFLICT
-      );
-    }
-
+    const file = await FileServices.GetSharedFileViaLinkService(fileId, token);
     req.file = file;
     next();
   } catch (error) {
@@ -238,19 +121,10 @@ export const getSharedFileViaLink = async (req, res, next) => {
 };
 
 export const getFileInfoAndURL = async (req, res, next) => {
+  const fileId = req.params.fileId;
   try {
-    const file = await File.findById(req.params.fileId)
-      .select("name sharedViaLink userId")
-      .populate("userId");
-
-    const url = `${process.env.BASE_URL}/guest/file/view/${file._id}?token=${file.sharedViaLink.token}`;
-
-    return CustomSuccess.send(res, null, StatusCodes.OK, {
-      url,
-      name: file.name,
-      sharedBy: file.userId.name,
-      isAccessible: file.sharedViaLink.enabled,
-    });
+    const fileInfo = await FileServices.GetFileInfoService(fileId);
+    return CustomSuccess.send(res, null, StatusCodes.OK, fileInfo);
   } catch (error) {
     next(error);
   }
@@ -258,25 +132,10 @@ export const getFileInfoAndURL = async (req, res, next) => {
 
 export const getSharedFileViaEmail = async (req, res, next) => {
   const { fileId } = req.params;
+  const userId = req.user._id;
   try {
-    const file = await File.findById(fileId).lean();
-    if (!file) {
-      throw new CustomError("File not found", StatusCodes.NOT_FOUND);
-    }
-    
-    const hasAccess = file.sharedWith.find((u) =>
-      u.userId.equals(req.user._id)
-    );
-
-    if (!hasAccess) {
-      throw new CustomError(
-        "You are not authorized to access this file.",
-        StatusCodes.UNAUTHORIZED
-      );
-    }
-
+    const file = await FileServices.GetSharedFileViaEmailService(fileId, userId);
     req.file = file;
-
     next();
   } catch (error) {
     next(error);
@@ -287,11 +146,10 @@ export const changePermission = async (req, res, next) => {
   const file = req.file;
   const { permission } = req.body;
   try {
-    file.sharedViaLink.permission = permission;
-    await file.save();
-
+    const changedPermission =
+      await FileServices.ChangeFileSharePermissionService(file, permission);
     return CustomSuccess.send(res, null, StatusCodes.OK, {
-      permission: file.sharedViaLink.permission,
+      permission: changedPermission,
     });
   } catch (error) {
     next(error);
@@ -303,26 +161,17 @@ export const changePermissionOfUser = async (req, res, next) => {
   const { permission } = req.body;
   const { userId } = req.params;
   try {
-
-    // Checking if the given user exist in the shared list.
-    const collaborator = file.sharedWith.find(
-      (c) => c.userId._id.toString() === userId
+    const changedPermission = await FileServices.ChangePermissionOfUserService(
+      file,
+      permission,
+      userId
     );
-    if (!collaborator) {
-      throw new CustomError(
-        "File is not shared with the selected user.",
-        StatusCodes.CONFLICT
-      );
-    }
-
-    collaborator.permission = permission;
-    await file.save();
 
     return CustomSuccess.send(
       res,
       "SuccessFully Updated the permission.",
       StatusCodes.OK,
-      { permission: collaborator.permission }
+      { permission: changePermission }
     );
   } catch (error) {
     next(error);
@@ -333,22 +182,7 @@ export const revokeUserAccess = async (req, res, next) => {
   const { userId } = req.params;
   const file = req.file;
   try {
-    // Checking if the given user exist in the list.
-    const collaborator = file.sharedWith.find(
-      (c) => c.userId._id.toString() === userId
-    );
-    if (!collaborator) {
-      throw new CustomError(
-        "File is not shared with the selected user.",
-        StatusCodes.CONFLICT
-      );
-    }
-
-    file.sharedWith = file.sharedWith.filter(
-      (c) => c.userId._id.toString() !== userId
-    );
-    await file.save();
-
+    await FileServices.RevokeUserAccessService(file, userId);
     return CustomSuccess.send(
       res,
       "SuccessFully removed the user.",
@@ -361,25 +195,10 @@ export const revokeUserAccess = async (req, res, next) => {
 
 export const getUserAccessList = async (req, res, next) => {
   const file = req.file;
+  const userId = req.user._id;
   try {
-    const sharedUsers =
-      (
-        await File.findById(file._id)
-          .populate("sharedWith.userId", "name email picture")
-          .select("sharedWith.userId sharedWith.permission sharedWith.sharedAt")
-          .lean()
-      )?.sharedWith || [];
-
-    const allUsers = (
-      await User.find().select("name email picture").lean()
-    ).filter((u) => !req.user._id.equals(u._id));
-
-    const sharedUserIdArray = sharedUsers.map((u) => u.userId._id.toString());
-
-    const availableUsers = allUsers.filter(
-      (u) => !sharedUserIdArray.includes(u._id.toString())
-    );
-
+    const { sharedUsers, availableUsers } =
+      await FileServices.GetUserAccessListService(file._id, userId);
     return CustomSuccess.send(res, null, StatusCodes.OK, {
       sharedUsers,
       availableUsers,
@@ -392,13 +211,13 @@ export const getUserAccessList = async (req, res, next) => {
 export const getDashboardInfo = async (req, res, next) => {
   const currentUser = req.user;
   try {
-    let sharedByMe = await sharedByMeFiles(currentUser._id) || [];
+    let sharedByMe = (await sharedByMeFiles(currentUser._id)) || [];
     sharedByMe = sharedByMe.map((f) => ({
       ...f,
       type: "sharedByMe",
     }));
 
-    let sharedWithMe = await sharedWithMeFiles(currentUser._id) || [];
+    let sharedWithMe = (await sharedWithMeFiles(currentUser._id)) || [];
     sharedWithMe = sharedWithMe.map((f) => ({
       ...f,
       type: "sharedWithMe",
@@ -540,9 +359,11 @@ export const renameFileByEditor = async (req, res, next) => {
   const file = req.file;
   const { name } = req.body;
   try {
-    file.name = name;
-    await file.save();
-    return CustomSuccess.send(res, null, StatusCodes.OK, { name: file.name });
+    const newFileName = await FileServices.RenameFileByEditorService(
+      file,
+      name
+    );
+    return CustomSuccess.send(res, null, StatusCodes.OK, { name: newFileName });
   } catch (error) {
     next(error);
   }
