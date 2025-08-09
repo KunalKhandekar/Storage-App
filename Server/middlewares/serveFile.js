@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import { client } from "../services/googleService.js";
+import { client } from "../services/auth/googleService.js";
 import { absolutePath } from "../app.js";
 import path from "node:path";
 

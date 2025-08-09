@@ -1,8 +1,8 @@
 import { OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
-import Directory from "../models/dirModel.js";
-import File from "../models/fileModel.js";
-import User from "../models/userModel.js";
+import Directory from "../../models/dirModel.js";
+import File from "../../models/fileModel.js";
+import User from "../../models/userModel.js";
 
 export const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,

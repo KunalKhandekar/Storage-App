@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-import githubClient from "../services/githubAuthService.js";
+import githubClient from "../services/auth/githubAuthService.js";
 import {
   connectGoogleDrive
-} from "../services/googleService.js";
+} from "../services/auth/googleService.js";
 import { AuthServices } from "../services/index.js";
 import { setCookie } from "../utils/setCookie.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
