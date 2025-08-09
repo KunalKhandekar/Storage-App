@@ -17,31 +17,45 @@ const PasswordSettings = ({
   const { showModal } = useModal();
 
   const handlePasswordAction = async () => {
-    if (passwordData.new !== passwordData.confirm) {
+    const { current, new: newPass, confirm } = passwordData;
+
+
+    if (newPass !== confirm) {
       showModal("Mismatch", "New passwords do not match!", "error");
       return;
     }
 
-    if (!hasManualPassword) {
-      const res = await setPassword(passwordData.confirm);
-      if (res.success) {
-        showModal("Success", "Password set successfully!", "success");
-        setHasManualPassword(true);
-        setPasswordData({ current: "", new: "", confirm: "" });
-      } else {
-        showModal("Error", res.message, "error");
-      }
-    } else {
-      const res = await updatePassword(
-        passwordData.current,
-        passwordData.confirm
+    if (newPass.length <= 3) {
+      showModal(
+        "Invalid",
+        "Password must be longer than 3 characters!",
+        "error"
       );
-      if (res.success) {
-        showModal("Success", "Password updated successfully!", "success");
-        setPasswordData({ current: "", new: "", confirm: "" });
-      } else {
-        showModal("Error", res.message, "error");
-      }
+      return;
+    }
+
+    if (hasManualPassword && current === confirm) {
+      showModal("Invalid", "Old and New password cannot be same!", "error");
+      return;
+    }
+
+
+    const res = hasManualPassword
+      ? await updatePassword(current, confirm)
+      : await setPassword(confirm);
+
+    if (res.success) {
+      showModal(
+        "Success",
+        hasManualPassword
+          ? "Password updated successfully!"
+          : "Password set successfully!",
+        "success"
+      );
+      if (!hasManualPassword) setHasManualPassword(true);
+      setPasswordData({ current: "", new: "", confirm: "" });
+    } else {
+      showModal("Error", res.message, "error");
     }
   };
 
@@ -70,6 +84,7 @@ const PasswordSettings = ({
             </label>
             <div className="relative">
               <input
+                tabIndex={1}
                 type={showCurrentPassword ? "text" : "password"}
                 value={passwordData.current}
                 onChange={(e) =>
@@ -97,6 +112,7 @@ const PasswordSettings = ({
           </label>
           <div className="relative">
             <input
+              tabIndex={2}
               type={showNewPassword ? "text" : "password"}
               value={passwordData.new}
               onChange={(e) =>
@@ -120,6 +136,7 @@ const PasswordSettings = ({
           </label>
           <div className="relative">
             <input
+              tabIndex={3}
               type={showConfirmPassword ? "text" : "password"}
               value={passwordData.confirm}
               onChange={(e) =>
@@ -141,6 +158,7 @@ const PasswordSettings = ({
         </div>
 
         <button
+          tabIndex={4}
           onClick={handlePasswordAction}
           className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
         >

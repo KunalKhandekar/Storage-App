@@ -8,8 +8,8 @@ import Directory from "../../models/dirModel.js";
 import File from "../../models/fileModel.js";
 import { hash } from "bcrypt";
 import path from "node:path";
-import { DirectoryServices }  from "../index.js";
-import { canPerform } from "../../utils/canPerform.js"
+import { DirectoryServices } from "../index.js";
+import { canPerform } from "../../utils/canPerform.js";
 
 const logoutUserService = async (token) => {
   await redisClient.del(`session:${token}`);
@@ -72,7 +72,15 @@ const logoutSpecificUserService = async (userId, currentUser) => {
 };
 
 const softDeleteUserService = async (userId, currentUser) => {
-  const user = await User.findOne({ _id: userId }).select("role");
+  if (currentUser.role !== "SuperAdmin" && currentUser.role !== "Admin") {
+    throw new CustomError(
+      "You're not authorized to soft delete a user.",
+      StatusCodes.BAD_REQUEST
+    );
+  }
+  const user = await User.findOne({ _id: userId }).select("role isDeleted");
+
+  console.log(user);
 
   if (!user) {
     throw new CustomError("User not found", StatusCodes.NOT_FOUND);
@@ -108,6 +116,7 @@ const softDeleteUserService = async (userId, currentUser) => {
 };
 
 const hardDeleteUserService = async (userId, currentUser) => {
+  
   const user = await User.findOne({ _id: userId }).select("role");
 
   if (!user) {
@@ -173,6 +182,12 @@ const recoverUserService = async (userId, currentUser) => {
 };
 
 const setPasswordService = async (userId, password) => {
+  if (password.length <= 3) {
+    throw new CustomError(
+      "Password must be longer than 3 characters!",
+      StatusCodes.CONFLICT
+    );
+  }
   const hashedPassword = await hash(password, 10);
 
   await User.findByIdAndUpdate(userId, {
@@ -181,6 +196,19 @@ const setPasswordService = async (userId, password) => {
 };
 
 const updatePasswordService = async (userId, oldPassword, newPassword) => {
+  if (newPassword.length <= 3) {
+    throw new CustomError(
+      "Password must be longer than 3 characters!",
+      StatusCodes.CONFLICT
+    );
+  }
+
+  if (oldPassword === newPassword) {
+    throw new CustomError(
+      "Old and New password cannot be same!",
+      StatusCodes.CONFLICT
+    );
+  }
   const user = await User.findOne({ _id: userId });
   if (!(await user.comparePassword(oldPassword))) {
     throw new CustomError(
@@ -240,6 +268,7 @@ const deleteUserService = async (userId) => {
   // delete all files of the user (virtual and local)
   const allFiles = await File.find({ userId: user._id });
   for (const file of allFiles) {
+    console.log(file);
     await rm(path.join(absolutePath, file.storedName));
     await file.deleteOne();
   }
