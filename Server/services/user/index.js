@@ -72,6 +72,8 @@ const logoutSpecificUserService = async (userId, currentUser) => {
 };
 
 const softDeleteUserService = async (userId, currentUser) => {
+
+  // Only Superadmin or Admin can soft delete.
   if (currentUser.role !== "SuperAdmin" && currentUser.role !== "Admin") {
     throw new CustomError(
       "You're not authorized to soft delete a user.",
@@ -79,8 +81,6 @@ const softDeleteUserService = async (userId, currentUser) => {
     );
   }
   const user = await User.findOne({ _id: userId }).select("role isDeleted");
-
-  console.log(user);
 
   if (!user) {
     throw new CustomError("User not found", StatusCodes.NOT_FOUND);
@@ -116,7 +116,7 @@ const softDeleteUserService = async (userId, currentUser) => {
 };
 
 const hardDeleteUserService = async (userId, currentUser) => {
-  
+
   const user = await User.findOne({ _id: userId }).select("role");
 
   if (!user) {
@@ -268,7 +268,6 @@ const deleteUserService = async (userId) => {
   // delete all files of the user (virtual and local)
   const allFiles = await File.find({ userId: user._id });
   for (const file of allFiles) {
-    console.log(file);
     await rm(path.join(absolutePath, file.storedName));
     await file.deleteOne();
   }

@@ -7,23 +7,28 @@ import {
   AlertCircle,
   Loader2,
   Eye,
+  PenIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getFileInfo } from "../Apis/shareApi";
+import { getFileInfo, renameFileSharedViaLink } from "../Apis/shareApi";
 import FilePreview from "./RenderFile";
 import { renderFilePreview } from "../Utils/helpers";
+import RenameModal from "../Pages/DirectoryPage/RenameModal";
 
 const GuestFileAccess = () => {
   const { fileId } = useParams();
   const [fileInfo, setFileInfo] = useState({
+    _id: "",
     fileUrl: "",
     name: "",
     sharedBy: "",
     isAccessible: null,
+    permission: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isRenameModal, setIsRenameModal] = useState(false);
 
   const getDisplayUrl = async () => {
     try {
@@ -32,10 +37,12 @@ const GuestFileAccess = () => {
       const res = await getFileInfo(fileId);
       if (res.success) {
         setFileInfo({
+          _id: res.data._id,
           fileUrl: res.data.url,
           name: res.data.name,
           sharedBy: res.data.sharedBy,
           isAccessible: res.data.isAccessible,
+          permission: res.data.permission,
         });
       } else {
         setError("Failed to load file information");
@@ -95,106 +102,180 @@ const GuestFileAccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* File Info Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-blue-600" />
+    <>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6">
+          {/* File Info Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div className="p-4 sm:p-6">
+              {/* Mobile Layout - Stacked */}
+              <div className="block sm:hidden">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg font-semibold text-gray-900 truncate">
+                      {fileInfo.name || "Untitled File"}
+                    </h2>
+                    <p className="text-sm text-gray-600 truncate">
+                      Shared by {fileInfo.sharedBy || "Unknown User"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {fileInfo.name || "Untitled File"}
-                  </h2>
-                  <p className="text-gray-600 mt-1">
-                    Shared by {fileInfo.sharedBy || "Unknown User"}
-                  </p>
-                </div>
+
+                {/* Mobile Action Buttons */}
+                {fileInfo.fileUrl && (
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex space-x-2">
+                      {fileInfo.permission === "editor" && (
+                        <button 
+                          className="flex items-center justify-center space-x-2 px-3 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors flex-1 text-sm"
+                          onClick={() => setIsRenameModal(true)}
+                        >
+                          <PenIcon className="w-4 h-4" />
+                          <span>Rename</span>
+                        </button>
+                      )}
+                      <a
+                        href={`${fileInfo.fileUrl}&action=download`}
+                        className="flex items-center justify-center space-x-2 px-3 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors flex-1 text-sm"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Download</span>
+                      </a>
+                    </div>
+                    <a
+                      href={fileInfo.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center space-x-2 px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors text-sm w-full"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Open</span>
+                    </a>
+                  </div>
+                )}
               </div>
 
-              {fileInfo.fileUrl && (
-                <div className="flex items-center space-x-3">
-                  <a
-                    href={`${fileInfo.fileUrl}&action=download`}
-                    className="flex items-center space-x-2 px-4 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Download</span>
-                  </a>
-                  <a
-                    href={fileInfo.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Open</span>
-                  </a>
+              {/* Desktop Layout - Side by side */}
+              <div className="hidden sm:flex sm:items-center sm:justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      {fileInfo.name || "Untitled File"}
+                    </h2>
+                    <p className="text-gray-600 mt-1">
+                      Shared by {fileInfo.sharedBy || "Unknown User"}
+                    </p>
+                  </div>
                 </div>
-              )}
+
+                {fileInfo.fileUrl && (
+                  <div className="flex items-center space-x-3">
+                    {fileInfo.permission === "editor" && (
+                      <button 
+                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors" 
+                        onClick={() => setIsRenameModal(true)}
+                      >
+                        <PenIcon className="w-4 h-4" />
+                        <span>Rename</span>
+                      </button>
+                    )}
+                    <a
+                      href={`${fileInfo.fileUrl}&action=download`}
+                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download</span>
+                    </a>
+                    <a
+                      href={fileInfo.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Open</span>
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* File Content */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {fileInfo.isAccessible === null ? (
-            <div className="p-12 text-center">
-              <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Checking Access
-              </h3>
-              <p className="text-gray-600">
-                Verifying your permissions to view this file...
-              </p>
-            </div>
-          ) : fileInfo.isAccessible ? (
-            <>
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
-                  File Preview
+          {/* File Content */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            {fileInfo.isAccessible === null ? (
+              <div className="p-8 sm:p-12 text-center">
+                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Checking Access
                 </h3>
-                <p className="text-gray-600 text-sm mt-1">
-                  Preview of the shared content
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Verifying your permissions to view this file...
                 </p>
               </div>
-              <div className="p-6">
-                {renderFilePreview(fileInfo, fileInfo.fileUrl)}
+            ) : fileInfo.isAccessible ? (
+              <>
+                <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    File Preview
+                  </h3>
+                  <p className="text-gray-600 text-sm mt-1">
+                    Preview of the shared content
+                  </p>
+                </div>
+                <div className="p-4 sm:p-6">
+                  {renderFilePreview(fileInfo, fileInfo.fileUrl)}
+                </div>
+              </>
+            ) : (
+              <div className="p-8 sm:p-12 text-center">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <AlertCircle className="w-8 h-8 text-red-500" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
+                  Access Denied
+                </h3>
+                <p className="text-gray-600 max-w-md mx-auto mb-6 text-sm sm:text-base">
+                  This file is not accessible. The link may have expired, been
+                  revoked, or you may not have permission to view this content.
+                </p>
+                <div className="inline-flex items-center px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm">
+                  <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                  File not accessible
+                </div>
               </div>
-            </>
-          ) : (
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertCircle className="w-8 h-8 text-red-500" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Access Denied
-              </h3>
-              <p className="text-gray-600 max-w-md mx-auto mb-6">
-                This file is not accessible. The link may have expired, been
-                revoked, or you may not have permission to view this content.
-              </p>
-              <div className="inline-flex items-center px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm">
-                <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                File not accessible
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-gray-500 text-sm">
-            Secure file sharing • Protected by access controls
-          </p>
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <p className="text-gray-500 text-xs sm:text-sm">
+              Secure file sharing • Protected by access controls
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+
+      {isRenameModal && fileInfo.permission === "editor" && (
+        <RenameModal
+          item={{ ...fileInfo, type: "file" }}
+          onClose={() => setIsRenameModal(false)}
+          onRename={async () => {
+            setIsRenameModal(false);
+            await getDisplayUrl();
+          }}
+          ApiFunc={renameFileSharedViaLink}
+        />
+      )}
+    </>
   );
 };
 

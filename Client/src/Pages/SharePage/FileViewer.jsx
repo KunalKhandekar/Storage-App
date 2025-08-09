@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { renameFileAsEditor } from "../../Apis/shareApi";
+import { renameFileSharedViaEmail } from "../../Apis/shareApi";
 import { formatTime, renderFilePreview } from "../../Utils/helpers";
 import RenameModal from "../DirectoryPage/RenameModal";
 
@@ -212,7 +212,7 @@ export default function FileViewer() {
             });
             setIsRenameModal(false);
           }}
-          ApiFunc={renameFileAsEditor}
+          ApiFunc={renameFileSharedViaEmail}
         />
       )}
     </>

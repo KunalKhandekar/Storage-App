@@ -20,7 +20,6 @@ export async function verifyGoogleCode(code) {
     const payload = ticket.getPayload();
     return payload;
   } catch (error) {
-    console.log(error);
     throw new Error("Failed to verify Google code: " + error.message);
   }
 }
