@@ -1,17 +1,18 @@
 import { StatusCodes } from "http-status-codes";
 import githubClient from "../services/auth/githubAuthService.js";
-import {
-  connectGoogleDrive
-} from "../services/auth/googleService.js";
+import { connectGoogleDrive } from "../services/auth/googleService.js";
 import { AuthServices } from "../services/index.js";
 import { setCookie } from "../utils/setCookie.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
-import { validateLoginInputs } from "../validators/validateLoginInputs.js";
-import { validateRegisterInput } from "../validators/validateRegisterInputs.js";
+import { validateInputs } from "../utils/ValidateInputs.js";
+import {
+  loginValidations,
+  registerValidations,
+} from "../validators/authSchema.js";
 
 export const registerUser = async (req, res, next) => {
   try {
-    const parsedData = validateRegisterInput(req.body);
+    const parsedData = validateInputs(registerValidations, req.body);
     await AuthServices.RegisterUserService(parsedData);
     return CustomSuccess.send(res, "User registered", StatusCodes.CREATED);
   } catch (error) {
@@ -21,7 +22,7 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   try {
-    const parsedData = validateLoginInputs(req.body);
+    const parsedData = validateInputs(loginValidations, req.body);
     const { sessionID, sessionExpiry } =
       await AuthServices.LoginUserService(parsedData);
     setCookie(res, sessionID, sessionExpiry);

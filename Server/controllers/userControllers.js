@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import { UserServices } from "../services/index.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
+import { validateInputs } from "../utils/ValidateInputs.js";
+import { passwordSchema, roleSchema } from "../validators/commonValidation.js";
 
 export const getUserInfo = (req, res) => {
   return CustomSuccess.send(res, null, StatusCodes.OK, {
@@ -105,7 +107,8 @@ export const setPasswordForManualLogin = async (req, res, next) => {
   const { password } = req.body;
   const userId = req.user._id;
   try {
-    await UserServices.SetPasswordService(userId, password);
+    const parsedPassword = validateInputs(passwordSchema, password);
+    await UserServices.SetPasswordService(userId, parsedPassword);
     return CustomSuccess.send(
       res,
       "Your password has been updated",
@@ -120,7 +123,13 @@ export const updatePassword = async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
   const userId = req.user._id;
   try {
-    await UserServices.UpdatePasswordService(userId, oldPassword, newPassword);
+    const parsedOldPassword = validateInputs(passwordSchema, oldPassword);
+    const parsedNewPassword = validateInputs(passwordSchema, newPassword);
+    await UserServices.UpdatePasswordService(
+      userId,
+      parsedOldPassword,
+      parsedNewPassword
+    );
     return CustomSuccess.send(
       res,
       "Your password has been updated",
@@ -168,8 +177,9 @@ export const changeRole = async (req, res, next) => {
   const currentUser = req.user;
   const { newRole } = req.body;
   try {
+    const parsedRole = validateInputs(roleSchema, newRole);
     const target_user = await UserServices.ChangeRoleService(
-      newRole,
+      parsedRole,
       currentUser,
       userId
     );

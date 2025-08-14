@@ -4,6 +4,13 @@ import { sharedByMeFiles } from "../services/file/sharedByMeFiles.js";
 import { sharedWithMeFiles } from "../services/file/sharedWithMeFiles.js";
 import { FileServices } from "../services/index.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
+import { validateInputs } from "../utils/ValidateInputs.js";
+import {
+  enabledSchema,
+  nameSchema,
+  permissionSchema,
+} from "../validators/commonValidation.js";
+import { shareViaEmailSchema } from "../validators/fileSchema.js";
 
 export const uploadFile = async (req, res, next) => {
   const file = req.file;
@@ -43,7 +50,12 @@ export const renameFile = async (req, res, next) => {
   const { name } = req.body;
   const userId = req.user._id;
   try {
-    const renamedFile = await FileServices.RenameFileService(id, userId, name);
+    const parsedName = validateInputs(nameSchema, name);
+    const renamedFile = await FileServices.RenameFileService(
+      id,
+      userId,
+      parsedName
+    );
     return CustomSuccess.send(res, "File renamed", StatusCodes.OK, renamedFile);
   } catch (error) {
     next(error);
@@ -66,7 +78,8 @@ export const shareViaEmail = async (req, res, next) => {
   const file = req.file;
   const { users } = req.body;
   try {
-    const response = await FileServices.ShareViaEmailService(users, file);
+    const parsedUsers = validateInputs(shareViaEmailSchema, users);
+    const response = await FileServices.ShareViaEmailService(parsedUsers, file);
     return CustomSuccess.send(
       res,
       "File Shared with selected user.",
@@ -82,7 +95,11 @@ export const shareViaLink = async (req, res, next) => {
   const file = req.file;
   const { permission } = req.body;
   try {
-    const linkInfo = await FileServices.ShareviaLinkService(file, permission);
+    const parsedPermission = validateInputs(permissionSchema, permission);
+    const linkInfo = await FileServices.ShareviaLinkService(
+      file,
+      parsedPermission
+    );
     return CustomSuccess.send(
       res,
       "Link generated for file.",
@@ -98,7 +115,11 @@ export const shareLinkToggle = async (req, res, next) => {
   const file = req.file;
   const { enabled } = req.body;
   try {
-    const permission = await FileServices.ShareLinkToggleService(file, enabled);
+    const parsedEnabled = validateInputs(enabledSchema, enabled);
+    const permission = await FileServices.ShareLinkToggleService(
+      file,
+      parsedEnabled
+    );
     return CustomSuccess.send(res, null, StatusCodes.OK, {
       permission,
       enabled,
@@ -134,7 +155,10 @@ export const getSharedFileViaEmail = async (req, res, next) => {
   const { fileId } = req.params;
   const userId = req.user._id;
   try {
-    const file = await FileServices.GetSharedFileViaEmailService(fileId, userId);
+    const file = await FileServices.GetSharedFileViaEmailService(
+      fileId,
+      userId
+    );
     req.file = file;
     next();
   } catch (error) {
@@ -146,8 +170,12 @@ export const changePermission = async (req, res, next) => {
   const file = req.file;
   const { permission } = req.body;
   try {
+    const parsedPermission = validateInputs(permissionSchema, permission);
     const changedPermission =
-      await FileServices.ChangeFileSharePermissionService(file, permission);
+      await FileServices.ChangeFileSharePermissionService(
+        file,
+        parsedPermission
+      );
     return CustomSuccess.send(res, null, StatusCodes.OK, {
       permission: changedPermission,
     });
@@ -161,9 +189,10 @@ export const changePermissionOfUser = async (req, res, next) => {
   const { permission } = req.body;
   const { userId } = req.params;
   try {
+    const parsedPermission = validateInputs(permissionSchema, permission);
     const changedPermission = await FileServices.ChangePermissionOfUserService(
       file,
-      permission,
+      parsedPermission,
       userId
     );
 
@@ -171,7 +200,7 @@ export const changePermissionOfUser = async (req, res, next) => {
       res,
       "SuccessFully Updated the permission.",
       StatusCodes.OK,
-      { permission: changePermission }
+      { permission: changedPermission }
     );
   } catch (error) {
     next(error);
@@ -359,9 +388,10 @@ export const renameFileSharedViaEmail = async (req, res, next) => {
   const file = req.file;
   const { name } = req.body;
   try {
+    const parsedName = validateInputs(nameSchema, name);
     const newFileName = await FileServices.RenameFileByEditorService(
       file,
-      name
+      parsedName
     );
     return CustomSuccess.send(res, null, StatusCodes.OK, { name: newFileName });
   } catch (error) {
@@ -373,9 +403,13 @@ export const renameFileSharedViaLink = async (req, res, next) => {
   const file = req.file;
   const { name } = req.body;
   try {
-    const newFileName = await FileServices.RenameFileByEditorService(file, name);
+    const parsedName = validateInputs(nameSchema, name);
+    const newFileName = await FileServices.RenameFileByEditorService(
+      file,
+      parsedName
+    );
     return CustomSuccess.send(res, null, StatusCodes.OK, { name: newFileName });
   } catch (error) {
     next(error);
   }
-}
+};

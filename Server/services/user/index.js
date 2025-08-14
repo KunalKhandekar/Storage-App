@@ -10,6 +10,8 @@ import { hash } from "bcrypt";
 import path from "node:path";
 import { DirectoryServices } from "../index.js";
 import { canPerform } from "../../utils/canPerform.js";
+import { validateInputs } from "../../utils/ValidateInputs.js";
+import { nameSchema } from "../../validators/commonValidation.js";
 
 const logoutUserService = async (token) => {
   await redisClient.del(`session:${token}`);
@@ -182,12 +184,6 @@ const recoverUserService = async (userId, currentUser) => {
 };
 
 const setPasswordService = async (userId, password) => {
-  if (password.length <= 3) {
-    throw new CustomError(
-      "Password must be longer than 3 characters!",
-      StatusCodes.CONFLICT
-    );
-  }
   const hashedPassword = await hash(password, 10);
 
   await User.findByIdAndUpdate(userId, {
@@ -223,7 +219,8 @@ const updatePasswordService = async (userId, oldPassword, newPassword) => {
 const updateProfileService = async (userId, file, name) => {
   const user = await User.findOne({ _id: userId }).select("-password");
   if (user.name !== name) {
-    user.name = name;
+    const parsedName = validateInputs(nameSchema, name);
+    user.name = parsedName;
   }
   if (file && file?.filename) {
     // Delete the old Image
