@@ -3,6 +3,7 @@ import { UserServices } from "../services/index.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import { validateInputs } from "../utils/ValidateInputs.js";
 import { passwordSchema, roleSchema } from "../validators/commonValidation.js";
+import { sanitizeInput } from "../utils/sanitizeInput.js";
 
 export const getUserInfo = (req, res) => {
   return CustomSuccess.send(res, null, StatusCodes.OK, {
@@ -145,7 +146,8 @@ export const updateProfile = async (req, res, next) => {
   const userId = req.user._id;
   const file = req.file;
   try {
-    await UserServices.UpdateProfileService(userId, file, name);
+    const sanitizedName = sanitizeInput(name);
+    await UserServices.UpdateProfileService(userId, file, sanitizedName);
     return CustomSuccess.send(res, "Profile Updated.", StatusCodes.OK);
   } catch (error) {
     next(error);

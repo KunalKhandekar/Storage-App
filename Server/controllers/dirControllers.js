@@ -3,6 +3,7 @@ import { DirectoryServices } from "../services/index.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import { validateInputs } from "../utils/ValidateInputs.js";
 import { nameSchema } from "../validators/commonValidation.js";
+import { sanitizeInput } from "../utils/sanitizeInput.js";
 
 export const getDir = async (req, res, next) => {
   const { id } = req.params;
@@ -25,6 +26,7 @@ export const updateDir = async (req, res, next) => {
   const userId = req.user._id;
   const { name } = req.body;
   try {
+    const sanitizedData = sanitizeInput(name);
     const parsedName = validateInputs(nameSchema, name);
     await DirectoryServices.UpdateDirectoryDataService(userId, id, parsedName);
     return CustomSuccess.send(res, "Directory renamed", StatusCodes.OK);
@@ -39,7 +41,8 @@ export const createDir = async (req, res, next) => {
   const { dirname } = req.headers;
 
   try {
-    const parsedName = validateInputs(nameSchema, dirname);
+    const sanitizedData = sanitizeInput(dirname);
+    const parsedName = validateInputs(nameSchema, sanitizedData);
     const directory = await DirectoryServices.CreateDirectoryService(
       parentDirId,
       user._id,

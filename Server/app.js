@@ -19,6 +19,10 @@ import { port, secretKey } from "./utils/Constants.js";
 // Database Connection
 import { connectDB } from "./config/db.js";
 
+// Security Imports
+import helmet from "helmet";
+import { RateLimiter } from "./utils/RateLimiter.js";
+
 // Connect to MongoDB
 await connectDB();
 
@@ -27,6 +31,16 @@ export const rootPath = import.meta.dirname;
 
 // Create Express App
 const app = express();
+
+// Adding Security Headers
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "same-site" },
+  })
+);
+
+// Global RateLimiting -> 150 Reqs / 15 mins / IP
+app.use(RateLimiter());
 
 // Middlewares
 app.use("/profilePictures", express.static("profilePictures"));
@@ -42,9 +56,9 @@ app.use(
 // Protected Routes
 app.use("/file", checkAuth, fileRoutes);
 app.use("/directory", checkAuth, dirRoutes);
+app.use("/user", checkAuth, userRoutes);
 
 // Public Routes
-app.use("/user", userRoutes);
 app.use("/otp", otpRoutes);
 app.use("/auth", authRoutes);
 app.use("/guest", guestRoutes);

@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import githubClient from "../services/auth/githubAuthService.js";
 import { connectGoogleDrive } from "../services/auth/googleService.js";
 import { AuthServices } from "../services/index.js";
+import { sanitizeObject } from "../utils/sanitizeInput.js";
 import { setCookie } from "../utils/setCookie.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import { validateInputs } from "../utils/ValidateInputs.js";
@@ -12,7 +13,8 @@ import {
 
 export const registerUser = async (req, res, next) => {
   try {
-    const parsedData = validateInputs(registerValidations, req.body);
+    const sanitizedData = sanitizeObject(req.body);
+    const parsedData = validateInputs(registerValidations, sanitizedData);
     await AuthServices.RegisterUserService(parsedData);
     return CustomSuccess.send(res, "User registered", StatusCodes.CREATED);
   } catch (error) {
@@ -22,7 +24,8 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   try {
-    const parsedData = validateInputs(loginValidations, req.body);
+    const sanitizedData = sanitizeObject(req.body);
+    const parsedData = validateInputs(loginValidations, sanitizedData);
     const { sessionID, sessionExpiry } =
       await AuthServices.LoginUserService(parsedData);
     setCookie(res, sessionID, sessionExpiry);

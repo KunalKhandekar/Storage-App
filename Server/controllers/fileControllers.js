@@ -11,6 +11,7 @@ import {
   permissionSchema,
 } from "../validators/commonValidation.js";
 import { shareViaEmailSchema } from "../validators/fileSchema.js";
+import { sanitizeInput } from "../utils/sanitizeInput.js";
 
 export const uploadFile = async (req, res, next) => {
   const file = req.file;
@@ -50,7 +51,8 @@ export const renameFile = async (req, res, next) => {
   const { name } = req.body;
   const userId = req.user._id;
   try {
-    const parsedName = validateInputs(nameSchema, name);
+    const sanitizedData = sanitizeInput(name);
+    const parsedName = validateInputs(nameSchema, sanitizedData);
     const renamedFile = await FileServices.RenameFileService(
       id,
       userId,
@@ -388,7 +390,8 @@ export const renameFileSharedViaEmail = async (req, res, next) => {
   const file = req.file;
   const { name } = req.body;
   try {
-    const parsedName = validateInputs(nameSchema, name);
+    const sanitizedData = sanitizeInput(name);
+    const parsedName = validateInputs(nameSchema, sanitizedData);
     const newFileName = await FileServices.RenameFileByEditorService(
       file,
       parsedName
@@ -403,7 +406,8 @@ export const renameFileSharedViaLink = async (req, res, next) => {
   const file = req.file;
   const { name } = req.body;
   try {
-    const parsedName = validateInputs(nameSchema, name);
+    const sanitizedData = sanitizeInput(name);
+    const parsedName = validateInputs(nameSchema, sanitizedData);
     const newFileName = await FileServices.RenameFileByEditorService(
       file,
       parsedName

@@ -1,36 +1,37 @@
 import { Router } from "express";
 import {
-    connectToDrive,
-    DeleteAndCreateSession,
-    loginUser,
-    loginWithGithub,
-    loginWithGoogle,
-    redirectToAuthURL,
-    registerUser
+  connectToDrive,
+  DeleteAndCreateSession,
+  loginUser,
+  loginWithGithub,
+  loginWithGoogle,
+  redirectToAuthURL,
+  registerUser,
 } from "../controllers/authControllers.js";
 import checkAuth from "../middlewares/auth.js";
+import { limiter } from "../utils/RateLimiter.js";
 
 const router = Router();
 
 // POST /auth/register
 // Desc -> Register a new user.
 // Body -> { name: string, email: string, password: string, otp: number }
-router.post("/register", registerUser);
+router.post("/register", limiter.registerLimiter, registerUser);
 
 // POST /auth/session
 // Desc -> Delete previous and create new session
 // Body -> { temp_token: string }
-router.post("/session", DeleteAndCreateSession);
+router.post("/session", limiter.sessionRecreateLimiter, DeleteAndCreateSession);
 
 // POST /auth/login
 // Desc -> Login existing user
 // Body -> { email: string, password: string, otp: number }
-router.post("/login", loginUser);
+router.post("/login", limiter.loginLimiter, loginUser);
 
 // POST /auth/google
 // Desc  -> Login or register a user using Google OAuth.
 // Body  -> { code: string }
-router.post("/google", loginWithGoogle);
+router.post("/google", limiter.googleLimiter, loginWithGoogle);
 
 // GET /auth/github
 // Desc  -> Generate GitHub OAuth URL for login or registration.
@@ -39,12 +40,17 @@ router.get("/github", redirectToAuthURL);
 // GET /auth/github/callback
 // Desc  -> Handle GitHub OAuth callback for login or registration.
 // Query -> { code: string, state: string }
-router.get("/github/callback", loginWithGithub);
+router.get("/github/callback", limiter.githubLimiter, loginWithGithub);
 
 // POST /auth/google/drive/connect
 // Desc  -> Connect and import files from the user's Google Drive.
 // Body  -> { code: string }
 // Auth  -> Requires user to be authenticated.
-router.post("/google/drive/connect", checkAuth, connectToDrive);
+router.post(
+  "/google/drive/connect",
+  checkAuth,
+  limiter.connectDriveLimiter,
+  connectToDrive
+);
 
 export default router;

@@ -3,5 +3,6 @@ export const setCookie = (res, sessionID, sessionExpiry) => {
     httpOnly: true,
     signed: true,
     maxAge: sessionExpiry,
+    sameSite: "lax",
   });
 };

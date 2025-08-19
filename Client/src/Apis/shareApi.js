@@ -143,7 +143,7 @@ export const renameFileSharedViaEmail = async (file, newName) => {
 
 export const renameFileSharedViaLink = async (file, newName) => {
   try {
-    const response = await axios.patch(`/file/share/edit/${file._id}/link`, {
+    const response = await axios.patch(`/guest/share/edit/${file._id}/link`, {
       name: newName,
     });
     return response?.data;
