@@ -40,6 +40,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         reportUri: ["/csp-violation-report"],
+        frameAncestors: ["'self'", process.env.CLIENT_URL]
       },
     },
   })

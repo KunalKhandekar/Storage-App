@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import { FileIcon, formatTime } from "../../../Utils/helpers";
+import { FileIcon, formatFileSize, formatTime } from "../../../Utils/helpers";
 
 const FileInfo = ({ file }) => {
   return (
@@ -17,7 +17,7 @@ const FileInfo = ({ file }) => {
               {file.name}
             </h3>
             <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-              <span className="font-medium">{file.size}</span>
+              <span className="font-medium">{formatFileSize(file.size)}</span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <Clock size={12} />

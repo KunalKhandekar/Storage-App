@@ -316,7 +316,7 @@ export const getFileInfoById = async (req, res, next) => {
       fileInfo: {
         ...file._doc,
         fileType: path.extname(file.name),
-        size: "2 MB",
+        size: file.size,
       },
     });
   } catch (error) {
@@ -349,7 +349,7 @@ export const getSharedByMeFiles = async (req, res, next) => {
           latestTime: file.latestTime,
           type: "sharedByMe",
           fileType: path.extname(file.name),
-          size: "2 MB",
+          size: file.size,
         };
       }),
     });
@@ -377,7 +377,7 @@ export const getSharedWithMeFiles = async (req, res, next) => {
           },
           latestTime: new Date(file.updatedAt),
           fileType: path.extname(file.name),
-          size: "2 MB",
+          size: file.size,
         };
       }),
     });

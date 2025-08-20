@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { deleteFile_or_Directory } from "../../Apis/file_Dir_Api";
 import RenameModal from "./RenameModal";
 import { useModal } from "../../Contexts/ModalContext";
+import { formatFileSize } from "../../Utils/helpers";
 
 function ItemCard({
   item,
@@ -67,20 +68,6 @@ function ItemCard({
     }
 
     return <File className={`${iconSize} text-gray-500`} />;
-  };
-
-  const formatFileSize = (size) => {
-    if (!size) return "";
-    const units = ["B", "KB", "MB", "GB"];
-    let unitIndex = 0;
-    let fileSize = Number.parseInt(size);
-
-    while (fileSize >= 1024 && unitIndex < units.length - 1) {
-      fileSize /= 1024;
-      unitIndex++;
-    }
-
-    return `${fileSize.toFixed(1)} ${units[unitIndex]}`;
   };
 
   const openItem = () => {

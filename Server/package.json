@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --env-file=.env app.js",
-    "start": "node --env-file=.env app.js"
+    "start": "node --env-file=.env app.js",
+    "setup": "node --env-file=.env ./config/setup.js"
   },
   "author": "",
   "license": "ISC",

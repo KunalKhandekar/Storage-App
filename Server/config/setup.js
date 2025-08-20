@@ -119,7 +119,7 @@ const validations = [
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: ["_id", "storedName", "userId", "name", "parentDirId"],
+        required: ["_id", "storedName", "userId", "name", "parentDirId", "size"],
         additionalProperties: false,
         properties: {
           _id: {
@@ -187,6 +187,9 @@ const validations = [
                 },
               },
             },
+          },
+          size: {
+            bsonType: "number",
           },
           __v: {
             bsonType: "number",

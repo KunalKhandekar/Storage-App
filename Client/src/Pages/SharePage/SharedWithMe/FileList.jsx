@@ -2,6 +2,7 @@ import { Clock, Edit3, Eye, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   FileIcon,
+  formatFileSize,
   formatTime,
   PermissionBadge,
   UserAvatar,
@@ -62,7 +63,7 @@ const FileList = ({ finalFilteredFiles, searchTerm, filter }) => {
                     <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-3">
                       <span>Shared by {file.sharedBy.name}</span>
                       <span>•</span>
-                      <span className="font-medium">{file.size}</span>
+                      <span className="font-medium">{formatFileSize(file.size)}</span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
                         <Clock size={10} />
@@ -116,7 +117,7 @@ const FileList = ({ finalFilteredFiles, searchTerm, filter }) => {
                     <div className="flex items-center gap-4 text-xs text-gray-500">
                       <span>Shared by {file.sharedBy.name}</span>
                       <span>•</span>
-                      <span className="font-medium">{file.size}</span>
+                      <span className="font-medium">{formatFileSize(file.size)}</span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
                         <Clock size={12} />

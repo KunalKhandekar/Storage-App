@@ -62,6 +62,10 @@ const fileSchema = new Schema(
         }
       },
     ],
+    size: {
+      type: Number,
+      required: true,
+    }
   },
   {
     strict: "throw",

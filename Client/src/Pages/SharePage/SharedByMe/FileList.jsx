@@ -7,7 +7,7 @@ import {
     Users
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { FileIcon, formatTime, PermissionBadge, UserAvatar } from "../../../Utils/helpers"
+import { FileIcon, formatFileSize, formatTime, PermissionBadge, UserAvatar } from "../../../Utils/helpers"
 
 const FileList = ({ filteredFiles, searchTerm }) => {
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ const FileList = ({ filteredFiles, searchTerm }) => {
                       )}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                      <span className="font-medium">{file.size}</span>
+                      <span className="font-medium">{formatFileSize(file.size)}</span>
                       {file.sharedWith.length > 0 && (
                         <>
                           <span>•</span>
@@ -127,7 +127,7 @@ const FileList = ({ filteredFiles, searchTerm }) => {
                         )}
                       </div>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="font-medium">{file.size}</span>
+                        <span className="font-medium">{formatFileSize(file.size)}</span>
                         <span>•</span>
                         {file.sharedWith.length > 0 && (
                           <>

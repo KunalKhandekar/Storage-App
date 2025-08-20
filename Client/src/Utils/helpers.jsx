@@ -213,3 +213,17 @@ export const showSessionLimitExceedModal = ({
     "warning"
   );
 };
+
+export const formatFileSize = (size) => {
+  if (!size) return 0;
+  const units = ["B", "KB", "MB", "GB"];
+  let unitIndex = 0;
+  let fileSize = Number.parseInt(size);
+
+  while (fileSize >= 1024 && unitIndex < units.length - 1) {
+    fileSize /= 1024;
+    unitIndex++;
+  }
+
+  return `${fileSize.toFixed(2)} ${units[unitIndex]}`;
+};

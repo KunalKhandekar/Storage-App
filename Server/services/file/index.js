@@ -9,9 +9,10 @@ import CustomError from "../../utils/ErrorResponse.js";
 
 const uploadFileService = async (file, parentDirId, userId) => {
   if (!file) {
-    throw new CustomError("No files uploaded", StatusCodess.BAD_REQUEST);
+    throw new CustomError("No files uploaded", StatusCodes.BAD_REQUEST);
   }
-  const { originalname, storedName } = file;
+
+  const { originalname, storedName, size } = file;
 
   const parentDirectory = await Directory.findOne({
     _id: parentDirId,
@@ -29,6 +30,7 @@ const uploadFileService = async (file, parentDirId, userId) => {
   const newFile = await File.create({
     storedName,
     userId,
+    size,
     name: originalname,
     parentDirId: parentDirectory._id,
   });
@@ -286,5 +288,5 @@ export default {
   ChangePermissionOfUserService: changePermissionOfUserService,
   RevokeUserAccessService: revokeUserAccessService,
   GetUserAccessListService: getUserAccessListService,
-  RenameFileByEditorService: renameFileByEditorService 
+  RenameFileByEditorService: renameFileByEditorService,
 };
