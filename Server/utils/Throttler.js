@@ -1,99 +1,85 @@
 import redisClient from "../config/redis.js";
 
-const createThrottler = (
+export const createThrottler = (
   throttlerName,
   useUserId = false,
   delayAfter = 3,
-  windowMs = 60000,
-  limitPerSecond = 1
+  waitTime = 1000
 ) => {
-  return async (req, _, next) => {
+  return async (req, res, next) => {
     try {
-      let key = `${throttlerName}:${req.ip}`;
+      // Unique key based on IP or userId
+      let key = `${throttlerName}:${req.ip.replace(/:/g, "_")}`;
       if (useUserId && req.user?._id) {
-        key = `${throttlerName}:${req.user._id}`;
+        key = `${throttlerName}:${req.user._id.toString()}`;
       }
-      const now = Date.now();
 
+      const now = Date.now();
       const requestDataRaw = await redisClient.get(key);
-      let requestData = requestDataRaw
+      let { count, previousDelay, lastRequestTime } = requestDataRaw
         ? JSON.parse(requestDataRaw)
         : {
             count: 0,
-            lastRequestTime: 0,
-            windowStart: now,
+            previousDelay: 0,
+            lastRequestTime: now - waitTime,
           };
 
-      let { count, lastRequestTime, windowStart } = requestData;
+      count += 1;
+      let delay = 0;
 
-      // Reset window if expired
-      if (now - windowStart > windowMs) {
-        requestData = {
-          count: 0,
-          lastRequestTime: 0,
-          windowStart: now,
-        };
-      }
-      const timeDiff = now - (lastRequestTime || 0);
-      const minInterval = 1000 / limitPerSecond;
-
-      let newCount = count++;
-
-      if (newCount > delayAfter && timeDiff < minInterval) {
-        const delayTime = minInterval - timeDiff;
-        await new Promise((resolve, _) => {
-          setTimeout(resolve, delayTime);
-        });
+      if (count >= delayAfter) {
+        const timeDiff = now - lastRequestTime;
+        delay = Math.max(0, waitTime + previousDelay - timeDiff);
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
       await redisClient.set(
         key,
         JSON.stringify({
-          count: newCount,
-          lastRequestTime: now,
-          windowStart: now,
+          count,
+          previousDelay: delay,
+          lastRequestTime: Date.now(),
         }),
-        "EX",
-        Math.ceil(windowMs / 1000)
+        { EX: 10 * 60 } // 10 minutes
       );
+
       next();
     } catch (error) {
-      console.error("Throttling error:", error);
-      next(); // Pass the request if error occurced.
+      console.error(`[Throttler:${throttlerName}] Error:`, error);
+      next();
     }
   };
 };
 
-// Arguments: [useUserId, delayAfter, windowMs, limitPerSecond]
-const throttlerConfig = {
-  // File Routes Throttler
-  fileAccessThrottler: [true, 3, 60000, 2], // 2 req/sec, delay after 3 requests, 1min window
-  fileInfoThrottler: [true, 2, 30000, 3], // 3 req/sec, delay after 2 requests, 30sec window
-  editorRenameThrottler: [true, 2, 45000, 1], // 1 req/sec, delay after 2 requests, 45sec window
-  shareLinkToggleThrottler: [true, 2, 30000, 2], // 2 req/sec, delay after 2 requests, 30sec window
-  sharePermissionThrottler: [true, 2, 30000, 2], // 2 req/sec, delay after 2 requests, 30sec window
-  shareAccessListThrottler: [true, 3, 45000, 2], // 2 req/sec, delay after 3 requests, 45sec window
-  dashboardThrottler: [true, 3, 60000, 1], // 1 req/sec, delay after 3 requests, 1min window
-  sharedFilesThrottler: [true, 3, 45000, 2], // 2 req/sec, delay after 3 requests, 45sec window
-  fileRenameThrottler: [true, 3, 45000, 2], // 2 req/sec, delay after 3 requests, 45sec window
+export const throttlerConfig = {
+  // File Routes
+  fileAccessThrottler: [true, 3, 1000],
+  fileInfoThrottler: [true, 2, 1000],
+  editorRenameThrottler: [true, 2, 1000],
+  shareLinkToggleThrottler: [true, 2, 1000],
+  sharePermissionThrottler: [true, 2, 1000],
+  shareAccessListThrottler: [true, 3, 1000],
+  dashboardThrottler: [true, 3, 1000],
+  sharedFilesThrottler: [true, 3, 1000],
+  fileRenameThrottler: [true, 3, 1000],
 
-  // Directory Routes Throttler
-  getDirThrottler: [true, 5, 60000, 3], // 3 req/sec, delay after 5 requests, 1min window
-  createDirThrottler: [true, 3, 45000, 2], // 2 req/sec, delay after 3 requests, 45sec window
-  updateDirThrottler: [true, 4, 45000, 2], // 2 req/sec, delay after 4 requests, 45sec window
-  
-  // User Routes Throttler
-  getSpecificUserDirThrottler: [true, 3, 45000, 2], // 2 req/sec, delay after 3 requests, 45sec window
-  getAllUsersThrottler: [true, 5, 60000, 2], // 2 req/sec, delay after 5 requests, 1min window
-  userInfoThrottler: [true, 4, 45000, 3], // 3 req/sec, delay after 4 requests, 45sec window
-  getFileThrottler: [true, 3, 45000, 2], // 2 req/sec, delay after 3 requests, 45sec window
-  userSettingsThrottler: [true, 8, 60000, 3], // 3 req/sec, delay after 8 requests, 1min window
-  updateProfileThrottler: [true, 3, 60000, 1], // 1 req/sec, delay after 3 requests, 1min window
+  // Directory Routes
+  getDirThrottler: [true, 5, 1000],
+  createDirThrottler: [true, 3, 1000],
+  updateDirThrottler: [true, 4, 1000],
 
-  // Guest Routes Throttler - Public access (IP-based)
-  getFileInfoThrottler: [false, 3, 60000, 1], // 1 req/sec, delay after 3 requests, 1min window
-  guestFileAccessThrottler: [false, 3, 60000, 1], // 1 req/sec, delay after 3 requests, 1min window
-  guestRenameThrottler: [false, 2, 45000, 1], // 1 req/sec, delay after 2 requests, 45sec window
+  // User Routes
+  getSpecificUserDirThrottler: [true, 3, 1000],
+  getAllUsersThrottler: [true, 5, 1000],
+  userInfoThrottler: [true, 4, 1000],
+  getFileThrottler: [true, 3, 1000],
+  userSettingsThrottler: [true, 8, 1000],
+  updateProfileThrottler: [true, 3, 1000],
+
+  // Guest Routes (IP-based)
+  getFileInfoThrottler: [false, 3, 1000],
+  guestFileAccessThrottler: [false, 3, 1000],
+  guestRenameThrottler: [false, 2, 1000],
 };
 
 export const throttler = Object.fromEntries(
