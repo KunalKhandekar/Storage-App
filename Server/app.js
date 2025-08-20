@@ -1,15 +1,16 @@
 // Required Packages
-import express from "express";
+import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import express from "express";
 
 // Route Imports
+import authRoutes from "./routes/authRoutes.js";
 import dirRoutes from "./routes/dirRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import otpRoutes from "./routes/otpRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
 import guestRoutes from "./routes/guestRoutes.js";
+import otpRoutes from "./routes/otpRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 // Middleware & Utilities
 import checkAuth from "./middlewares/auth.js";
@@ -36,7 +37,22 @@ const app = express();
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "same-site" },
+    contentSecurityPolicy: {
+      directives: {
+        reportUri: ["/csp-violation-report"],
+      },
+    },
   })
+);
+
+// Header Violation End-point
+app.post(
+  "/csp-violation-report",
+  express.json({ type: "application/csp-report" }),
+  (req, res) => {
+    console.log("CSP violation by client: ", req.body);
+    return res.sendStatus(StatusCodes.NO_CONTENT);
+  }
 );
 
 // Global RateLimiting -> 150 Reqs / 15 mins / IP
