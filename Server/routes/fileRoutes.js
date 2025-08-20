@@ -30,8 +30,9 @@ import { serveFile } from "../middlewares/serveFile.js";
 import validateRequest from "../middlewares/validateRequest.js";
 import { fileStorage } from "../utils/MulterSetup.js";
 
-// Import the limiters
+// Import the limiters, Throttlers
 import { limiter } from "../utils/RateLimiter.js";
+import { throttler } from "../utils/Throttler.js";
 
 // Multer Instance for file uploading
 const upload = multer({ storage: fileStorage });
@@ -44,7 +45,13 @@ const router = Router();
 // GET /file/:id
 // Desc -> Retrieve a file by ID.
 // Params -> { id }
-router.get("/:id", limiter.fileAccessLimiter, getFileById, serveFile);
+router.get(
+  "/:id",
+  limiter.fileAccessLimiter,
+  throttler.fileAccessThrottler,
+  getFileById,
+  serveFile
+);
 
 // POST /file/upload
 // Desc -> Upload a file.
@@ -65,7 +72,12 @@ router.delete("/:id", limiter.fileDeleteLimiter, deleteFile);
 // Desc -> Rename a file.
 // Params -> { id }
 // Body -> { name: string }
-router.patch("/:id", limiter.fileRenameLimiter, renameFile);
+router.patch(
+  "/:id",
+  limiter.fileRenameLimiter,
+  throttler.fileRenameThrottler,
+  renameFile
+);
 
 // ---------------- File Sharing Routes (Owner Only) -------------------------
 
@@ -98,6 +110,7 @@ router.post(
 router.patch(
   "/share/:fileId/link/toggle",
   limiter.shareLinkToggleLimiter,
+  throttler.shareLinkToggleThrottler,
   checkFileAccess,
   shareLinkToggle
 );
@@ -109,6 +122,7 @@ router.patch(
 router.patch(
   "/share/:fileId/link/permission",
   limiter.sharePermissionLimiter,
+  throttler.sharePermissionThrottler,
   checkFileAccess,
   changePermission
 );
@@ -119,6 +133,7 @@ router.patch(
 router.get(
   "/share/access/:fileId/list",
   limiter.shareAccessListLimiter,
+  throttler.shareAccessListThrottler,
   checkFileAccess,
   getUserAccessList
 );
@@ -129,6 +144,7 @@ router.get(
 router.get(
   "/info/:fileId",
   limiter.fileInfoLimiter,
+  throttler.fileInfoThrottler,
   checkFileAccess,
   getFileInfoById
 );
@@ -179,15 +195,30 @@ router.get(
 
 // GET /file/share/dashboard
 // Desc -> Retrieve sharing dashboard information (totals, recent shares).
-router.get("/share/dashboard", limiter.dashboardLimiter, getDashboardInfo);
+router.get(
+  "/share/dashboard",
+  limiter.dashboardLimiter,
+  throttler.dashboardThrottler,
+  getDashboardInfo
+);
 
 // GET /file/share/by-me
 // Desc -> Retrieve files shared by the current user.
-router.get("/share/by-me", limiter.sharedFilesLimiter, getSharedByMeFiles);
+router.get(
+  "/share/by-me",
+  limiter.sharedFilesLimiter,
+  throttler.sharedFilesThrottler,
+  getSharedByMeFiles
+);
 
 // GET /file/share/with-me
 // Desc -> Retrieve files shared with the current user.
-router.get("/share/with-me", limiter.sharedFilesLimiter, getSharedWithMeFiles);
+router.get(
+  "/share/with-me",
+  limiter.sharedFilesLimiter,
+  throttler.sharedFilesThrottler,
+  getSharedWithMeFiles
+);
 
 // ---------------- Editor Routes -------------------------
 
@@ -198,6 +229,7 @@ router.get("/share/with-me", limiter.sharedFilesLimiter, getSharedWithMeFiles);
 router.patch(
   "/share/edit/:fileId",
   limiter.editorRenameLimiter,
+  throttler.editorRenameThrottler,
   checkFileSharedViaEmail,
   renameFileSharedViaEmail
 );

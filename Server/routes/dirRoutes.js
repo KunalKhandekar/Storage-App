@@ -8,7 +8,7 @@ import {
   updateDir,
 } from "../controllers/dirControllers.js";
 import { limiter } from "../utils/RateLimiter.js";
-
+import { throttler } from "../utils/Throttler.js";
 const router = Router();
 
 ["id", "parentDirId"].forEach((param) => router.param(param, validateRequest));
@@ -16,19 +16,29 @@ const router = Router();
 // GET /directory/:id
 // Desc    -> Retrieve directory information.
 // Params  -> { id: string }
-router.get("/{:id}", limiter.getDirLimiter, getDir);
+router.get("/{:id}", limiter.getDirLimiter, throttler.getDirThrottler, getDir);
 
 // POST /directory/:parentDirId?
 // Desc    -> Create a directory inside a parent directory.
 // Params  -> { parentDirId?: string }
 // Headers -> { dirname: string }
-router.post("/{:parentDirId}", limiter.createDirLimiter, createDir);
+router.post(
+  "/{:parentDirId}",
+  limiter.createDirLimiter,
+  throttler.createDirThrottler,
+  createDir
+);
 
 // PATCH /directory/:id
 // Desc   -> Update the directory name.
 // Params -> { id: string }
 // Body   -> { name: string }`
-router.patch("/:id", limiter.updateDirLimiter, updateDir);
+router.patch(
+  "/:id",
+  limiter.updateDirLimiter,
+  throttler.updateDirThrottler,
+  updateDir
+);
 
 // DELETE /directory/:id
 // Desc   -> Delete a directory by ID.

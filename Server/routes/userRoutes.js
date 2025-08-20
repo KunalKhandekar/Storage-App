@@ -23,6 +23,7 @@ import { checkRole } from "../middlewares/checkRole.js";
 import validateRequest from "../middlewares/validateRequest.js";
 import { profileStorage } from "../utils/MulterSetup.js";
 import { limiter } from "../utils/RateLimiter.js";
+import { throttler } from "../utils/Throttler.js";
 
 const upload = multer({ storage: profileStorage });
 
@@ -34,7 +35,12 @@ const router = Router();
 
 // GET /user/
 // Desc   -> Retrieve authenticated user's information.
-router.get("/", limiter.userInfoLimiter, getUserInfo);
+router.get(
+  "/",
+  limiter.userInfoLimiter,
+  throttler.userInfoThrottler,
+  getUserInfo
+);
 
 // POST /user/logout
 // Desc   -> Logout the current user from this session.
@@ -47,7 +53,13 @@ router.post("/logout-all", limiter.userLogoutAllLimiter, logoutAll);
 // GET /user/all-users
 // Desc   -> Retrieve a list of all users.
 // Role   -> SuperAdmin | Admin | Manager only
-router.get("/all-users", limiter.getAllUsersLimiter, checkRole, getAllUsers);
+router.get(
+  "/all-users",
+  limiter.getAllUsersLimiter,
+  throttler.getAllUsersThrottler,
+  checkRole,
+  getAllUsers
+);
 
 // POST /user/:userId/logout
 // Desc   -> Logout a specific user.
@@ -95,7 +107,12 @@ router.patch(
 
 // GET /user/settings
 // Desc   -> Get user settings/details.
-router.get("/settings", limiter.userSettingsLimiter, getSettingDetails);
+router.get(
+  "/settings",
+  limiter.userSettingsLimiter,
+  throttler.userSettingsThrottler,
+  getSettingDetails
+);
 
 // PATCH /user/setPassword
 // Desc   -> Set a password for manual login (for social accounts).
@@ -118,6 +135,7 @@ router.patch("/updatePassword", limiter.updatePasswordLimiter, updatePassword);
 router.post(
   "/updateProfile",
   limiter.updateProfileLimiter,
+  throttler.updateProfileThrottler,
   upload.single("file"),
   updateProfile
 );
@@ -149,6 +167,7 @@ router.post(
 router.get(
   "/:userId/{:dirId}",
   limiter.getSpecificUserDirLimiter,
+  throttler.getSpecificUserDirThrottler,
   checkRole,
   getSpecificUserDirectory
 );
@@ -157,6 +176,6 @@ router.get(
 // Desc   -> Get a specific file of a user (Admin only).
 // Params -> { userId: string, fileId: string }
 // Role   -> SuperAdmin | Admin | Manager Only
-router.get("/:userId/file/:fileId", limiter.getFileLimiter, checkRole, getFile);
+router.get("/:userId/file/:fileId", limiter.getFileLimiter, throttler.getFileThrottler, checkRole, getFile);
 
 export default router;

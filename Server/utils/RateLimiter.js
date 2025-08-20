@@ -27,7 +27,7 @@ const makeLimiter = (
 ) => {
   return RateLimiter({
     keyGenerator: (req, res) => {
-      if (useUserId && req.user?._id) return req.user._id;
+      if (useUserId && req.user?._id) return req.user._id.toString();
       if (useIp) return ipKeyGenerator(req.ip, 56);
     },
     limit,

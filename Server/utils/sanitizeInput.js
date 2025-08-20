@@ -1,3 +1,5 @@
+// Different Approach
+
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 import CustomError from "./ErrorResponse.js";
@@ -5,6 +7,7 @@ import CustomError from "./ErrorResponse.js";
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
 
+// For Objects
 export const sanitizeObject = (obj) => {
   if (!obj || typeof obj !== "object") {
     throw new CustomError("Invalid request. Required parameters are missing.");
@@ -18,6 +21,7 @@ export const sanitizeObject = (obj) => {
   return cleanInput;
 };
 
+// For single value
 export const sanitizeInput = (value) => {
   return purify.sanitize(value);
 };
