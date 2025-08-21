@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { uploadInBatches } from "../../Apis/uploadApi";
 import ImportDrive from "../../components/ImportDrive";
+import { useStorage } from "../../Contexts/StorageContext";
+import { useModal } from "../../Contexts/ModalContext";
 
 const MAX_CONCURRENT_UPLOADS = 5;
 
@@ -10,6 +12,8 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
   const [progressMap, setProgressMap] = useState({});
   const [dragOver, setDragOver] = useState(false);
   const { dirId } = useParams();
+  const { showModal } = useModal()
+  const { setStorageData, storageData } = useStorage();
 
   const handleFileUpload = async (selectedFiles) => {
     const fileList = Array.from(selectedFiles);
@@ -24,7 +28,10 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
         fileList,
         MAX_CONCURRENT_UPLOADS,
         dirId,
-        setProgressMap
+        setProgressMap,
+        setStorageData,
+        storageData,
+        showModal
       );
       setActionDone(true);
       // TODO: toast

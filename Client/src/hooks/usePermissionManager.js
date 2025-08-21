@@ -145,7 +145,6 @@ export const usePermissionManager = () => {
       let res;
       if (linkSharing.permission) {
         res = await toggleLink(file._id, newState);
-        console.log({res, linkSharing});
         if (res.success) {
           setLinkSharing((prev) => ({
             ...prev,

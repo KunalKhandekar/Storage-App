@@ -141,10 +141,7 @@ function ItemCard({
             </div>
 
             <div className="hidden sm:flex items-center space-x-4 text-xs text-gray-500">
-              <span className="capitalize min-w-[50px]">
-                {item.type === "directory" ? "Folder" : "File"}
-              </span>
-              {item.type === "file" && item.size && (
+              {item.size && (
                 <span className="min-w-[60px]">
                   {formatFileSize(item.size)}
                 </span>

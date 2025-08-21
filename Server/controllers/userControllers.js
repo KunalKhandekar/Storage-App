@@ -4,13 +4,20 @@ import CustomSuccess from "../utils/SuccessResponse.js";
 import { validateInputs } from "../utils/ValidateInputs.js";
 import { passwordSchema, roleSchema } from "../validators/commonValidation.js";
 import { sanitizeInput } from "../utils/sanitizeInput.js";
+import Directory from "../models/dirModel.js";
 
-export const getUserInfo = (req, res) => {
+export const getUserInfo = async (req, res) => {
+  const rootDir = await Directory.findById(req.user.rootDirId)
+    .select("size")
+    .lean();
   return CustomSuccess.send(res, null, StatusCodes.OK, {
     email: req.user.email,
     name: req.user.name,
     picture: req.user.picture,
     role: req.user.role,
+    maxStorageLimit: req.user.maxStorageLimit,
+    usedStorageLimit: rootDir.size,
+    availableStorageLimit: req.user.maxStorageLimit - rootDir.size,
   });
 };
 
@@ -92,7 +99,17 @@ export const recoverUser = async (req, res, next) => {
 };
 
 export const getSettingDetails = async (req, res, next) => {
-  const { name, email, canLoginWithPassword, createdWith, picture } = req.user;
+  const {
+    name,
+    email,
+    canLoginWithPassword,
+    createdWith,
+    picture,
+    maxStorageLimit,
+  } = req.user;
+  const rootDir = await Directory.findById(req.user.rootDirId)
+    .select("size")
+    .lean();
   const settings = {
     name,
     email,
@@ -100,6 +117,9 @@ export const getSettingDetails = async (req, res, next) => {
     manualLogin: canLoginWithPassword,
     socialLogin: createdWith !== "email",
     socialProvider: createdWith === "email" ? null : createdWith,
+    maxStorageLimit,
+    usedStorageLimit: rootDir.size,
+    availableStorageLimit: maxStorageLimit - rootDir.size,
   };
   return CustomSuccess.send(res, null, StatusCodes.OK, settings);
 };

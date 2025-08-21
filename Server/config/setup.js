@@ -73,6 +73,9 @@ const validations = [
           google_refresh_token: {
             bsonType: "string",
           },
+          maxStorageLimit: {
+            bsonType: "number",
+          },
           __v: {
             bsonType: "number",
           },

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { UserSettings } from "../Apis/userApi";
 
-export default function useUserSettings({ showModal }) {
+export default function useUserSettings({ showModal, setStorageData }) {
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -54,13 +54,27 @@ export default function useUserSettings({ showModal }) {
   const getUserSettings = async () => {
     const res = await UserSettings();
     if (res.success) {
-      const { name, email, picture, manualLogin, socialLogin, socialProvider } =
-        res.data;
+      const {
+        name,
+        email,
+        picture,
+        manualLogin,
+        socialLogin,
+        socialProvider,
+        maxStorageLimit,
+        usedStorageLimit,
+        availableStorageLimit,
+      } = res.data;
       const userData = { email, name, picture };
+      const storageData = {
+        maxStorageLimit,
+        usedStorageLimit,
+        availableStorageLimit
+      };
       setProfileData(userData);
       setOriginalProfileData(userData);
       setHasManualPassword(manualLogin);
-
+      setStorageData(storageData);
       if (socialLogin) {
         setSocialLogin(true);
         setConnectedAccount({ provider: socialProvider, email });
@@ -89,6 +103,6 @@ export default function useUserSettings({ showModal }) {
     setConnectedAccount,
     handleImageSelect,
     hasProfileChanges,
-    getUserSettings
+    getUserSettings,
   };
 }

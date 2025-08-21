@@ -57,6 +57,10 @@ const userSchema = new Schema(
     google_refresh_token: {
       type: String,
     },
+    maxStorageLimit: {
+      type: Number,
+      default: 1 * 1024 ** 3,
+    },
   },
   {
     strict: "throw",

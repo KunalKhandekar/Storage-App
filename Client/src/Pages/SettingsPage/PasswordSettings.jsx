@@ -1,6 +1,5 @@
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
-import useUserSettings from "../../hooks/useUserSettings";
 import { setPassword, updatePassword } from "../../Apis/authApi";
 import { useModal } from "../../Contexts/ModalContext";
 
