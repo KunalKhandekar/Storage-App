@@ -16,6 +16,11 @@ const dirSchema = new Schema(
       ref: "User",
       required: true,
     },
+    size: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   {
     strict: "throw",

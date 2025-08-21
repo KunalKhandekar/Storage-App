@@ -23,6 +23,7 @@ export const uploadFile = async (req, res, next) => {
       parentDirId,
       userId
     );
+
     return CustomSuccess.send(
       res,
       "File uploaded",

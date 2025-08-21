@@ -6,6 +6,7 @@ import Directory from "../../models/dirModel.js";
 import File from "../../models/fileModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
 import { collectDirectoryContents } from "./collectDirectoryContents.js";
+import { updateParentDirectorySize } from "../file/index.js";
 
 const getDirectoryDataService = async (userId, dirId = null) => {
   try {
@@ -35,8 +36,8 @@ const getDirectoryDataService = async (userId, dirId = null) => {
 
     return { ...directoryData, files, directory: directories };
   } catch (error) {
-      throw error;
-    }
+    throw error;
+  }
 };
 
 export const updateDirectoryDataService = async (userId, dirId, name) => {
@@ -79,10 +80,9 @@ const createDirectoryService = async (parentDirId, userId, dirname) => {
 
 const deleteDirectoryService = async (dirId, userId) => {
   try {
-    const dirObj = await Directory.findOne(
-      { _id: dirId, userId },
-      { projection: { _id: 1 } }
-    ).lean();
+    const dirObj = await Directory.findOne({ _id: dirId, userId })
+      .select("_id parentDirId size")
+      .lean();
 
     if (!dirObj) {
       throw new CustomError(
@@ -108,6 +108,7 @@ const deleteDirectoryService = async (dirId, userId) => {
     }
 
     await File.deleteMany({ _id: { $in: files?.map((file) => file._id) } });
+    await updateParentDirectorySize(dirObj.parentDirId, -dirObj.size);
   } catch (error) {
     throw error;
   }

@@ -85,7 +85,7 @@ const validations = [
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: ["_id", "name", "parentDirId", "userId"],
+        required: ["_id", "name", "parentDirId", "userId", "size"],
         additionalProperties: false,
         properties: {
           _id: {
@@ -106,6 +106,9 @@ const validations = [
             bsonType: "objectId",
             description:
               "userId must be a valid ObjectId referencing the owner user",
+          },
+          size: {
+            bsonType: "number",
           },
           __v: {
             bsonType: "number",

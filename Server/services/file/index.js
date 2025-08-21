@@ -7,6 +7,27 @@ import File from "../../models/fileModel.js";
 import User from "../../models/userModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
 
+export const updateParentDirectorySize = async (parentDirectoryId, deltaSize) => {
+  const parents = [];
+
+  while (parentDirectoryId) {
+    const parentDirectory = await Directory.findById(
+      parentDirectoryId,
+      "parentDirId"
+    );
+    if (!parentDirectory) break;
+    parents.push(parentDirectory._id);
+    parentDirectoryId = parentDirectory.parentDirId;
+  }
+
+  if (parents.length > 0) {
+    await Directory.updateMany(
+      { _id: { $in: parents } },
+      { $inc: { size: deltaSize } }
+    );
+  }
+};
+
 const uploadFileService = async (file, parentDirId, userId) => {
   if (!file) {
     throw new CustomError("No files uploaded", StatusCodes.BAD_REQUEST);
@@ -17,7 +38,7 @@ const uploadFileService = async (file, parentDirId, userId) => {
   const parentDirectory = await Directory.findOne({
     _id: parentDirId,
     userId,
-  }).lean();
+  });
 
   if (!parentDirectory) {
     await rm(path.join(absolutePath, storedName));
@@ -35,6 +56,7 @@ const uploadFileService = async (file, parentDirId, userId) => {
     parentDirId: parentDirectory._id,
   });
 
+  await updateParentDirectorySize(parentDirectory._id, size);
   return newFile;
 };
 
@@ -74,7 +96,11 @@ const deleteFileService = async (id, userId) => {
   if (!file) {
     throw new CustomError("File not found", StatusCodes.NOT_FOUND);
   }
+
   await File.deleteOne({ _id: file._id });
+
+  await updateParentDirectorySize(file.parentDirId, -file.size);
+
   if (!file.googleFileId) {
     await rm(path.join(absolutePath, file.storedName));
   }
