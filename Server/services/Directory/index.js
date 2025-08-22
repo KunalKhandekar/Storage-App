@@ -7,6 +7,8 @@ import File from "../../models/fileModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
 import { collectDirectoryContents } from "./collectDirectoryContents.js";
 import { updateParentDirectorySize } from "../file/index.js";
+import mongoose from "mongoose";
+import { generateBreadCrumb, generatePath } from "../../utils/generatePath.js";
 
 const getDirectoryDataService = async (userId, dirId = null) => {
   try {
@@ -14,11 +16,15 @@ const getDirectoryDataService = async (userId, dirId = null) => {
       ? await Directory.findOne({
           _id: dirId,
           userId,
-        }).lean()
+        })
+          .populate("path")
+          .lean()
       : await Directory.findOne({
           userId,
           parentDirId: null,
-        }).lean();
+        })
+          .populate("path")
+          .lean();
 
     if (!directoryData)
       throw new CustomError(
@@ -28,13 +34,38 @@ const getDirectoryDataService = async (userId, dirId = null) => {
 
     const files = (
       await File.find({ parentDirId: directoryData?._id }).lean()
-    ).map((file) => ({ ...file, type: "file" }));
+    ).map((file) => ({
+      ...file,
+      ...{
+        type: "file",
+        path: generatePath([...directoryData.path, file]),
+      },
+    }));
 
-    const directories = (
-      await Directory.find({ parentDirId: directoryData?._id }).lean()
-    ).map((dir) => ({ ...dir, type: "directory" }));
+    const childDirs = await Directory.find({
+      parentDirId: directoryData?._id,
+    }).lean();
 
-    return { ...directoryData, files, directory: directories };
+    const directories = await Promise.all(
+      childDirs.map(async (dir) => {
+        const [fileCounts, dirCounts] = await Promise.all([
+          await File.countDocuments({ parentDirId: dir._id }),
+          await Directory.countDocuments({ parentDirId: dir._id }),
+        ]);
+
+        return {
+          ...dir,
+          ...{
+            type: "directory",
+            path: generatePath([...directoryData.path, dir]),
+            files: fileCounts,
+            directories: dirCounts,
+          },
+        };
+      })
+    );
+
+    return { ...directoryData, files, directory: directories, breadCrumb: generateBreadCrumb([...directoryData.path]), };
   } catch (error) {
     throw error;
   }
@@ -54,20 +85,24 @@ export const updateDirectoryDataService = async (userId, dirId, name) => {
 
 const createDirectoryService = async (parentDirId, userId, dirname) => {
   try {
-    const dirObj = await Directory.findOne({
+    const parentDirectory = await Directory.findOne({
       _id: parentDirId,
       userId,
     }).lean();
 
-    if (!dirObj)
+    if (!parentDirectory)
       throw new CustomError(
         "You are not authorized to make this action",
         StatusCodes.UNAUTHORIZED
       );
+
+    const newId = new mongoose.Types.ObjectId();
     const dir = new Directory({
+      _id: newId,
       name: dirname,
       parentDirId,
-      userId: dirObj.userId,
+      userId: parentDirectory.userId,
+      path: [...(parentDirectory.path || []), newId],
     });
 
     await dir.save();

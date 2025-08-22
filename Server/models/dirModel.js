@@ -21,6 +21,12 @@ const dirSchema = new Schema(
       required: true,
       default: 0,
     },
+    path: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Directory",
+      },
+    ],
   },
   {
     strict: "throw",

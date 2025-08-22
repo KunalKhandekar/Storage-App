@@ -21,6 +21,7 @@ export const createUserWithRootDir = async (
         name: `root-${email}`,
         userId,
         parentDirId: null,
+        path: [rootDirId],
       },
     ],
     { session }

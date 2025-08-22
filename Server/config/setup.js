@@ -113,6 +113,12 @@ const validations = [
           size: {
             bsonType: "number",
           },
+          path: {
+            bsonType: "array",
+            items: {
+              bsonType: "objectId",
+            }
+          },
           __v: {
             bsonType: "number",
           },
