@@ -155,7 +155,6 @@ export const usePermissionManager = () => {
       } else {
         res = await generateShareLinkApi(file._id, "viewer");
         if (res.success) {
-          console.log(res.data);
           setLinkSharing({
             link: res.data.link,
             permission: res.data.permission,

@@ -1,7 +1,7 @@
 import ShareModal from "../../components/Modals/ShareModal";
 import DirectoryShimmer from "../../components/ShimmerUI/DirectoryShimmer";
 import useDirectory from "../../hooks/useDirectory";
-import DirectoryView from "./ai";
+import DirectoryView from "./DirectoryView";
 import CreateFolderModal from "./CreateModal";
 import UploadSection from "./UploadSection";
 
@@ -32,9 +32,9 @@ const DirectoryPage = () => {
   }
 
   return (
-    <div className="min-h-fit max-w-7xl m-auto mt-3">
+    <div className="max-w-7xl m-auto my-3">
       {/* Main Content */}
-      <main className="p-6 bg-gray-50 max-w-6xl mx-4 lg:m-auto rounded-lg shadow-sm border border-gray-200">
+      <main className="min-h-screen p-6 bg-gray-50 max-w-6xl mx-4 lg:m-auto rounded-lg shadow-sm border border-gray-200">
         {/* Upload Progress */}
         <UploadSection
           setShowCreateModal={setShowCreateModal}

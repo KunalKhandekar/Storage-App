@@ -1,9 +1,8 @@
 import { File, Folder, X } from "lucide-react";
-import { formatDate, formatFileSize } from "../../Utils/helpers";
+import { formatDate, formatFileSize, getFileIcon } from "../../Utils/helpers";
 
 const FileDetailsModal = ({ item, isOpen, onClose }) => {
   if (!isOpen || !item) return null;
-  console.log(item);
 
   return (
     <div className="fixed inset-0 bg-black/30 bg-opacity-60 flex items-center justify-center z-50 p-4">
@@ -21,11 +20,7 @@ const FileDetailsModal = ({ item, isOpen, onClose }) => {
         <div className="p-6 space-y-4">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-gray-100 rounded">
-              {item.type === "directory" ? (
-                <Folder className="w-6 h-6 text-blue-500" />
-              ) : (
-                <File className="w-6 h-6 text-gray-500" />
-              )}
+              {getFileIcon(item)}
             </div>
             <div>
               <h3 className="font-medium text-gray-900">{item.name}</h3>

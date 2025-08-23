@@ -35,7 +35,6 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
       );
       setActionDone(true);
       // TODO: toast
-      console.log("All files uploaded successfully");
     } catch (err) {
       // TODO: toast
       console.error("Some uploads failed");

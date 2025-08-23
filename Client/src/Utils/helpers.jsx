@@ -65,12 +65,14 @@ export const PermissionBadge = ({ permission }) => (
   </div>
 );
 
-
 export const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  return new Date(dateString).toLocaleString("en-US", {
+    month: "short",    // Jan, Feb, etc.
+    day: "numeric",    // 1, 2, 3...
+    year: "numeric",   // 2025
+    hour: "2-digit",   // 01, 02, ... 12
+    minute: "2-digit", // 00–59
+    hour12: true       // 12-hour format with AM/PM
   });
 };
 

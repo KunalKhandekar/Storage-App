@@ -120,7 +120,7 @@ const Breadcrumb = ({ breadCrumb }) => {
           }`}
         >
           <Home className="w-4 h-4" />
-          <span className="ml-1.5 font-medium">{breadCrumb[0]?.name}</span>
+          <span className="ml-1.5 font-medium truncate max-w-32" >{breadCrumb[0]?.name}</span>
         </button>
 
         {getDesktopItems()
@@ -134,7 +134,7 @@ const Breadcrumb = ({ breadCrumb }) => {
                   dirId !== item._id && navigate(`/directory/${item._id}`)
                 }
                 disabled={dirId === item._id}
-                className={`px-2 py-1.5 rounded transition-colors min-w-0 max-w-[200px] ${
+                className={`px-2 py-1.5 rounded transition-colors min-w-0 truncate max-w-32 ${
                   dirId === item._id
                     ? "text-gray-900 font-semibold cursor-default"
                     : "hover:text-blue-600 hover:bg-blue-50"
