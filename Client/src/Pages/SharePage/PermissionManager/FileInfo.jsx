@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import { FileIcon, formatFileSize, formatTime } from "../../../Utils/helpers";
+import { formatFileSize, formatTime, getFileIcon } from "../../../Utils/helpers";
 
 const FileInfo = ({ file }) => {
   return (
@@ -7,7 +7,7 @@ const FileInfo = ({ file }) => {
       <div className="p-4 sm:p-6">
         <div className="flex items-center space-x-4">
           <div className="p-3 bg-gray-50 rounded-xl">
-            <FileIcon type={file.fileType} size={20} />
+            {getFileIcon(file)}
           </div>
           <div className="flex-1 min-w-0">
             <h3

@@ -1,11 +1,11 @@
 import { Clock, Edit3, Eye, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
-  FileIcon,
   formatFileSize,
   formatTime,
+  getFileIcon,
   PermissionBadge,
-  UserAvatar,
+  UserAvatar
 } from "../../../Utils/helpers";
 
 const FileList = ({ finalFilteredFiles, searchTerm, filter }) => {
@@ -48,7 +48,7 @@ const FileList = ({ finalFilteredFiles, searchTerm, filter }) => {
               <div className="block sm:hidden space-y-4">
                 <div className="flex items-start space-x-3">
                   <div className="p-2.5 bg-gray-50 rounded-lg group-hover:bg-gray-100 transition-colors duration-200">
-                    <FileIcon type={file.fileType} size={18} />
+                    {getFileIcon(file)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-2">
@@ -102,7 +102,7 @@ const FileList = ({ finalFilteredFiles, searchTerm, filter }) => {
               <div className="hidden sm:flex sm:items-center sm:justify-between">
                 <div className="flex items-center space-x-4 flex-1 min-w-0">
                   <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-gray-100 transition-colors duration-200">
-                    <FileIcon type={file.fileType} size={20} />
+                   {getFileIcon(file)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">

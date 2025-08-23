@@ -10,8 +10,17 @@ import {
   Music,
   Video,
 } from "lucide-react";
+import {
+  FileArchive,
+  FileCode,
+  FileJson,
+  FileQuestion,
+  FileSpreadsheet,
+  FileSymlink,
+  FileType,
+  Folder,
+} from "lucide-react";
 import { regenerateSession } from "../Apis/authApi";
-
 import { useState } from "react";
 
 export const UserAvatar = ({ user, size = "w-8 h-8" }) => {
@@ -56,32 +65,6 @@ export const PermissionBadge = ({ permission }) => (
   </div>
 );
 
-export const FileIcon = ({ type, size = 24 }) => {
-  const iconProps = { size, className: "text-gray-600" };
-
-  switch (type?.toLowerCase()) {
-    case ".pdf":
-      return <FileText {...iconProps} className="text-red-500" />;
-    case ".zip":
-    case ".rar":
-      return <Archive {...iconProps} className="text-yellow-500" />;
-    case ".jpg":
-    case ".jpeg":
-    case ".png":
-    case ".gif":
-      return <ImageIcon {...iconProps} className="text-green-500" />;
-    case ".mp4":
-    case ".avi":
-    case ".mov":
-    case ".video":
-      return <Video {...iconProps} className="text-purple-500" />;
-    case ".mp3":
-    case ".wav":
-      return <Music {...iconProps} className="text-blue-500" />;
-    default:
-      return <FileBoxIcon {...iconProps} />;
-  }
-};
 
 export const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("en-US", {
@@ -214,16 +197,88 @@ export const showSessionLimitExceedModal = ({
   );
 };
 
-export const formatFileSize = (size) => {
-  if (!size) return 0;
-  const units = ["B", "KB", "MB", "GB"];
-  let unitIndex = 0;
-  let fileSize = Number.parseInt(size);
+export const formatFileSize = (bytes) => {
+  if (!bytes) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
 
-  while (fileSize >= 1024 && unitIndex < units.length - 1) {
-    fileSize /= 1024;
-    unitIndex++;
+export const getFileIcon = (item, viewMode = "list") => {
+  if (item.type === "directory") {
+    return (
+      <Folder
+        className={`${
+          viewMode === "grid" ? "w-8 h-8" : "w-5 h-5"
+        } text-blue-500`}
+      />
+    );
   }
 
-  return `${fileSize.toFixed(2)} ${units[unitIndex]}`;
+  const extension = item.name.split(".").pop()?.toLowerCase();
+  const iconSize = viewMode === "grid" ? "w-8 h-8" : "w-5 h-5";
+
+  // Images
+  if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension)) {
+    return <ImageIcon className={`${iconSize} text-green-500`} />;
+  }
+
+  // Videos
+  if (["mp4", "avi", "mov", "wmv", "flv", "mkv"].includes(extension)) {
+    return <Video className={`${iconSize} text-purple-500`} />;
+  }
+
+  // Audio
+  if (["mp3", "wav", "flac", "aac", "ogg"].includes(extension)) {
+    return <Music className={`${iconSize} text-pink-500`} />;
+  }
+
+  // Documents
+  if (["txt", "md"].includes(extension)) {
+    return <FileText className={`${iconSize} text-orange-500`} />;
+  }
+  if (["pdf"].includes(extension)) {
+    return <FileType className={`${iconSize} text-red-500`} />; // Distinct PDF
+  }
+  if (["doc", "docx"].includes(extension)) {
+    return <FileText className={`${iconSize} text-blue-600`} />;
+  }
+  if (["xls", "xlsx", "csv"].includes(extension)) {
+    return <FileSpreadsheet className={`${iconSize} text-green-600`} />;
+  }
+
+  // Archives
+  if (["zip", "rar", "7z", "tar", "gz"].includes(extension)) {
+    return <FileArchive className={`${iconSize} text-yellow-600`} />;
+  }
+
+  // Code files
+  if (
+    [
+      "js",
+      "jsx",
+      "ts",
+      "tsx",
+      "py",
+      "java",
+      "c",
+      "cpp",
+      "html",
+      "css",
+    ].includes(extension)
+  ) {
+    return <FileCode className={`${iconSize} text-cyan-500`} />;
+  }
+  if (["json"].includes(extension)) {
+    return <FileJson className={`${iconSize} text-emerald-500`} />;
+  }
+
+  // Symlinks
+  if (["lnk", "shortcut"].includes(extension)) {
+    return <FileSymlink className={`${iconSize} text-gray-500`} />;
+  }
+
+  // Fallback
+  return <FileQuestion className={`${iconSize} text-gray-400`} />;
 };

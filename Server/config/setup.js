@@ -122,6 +122,12 @@ const validations = [
           __v: {
             bsonType: "number",
           },
+          createdAt: {
+            bsonType: "date"
+          },
+          updatedAt: {
+            bsonType: "date"
+          }
         },
       },
     },

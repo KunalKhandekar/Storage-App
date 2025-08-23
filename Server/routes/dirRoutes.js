@@ -16,7 +16,8 @@ const router = Router();
 // GET /directory/:id
 // Desc    -> Retrieve directory information.
 // Params  -> { id: string }
-router.get("/{:id}", limiter.getDirLimiter, throttler.getDirThrottler, getDir);
+// router.get("/{:id}", limiter.getDirLimiter, throttler.getDirThrottler, getDir);
+router.get("/{:id}", getDir);
 
 // POST /directory/:parentDirId?
 // Desc    -> Create a directory inside a parent directory.

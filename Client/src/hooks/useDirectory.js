@@ -5,10 +5,10 @@ import { getItemList } from "../Apis/file_Dir_Api";
 const useDirectory = () => {
   const [files, setFiles] = useState([]);
   const [directories, setDirectories] = useState([]);
-  const [currentPath, setCurrentPath] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [breadCrumb, setBreadCrumb] = useState([]);
   const [actionDone, setActionDone] = useState(false);
   const [currentFile, setCurrentFile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,10 +24,10 @@ const useDirectory = () => {
     try {
       const res = await getItemList(dirId);
       if (res.success) {
-        const { files, directory, name } = res.data;
+        const { files, directory, name, breadCrumb } = res.data;
+        setBreadCrumb(breadCrumb);
         setFiles(files);
         setDirectories(directory);
-        setCurrentPath(name);
       } else {
         console.log(res.message);
         setError(res.message);
@@ -85,9 +85,9 @@ const useDirectory = () => {
     files,
     directories,
     allItems,
-    currentPath,
     loading,
     error,
+    breadCrumb,
     
     // Modal state
     showCreateModal,
@@ -113,7 +113,6 @@ const useDirectory = () => {
     refreshDirectory,
     
     // state setters
-    setCurrentPath,
     setActiveDropdown,
     setActionDone,
     setShowShareModal,

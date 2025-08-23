@@ -5,7 +5,7 @@ const _10Mins = 10 * 60 * 1000;
 
 export const RateLimiter = ({
   windowTimeInMs = _15Mins, // default: 15 min
-  limit = 150, // default: 150 requests
+  limit = 250, // default: 250 requests
   message = "Too many requests. Please try again later.",
   keyGenerator = (req, res) => ipKeyGenerator(req.ip, 56), // default: IP-based with IPv6 support
 } = {}) => {

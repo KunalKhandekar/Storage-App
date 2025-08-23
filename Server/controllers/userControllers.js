@@ -7,17 +7,17 @@ import { sanitizeInput } from "../utils/sanitizeInput.js";
 import Directory from "../models/dirModel.js";
 
 export const getUserInfo = async (req, res) => {
-  const rootDir = await Directory.findById(req.user.rootDirId)
+  const rootDir = await Directory.findById(req.user?.rootDirId)
     .select("size")
     .lean();
   return CustomSuccess.send(res, null, StatusCodes.OK, {
-    email: req.user.email,
-    name: req.user.name,
-    picture: req.user.picture,
-    role: req.user.role,
-    maxStorageLimit: req.user.maxStorageLimit,
+    email: req.user?.email,
+    name: req.user?.name,
+    picture: req.user?.picture,
+    role: req.user?.role,
+    maxStorageLimit: req.user?.maxStorageLimit,
     usedStorageLimit: rootDir.size,
-    availableStorageLimit: req.user.maxStorageLimit - rootDir.size,
+    availableStorageLimit: req.user?.maxStorageLimit - rootDir.size,
   });
 };
 

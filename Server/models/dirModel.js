@@ -30,6 +30,7 @@ const dirSchema = new Schema(
   },
   {
     strict: "throw",
+    timestamps: true,
   }
 );
 

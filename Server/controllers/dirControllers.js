@@ -7,7 +7,7 @@ import { sanitizeInput } from "../utils/sanitizeInput.js";
 
 export const getDir = async (req, res, next) => {
   const { id } = req.params;
-  const userId = req.user._id;
+  const userId = req.user?._id;
 
   try {
     const directoryData = await DirectoryServices.GetDirectoryDataService(

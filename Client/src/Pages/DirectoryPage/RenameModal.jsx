@@ -8,6 +8,7 @@ export default function RenameModal({ item, onClose, onRename, ApiFunc = renameF
   const inputRef = useRef(null);
 
   useEffect(() => {
+    console.log("Rendered");
     const input = inputRef.current;
     if (!input) return;
 

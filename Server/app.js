@@ -40,7 +40,12 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         reportUri: ["/csp-violation-report"],
-        frameAncestors: ["'self'", process.env.CLIENT_URL]
+        frameAncestors: [
+          "'self'",
+          process.env.CLIENT_URL,
+          "http://192.168.0.107:5173",
+          "http://172.27.192.1:5173",
+        ],
       },
     },
   })
@@ -56,8 +61,8 @@ app.post(
   }
 );
 
-// Global RateLimiting -> 150 Reqs / 15 mins / IP
-app.use(RateLimiter());
+// Global RateLimiting -> 250 Reqs / 15 mins / IP
+// app.use(RateLimiter());
 
 // Middlewares
 app.use("/profilePictures", express.static("profilePictures"));
@@ -65,7 +70,11 @@ app.use(express.json());
 app.use(cookieParser(secretKey));
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL],
+    origin: [
+      process.env.CLIENT_URL,
+      "http://192.168.0.107:5173",
+      "http://172.27.192.1:5173",
+    ],
     credentials: true,
   })
 );
