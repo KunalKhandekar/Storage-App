@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { connectDB } from "./db.js";
+import { existsSync } from "node:fs";
+import { mkdir } from "node:fs/promises";
 
 await connectDB();
 const db = mongoose.connection.db;
@@ -117,17 +119,17 @@ const validations = [
             bsonType: "array",
             items: {
               bsonType: "objectId",
-            }
+            },
           },
           __v: {
             bsonType: "number",
           },
           createdAt: {
-            bsonType: "date"
+            bsonType: "date",
           },
           updatedAt: {
-            bsonType: "date"
-          }
+            bsonType: "date",
+          },
         },
       },
     },
@@ -137,7 +139,14 @@ const validations = [
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: ["_id", "storedName", "userId", "name", "parentDirId", "size"],
+        required: [
+          "_id",
+          "storedName",
+          "userId",
+          "name",
+          "parentDirId",
+          "size",
+        ],
         additionalProperties: false,
         properties: {
           _id: {
@@ -185,7 +194,7 @@ const validations = [
               },
               modifiedAt: {
                 bsonType: "date",
-              }
+              },
             },
           },
           sharedWith: {
@@ -213,11 +222,11 @@ const validations = [
             bsonType: "number",
           },
           createdAt: {
-            bsonType: "date"
+            bsonType: "date",
           },
           updatedAt: {
-            bsonType: "date"
-          }
+            bsonType: "date",
+          },
         },
       },
     },
@@ -247,12 +256,12 @@ const validations = [
             description: "otp is required",
           },
           createdAt: {
-            bsonType: "date"
+            bsonType: "date",
           },
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 ];
 
 for await (const v of validations) {
@@ -273,4 +282,16 @@ for await (const v of validations) {
   }
 }
 
-client.close();
+await client.close();
+
+const requiredFolder = ["storage", "profilePictures"];
+const absolutePath = import.meta.dirname;
+requiredFolder.forEach((folder) => {
+  const path = absolutePath + `/../${folder}`;
+  if (existsSync(path)) {
+    console.log(`${folder} folder already created.`);
+  } else {
+    mkdir(path);
+    console.log(`${folder} folder created.`);
+  }
+});
