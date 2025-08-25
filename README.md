@@ -12,6 +12,7 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
   - [📂 File Management](#-file-management)
   - [🏷️ Sharing & Permissions](#️-sharing--permissions)
   - [⚙️ Settings & Customization](#️-settings--customization)
+  - [🛠️ Admin Dashboard](#️-admin-dashboard)
 - [🏗️ Project Structure](#️-project-structure)
   - [Client (Frontend - React + Vite + Tailwind)](#client-frontend---react--vite--tailwind)
   - [Server (Backend - Node + Express + MongoDB)](#server-backend---node--express--mongodb)
@@ -67,6 +68,15 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
 - Change password.
 - Manage connected devices/sessions.
 - Account Options **(Logout/Disable/Delete)**.
+
+### 🛠️ Admin Dashboard
+
+- User Overview – Track total, active, online, and deleted users.
+- User Management – View, filter, edit roles, force logout, and delete users.
+- Deletion System – Soft Delete (recoverable) & Hard Delete (permanent) with confirmation.
+- Role & Permissions – Roles like User, Manager, Admin, SuperAdmin with badges.
+- File Management – Access directories/files with navigation.
+- Real-Time Tracking – Monitor online users and refresh instantly.
 
 ## 🏗️ Project Structure
 
@@ -344,6 +354,14 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
   <img src="docs/ScreenShots/Share/by-me.png" alt="Dashboard Share By Me" width="45%" />
   <img src="docs/ScreenShots/Share/with-me.png" alt="Dashboard Share With Me" width="45%" />
   <img src="docs/ScreenShots/Share/Permission.png" alt="Permission" width="45%" />
+</p>
+
+### 🛠️ Admin Dashboard
+<p align="center">
+  <img src="docs/ScreenShots/Admin/Dashboard.png" alt="Dashboard" width="45%" />
+  <img src="docs/ScreenShots/Admin/Online-User.png" alt="Online Users" width="45%" />
+  <img src="docs/ScreenShots/Admin/Hard-Soft Delete.png" alt="Hard-soft-delete" width="45%" />
+  <img src="docs/ScreenShots/Admin/Single User view.png" alt="View Directory" width="45%" />
 </p>
 
 ---
