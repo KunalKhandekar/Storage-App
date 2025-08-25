@@ -12,3 +12,40 @@
 ## Home Page
   ![image](https://github.com/user-attachments/assets/c41d787b-5c5d-4412-a54d-a009f6b69dc9)
   ![image](https://github.com/user-attachments/assets/88d0f9b9-f722-4aad-9568-5f8a4c10c5f3)
+
+
+
+Client:
+
+VITE_GOOGLE_CLIENT_ID=<your_google_client_id>
+
+
+Server: 
+
+# MongoDB 
+MONGODB_URL="mongodb://<username>:<password>@localhost:27017/StorageApp?replicaSet=rs0&authSource=admin"
+
+# OAuth Creds
+GOOGLE_CLIENT_ID=<your-google-client-id>
+GOOGLE_CLIENT_SECRET=<your-google-client-secret>
+GITHUB_CLIENT_ID=<your-github-client-id>
+GITHUB_CLIENT_SECRET=<your-github-client-secret>
+
+# Signed Secret
+COOKIE_SECRET="<your-cookie-secret>"
+
+# PORT
+PORT=4000
+
+# Resend API Key
+RESEND_KEY=<your-resend-api-key>
+
+BASE_URL=http://localhost:4000
+CLIENT_URL=http://localhost:5173
+
+
+
+create 2 folders inside /Server
+
+-> storage
+-> profilePictures

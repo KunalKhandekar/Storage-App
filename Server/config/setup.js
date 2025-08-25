@@ -222,6 +222,37 @@ const validations = [
       },
     },
   },
+  {
+    collection: "otps",
+    validator: {
+      $jsonSchema: {
+        bsonType: "object",
+        required: ["_id", "email", "createdAt", "otp"],
+        additionalProperties: false,
+        properties: {
+          __v: {
+            bsonType: "number",
+          },
+          _id: {
+            bsonType: "objectId",
+            description: "_id must be a valid ObjectId",
+          },
+          email: {
+            bsonType: "string",
+            pattern: "^[\\w.-]+@([\\w-]+\\.)+[\\w-]{2,4}$",
+            description: "Email must be in valid format",
+          },
+          otp: {
+            bsonType: "number",
+            description: "otp is required",
+          },
+          createdAt: {
+            bsonType: "date"
+          },
+        }
+      }
+    }
+  }
 ];
 
 for await (const v of validations) {
