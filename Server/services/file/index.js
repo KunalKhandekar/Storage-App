@@ -142,6 +142,7 @@ const uploadFileCompleteService = async (fileId, userId) => {
   const contentLength = await getFileContentLength({ Key: key });
 
   if (contentLength !== file.size) {
+    // Delete from S3 and also from DB;
     throw new CustomError(
       `File length mismatch. Expected ${file.size}, got ${contentLength}`,
       StatusCodes.BAD_REQUEST

@@ -284,3 +284,16 @@ export const getFileIcon = (item, viewMode = "list") => {
   // Fallback
   return <FileQuestion className={`${iconSize} text-gray-400`} />;
 };
+
+const extensionToMime = {
+  md: "text/markdown",
+  csv: "text/csv",
+  txt: "text/plain",
+  json: "application/json"
+};
+
+export function getMimeType(file) {
+  if (file.type) return file.type;
+  const ext = file.name.split(".").pop().toLowerCase();
+  return extensionToMime[ext] || "application/octet-stream";
+}

@@ -1,7 +1,7 @@
 import { google } from "googleapis";
+import { extname } from "node:path";
 import { client } from "../services/auth/googleService.js";
-import { absolutePath } from "../app.js";
-import path from "node:path";
+import { generatePreSigendGetURL } from "../services/file/s3Services.js";
 
 export const serveFile = async (req, res, next) => {
   const fileObj = req.file;
@@ -98,18 +98,13 @@ export const serveFile = async (req, res, next) => {
       });
     }
 
-    const filePath = path.join(absolutePath, fileObj.storedName);
+    const s3URL = await generatePreSigendGetURL({
+      Key: `${fileObj._id}${extname(fileObj.name)}`,
+      Action: req.query.action,
+      Filename: fileObj.name,
+    });
 
-    if (req.query.action === "download") {
-      return res.download(filePath, fileObj.name);
-    }
-
-    res.setHeader(
-      "Content-Disposition",
-      `inline; filename="${encodeURIComponent(fileObj.name)}"; filename*=UTF-8''${encodeURIComponent(fileObj.name)}`
-    );
-
-    res.sendFile(filePath);
+    return res.redirect(s3URL);
   } catch (error) {
     next(error);
   }

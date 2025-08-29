@@ -13,7 +13,6 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
   const [dragOver, setDragOver] = useState(false);
   const { dirId } = useParams();
   const { showModal } = useModal()
-  const { setStorageData, storageData } = useStorage();
 
   const handleFileUpload = async (selectedFiles) => {
     const fileList = Array.from(selectedFiles);
@@ -29,8 +28,6 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
         MAX_CONCURRENT_UPLOADS,
         dirId,
         setProgressMap,
-        setStorageData,
-        storageData,
         showModal
       );
       setActionDone(true);

@@ -1,17 +1,36 @@
-import { formatFileSize } from "../Utils/helpers";
+import { formatFileSize, getMimeType } from "../Utils/helpers";
 import axios from "./axios";
 
-const uploadFile = async (file, dirId, setProgressMap) => {
-  const formData = new FormData();
-  formData.append("myfiles", file);
-
+export const uploadFile = async (file, dirId, setProgressMap, showModal) => {
   try {
-    await axios.post("/file/upload", formData, {
+    // Step 1: Initiate upload
+    const uploadData = await uploadFileInitiate({
+      name: file.name,
+      size: file.size,
+      contentType: file.type || getMimeType(file),
+      parentDirId: dirId,
+    });
+
+    if (!uploadData.success) {
+      showModal(
+        "Error",
+        uploadData.message || "Upload initiation failed.",
+        "error"
+      );
+      setProgressMap((prev) => ({ ...prev, [file.name]: "Failed" }));
+      return;
+    }
+
+    const { fileId, uploadURL } = uploadData.data || {};
+    if (!fileId || !uploadURL) {
+      throw new Error("Upload initiation response missing required fields.");
+    }
+
+    // Step 2: Upload file to S3
+    await axios.put(uploadURL, file, {
       headers: {
-        "Content-Type": "multipart/form-data",
-        parentdirid: dirId || "",
+        "Content-Type": file.type || getMimeType(file),
       },
-      withCredentials: true,
       onUploadProgress: (event) => {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
@@ -20,16 +39,28 @@ const uploadFile = async (file, dirId, setProgressMap) => {
       },
     });
 
-    // Remove progress for this file
-    setProgressMap((prev) => {
-      const updated = { ...prev };
-      delete updated[file.name];
-      return updated;
-    });
+    // Step 3: Complete file upload (notify backend)
+    const finalResponse = await uploadComplete(fileId);
+    if (finalResponse.success) {
+      // Remove from progress map once done
+      setProgressMap((prev) => {
+        const updated = { ...prev };
+        delete updated[file.name];
+        return updated;
+      });
+    } else {
+      throw new Error(finalResponse.message || "Failed to complete upload.");
+    }
   } catch (err) {
     console.error(`Upload failed for ${file.name}:`, err);
     setProgressMap((prev) => ({ ...prev, [file.name]: "Failed" }));
-    throw err;
+    showModal(
+      "Upload Failed",
+      err.response?.data?.message ||
+        err.message ||
+        "An unexpected error occurred during upload.",
+      "error"
+    );
   }
 };
 
@@ -45,37 +76,35 @@ export const uploadInBatches = async (
   storageData,
   showModal
 ) => {
-  // Local tracker for available storage
-  let availableStorage = storageData.availableStorageLimit;
-
   for (let i = 0; i < files.length; i += batchSize) {
     const batch = files.slice(i, i + batchSize);
-
     await Promise.all(
       batch.map(async (file) => {
-        if (file.size > availableStorage) {
-          showModal(
-            "Error",
-            `Cannot upload "${file.name}" (${formatFileSize(file.size)}). 
-            Only ${formatFileSize(availableStorage)} available.`,
-            "error"
-          );
-          setProgressMap((prev) => ({ ...prev, [file.name]: "Failed" }));
-          return;
-        }
-
         try {
-          await uploadFile(file, dirId, setProgressMap);
-          availableStorage -= file.size;
-          setStorageData((prev) => ({
-            ...prev,
-            availableStorageLimit: prev.availableStorageLimit - file.size,
-          }));
+          await uploadFile(file, dirId, setProgressMap, showModal);
         } catch (err) {
           console.error(`Upload failed for ${file.name}:`, err);
           setProgressMap((prev) => ({ ...prev, [file.name]: "Failed" }));
         }
       })
     );
+  }
+};
+
+const uploadFileInitiate = async (fileData) => {
+  try {
+    const response = await axios.post("/file/upload/initiate", fileData);
+    return response.data;
+  } catch (error) {
+    return error?.response?.data;
+  }
+};
+
+const uploadComplete = async (fileId) => {
+  try {
+    const response = await axios.post(`/file/upload/complete/${fileId}`);
+    return response.data;
+  } catch (error) {
+    return error?.response?.data;
   }
 };
