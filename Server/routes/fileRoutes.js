@@ -3,6 +3,7 @@ import multer from "multer";
 import {
   changePermission,
   changePermissionOfUser,
+  completeFileUpload,
   deleteFile,
   getDashboardInfo,
   getFileById,
@@ -12,9 +13,9 @@ import {
   getSharedFileViaLink,
   getSharedWithMeFiles,
   getUserAccessList,
+  initiateFileUpload,
   renameFile,
   renameFileSharedViaEmail,
-  renameFileSharedViaLink,
   revokeUserAccess,
   shareLinkToggle,
   shareViaEmail,
@@ -22,10 +23,7 @@ import {
   uploadFile,
 } from "../controllers/fileControllers.js";
 import { checkFileAccess } from "../middlewares/checkFileAccess.js";
-import {
-  checkFileSharedViaEmail,
-  checkFileSharedViaLink,
-} from "../middlewares/checkFileShared.js";
+import { checkFileSharedViaEmail } from "../middlewares/checkFileShared.js";
 import { serveFile } from "../middlewares/serveFile.js";
 import validateRequest from "../middlewares/validateRequest.js";
 import { fileStorage } from "../utils/MulterSetup.js";
@@ -62,6 +60,16 @@ router.post(
   upload.single("myfiles"),
   uploadFile
 );
+
+// POST /file/upload/initiate
+// Desc -> Checks validations and return presigned S3 URL
+// Body -> { name: string, size: number, contentType: string, parentDirId: "<optional; defaults to req.user.rootDirId> }
+router.post("/upload/initiate", initiateFileUpload);
+
+// POST /file/upload/complete/:fileId
+// Desc -> Completes the necessary S3 Validations and change the DB state.
+// Params -> { fileId }
+router.post("/upload/complete/:fileId", completeFileUpload);
 
 // DELETE /file/:id
 // Desc -> Delete a file by ID.

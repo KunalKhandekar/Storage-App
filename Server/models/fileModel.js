@@ -7,11 +7,6 @@ const fileSchema = new Schema(
       required: true,
       trim: true,
     },
-    storedName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     parentDirId: {
       type: Schema.Types.ObjectId,
       ref: "Directory",
@@ -64,6 +59,10 @@ const fileSchema = new Schema(
     ],
     size: {
       type: Number,
+      required: true,
+    },
+    isUploading: {
+      type: Boolean,
       required: true,
     }
   },

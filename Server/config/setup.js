@@ -141,22 +141,17 @@ const validations = [
         bsonType: "object",
         required: [
           "_id",
-          "storedName",
           "userId",
           "name",
           "parentDirId",
           "size",
+          "isUploading"
         ],
         additionalProperties: false,
         properties: {
           _id: {
             bsonType: "objectId",
             description: "_id must be a valid ObjectId",
-          },
-          storedName: {
-            bsonType: "string",
-            description:
-              "storedName must be a string representing the stored file or folder name",
           },
           userId: {
             bsonType: "objectId",
@@ -217,6 +212,9 @@ const validations = [
           },
           size: {
             bsonType: "number",
+          },
+          isUploading: {
+            bsonType: "bool"
           },
           __v: {
             bsonType: "number",

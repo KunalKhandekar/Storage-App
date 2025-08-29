@@ -9,3 +9,10 @@ const shareViaEmailObject = z.object({
 export const shareViaEmailSchema = z
   .array(shareViaEmailObject)
   .nonempty("Users array cannot be empty");
+
+export const initiateFileUploadSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  size: z.coerce.number().gt(1, "Size should be greater than 1 Byte."),
+  contentType: z.string().min(1, "Content-Type is required"),
+  parentDirId: z.string().optional(),
+});

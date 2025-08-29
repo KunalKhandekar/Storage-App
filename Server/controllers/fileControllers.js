@@ -3,6 +3,7 @@ import path from "path";
 import { sharedByMeFiles } from "../services/file/sharedByMeFiles.js";
 import { sharedWithMeFiles } from "../services/file/sharedWithMeFiles.js";
 import { FileServices } from "../services/index.js";
+import { sanitizeInput } from "../utils/sanitizeInput.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import { validateInputs } from "../utils/ValidateInputs.js";
 import {
@@ -10,8 +11,10 @@ import {
   nameSchema,
   permissionSchema,
 } from "../validators/commonValidation.js";
-import { shareViaEmailSchema } from "../validators/fileSchema.js";
-import { sanitizeInput } from "../utils/sanitizeInput.js";
+import {
+  initiateFileUploadSchema,
+  shareViaEmailSchema,
+} from "../validators/fileSchema.js";
 
 export const uploadFile = async (req, res, next) => {
   const file = req.file;
@@ -30,6 +33,44 @@ export const uploadFile = async (req, res, next) => {
       StatusCodes.CREATED,
       newFile
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const initiateFileUpload = async (req, res, next) => {
+  const { rootDirId, _id, maxStorageLimit } = req.user;
+  try {
+    const { name, size, contentType, parentDirId } = validateInputs(
+      initiateFileUploadSchema,
+      req.body
+    );
+
+    const { uploadURL, newFileId } = await FileServices.UploadFileInitiateService(
+      rootDirId,
+      _id,
+      maxStorageLimit,
+      name,
+      size,
+      contentType,
+      parentDirId
+    );
+
+    return CustomSuccess.send(res, "Upload initiated", StatusCodes.OK, {
+      uploadURL,
+      fileId: newFileId,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const completeFileUpload = async (req, res, next) => {
+  const { fileId } = req.params;
+  const userId = req.user._id;
+  try {
+    await FileServices.UploadFileCompleteService(fileId, userId);
+    return CustomSuccess.send(res, "File uploaded", StatusCodes.OK);
   } catch (error) {
     next(error);
   }

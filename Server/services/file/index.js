@@ -1,13 +1,20 @@
 import { StatusCodes } from "http-status-codes";
 import { rm } from "node:fs/promises";
-import path from "node:path";
+import path, { extname } from "node:path";
 import { absolutePath } from "../../app.js";
 import Directory from "../../models/dirModel.js";
 import File from "../../models/fileModel.js";
 import User from "../../models/userModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
+import {
+  generatePreSignedUploadURL,
+  getFileContentLength,
+} from "./s3Services.js";
 
-export const updateParentDirectorySize = async (parentDirectoryId, deltaSize) => {
+export const updateParentDirectorySize = async (
+  parentDirectoryId,
+  deltaSize
+) => {
   const parents = [];
 
   while (parentDirectoryId) {
@@ -58,6 +65,93 @@ const uploadFileService = async (file, parentDirId, userId) => {
 
   await updateParentDirectorySize(parentDirectory._id, size);
   return newFile;
+};
+
+const uploadFileInitiateService = async (
+  rootDirId,
+  userId,
+  maxStorageLimit,
+  name,
+  size,
+  contentType,
+  parentDirId
+) => {
+  const rootDirectory = await Directory.findOne({
+    _id: rootDirId,
+    userId,
+  })
+    .select("size")
+    .lean();
+
+  if (!rootDirectory) {
+    throw new CustomError("Root directory not found.", StatusCodes.NOT_FOUND);
+  }
+
+  if (rootDirectory.size + size > maxStorageLimit) {
+    throw new CustomError(
+      `${name} size is larger than available space.`,
+      StatusCodes.FORBIDDEN
+    );
+  }
+
+  let targetDirectory = rootDirectory;
+
+  if (parentDirId && parentDirId !== String(rootDirId)) {
+    targetDirectory = await Directory.findOne({
+      _id: parentDirId,
+      userId,
+    }).lean();
+
+    if (!targetDirectory) {
+      throw new CustomError(
+        "You are not authorized to upload in this directory.",
+        StatusCodes.UNAUTHORIZED
+      );
+    }
+  }
+
+  const fileExt = extname(name);
+  const newFile = await File.create({
+    userId,
+    size,
+    name,
+    parentDirId: targetDirectory._id,
+    isUploading: true,
+  });
+
+  const uploadURL = await generatePreSignedUploadURL({
+    Key: `${newFile._id}${fileExt}`,
+    ContentType: contentType,
+  });
+
+  return { uploadURL, newFileId: newFile._id };
+};
+
+const uploadFileCompleteService = async (fileId, userId) => {
+  const file = await File.findOne({
+    _id: fileId,
+    userId,
+    isUploading: true,
+  });
+
+  if (!file) {
+    throw new CustomError("File not found.", StatusCodes.BAD_REQUEST);
+  }
+
+  const key = `${file._id}${extname(file.name)}`;
+  const contentLength = await getFileContentLength({ Key: key });
+
+  if (contentLength !== file.size) {
+    throw new CustomError(
+      `File length mismatch. Expected ${file.size}, got ${contentLength}`,
+      StatusCodes.BAD_REQUEST
+    );
+  }
+
+  file.isUploading = false;
+  await file.save();
+
+  await updateParentDirectorySize(file.parentDirId, file.size);
 };
 
 const getFileService = async (id, userId) => {
@@ -301,6 +395,8 @@ const renameFileByEditorService = async (file, name) => {
 
 export default {
   UploadFileService: uploadFileService,
+  UploadFileInitiateService: uploadFileInitiateService,
+  UploadFileCompleteService: uploadFileCompleteService,
   GetFileService: getFileService,
   RenameFileService: renameFileService,
   DeleteFileService: deleteFileService,
