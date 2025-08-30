@@ -8,6 +8,7 @@ import SharedWithMe from "../Pages/SharePage/SharedWithMe";
 import SharedByMe from "../Pages/SharePage/SharedByMe";
 import PermissionManager from "../Pages/SharePage/PermissionManager";
 import FileViewer from "../Pages/SharePage/FileViewer";
+import GooglePicker from "../components/GooglePicker";
 
 export const protectedRoutes = [
   {
@@ -89,5 +90,12 @@ export const protectedRoutes = [
         <FileViewer />
       </ProtectedRoute>
     ),
-  },
+  },{
+    path: "/google-picker",
+    element: (
+     <ProtectedRoute>
+        <GooglePicker />
+      </ProtectedRoute>
+    )
+  }
 ];

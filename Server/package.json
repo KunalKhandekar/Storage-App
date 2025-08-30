@@ -14,8 +14,10 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.878.0",
     "@aws-sdk/cloudfront-signer": "^3.873.0",
+    "@aws-sdk/lib-storage": "^3.879.0",
     "@aws-sdk/s3-request-presigner": "^3.878.0",
     "@octokit/oauth-app": "^8.0.1",
+    "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -27,6 +29,7 @@
     "helmet": "^8.1.0",
     "http-status-codes": "^2.3.0",
     "jsdom": "^26.1.0",
+    "mime-types": "^3.0.1",
     "mongoose": "^8.15.1",
     "multer": "^2.0.0",
     "redis": "^5.6.0",

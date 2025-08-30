@@ -8,7 +8,7 @@ import { AuthProvider } from "./Contexts/AuthContent.jsx";
 import { StorageProvider } from "./Contexts/StorageContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  // <StrictMode>
     <AuthProvider>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <ModalProvider>
@@ -19,5 +19,5 @@ createRoot(document.getElementById("root")).render(
         </ModalProvider>
       </GoogleOAuthProvider>
     </AuthProvider>
-  </StrictMode>
+  // </StrictMode>
 );

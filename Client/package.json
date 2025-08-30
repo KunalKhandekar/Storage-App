@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@cyntler/react-doc-viewer": "^1.17.0",
+    "@googleworkspace/drive-picker-element": "^0.6.1",
     "@react-oauth/google": "^0.12.2",
     "@tailwindcss/vite": "^4.1.7",
     "axios": "^1.10.0",

@@ -9,9 +9,12 @@ export const googleAuth = async (code) => {
   }
 };
 
-export const driveConnect = async (code) => {
+export const driveConnect = async ({ token, filesMetaData }) => {
   try {
-    const response = await axios.post("/auth/google/drive/connect", { code });
+    const response = await axios.post("/auth/drive-import", {
+      token,
+      filesMetaData,
+    });
     return response.data;
   } catch (error) {
     return error?.response?.data;
