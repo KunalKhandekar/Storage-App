@@ -1,14 +1,13 @@
-import { rm } from "fs/promises";
 import { StatusCodes } from "http-status-codes";
-import path from "path";
-import { absolutePath } from "../../app.js";
+import mongoose from "mongoose";
+import { extname } from "path";
 import Directory from "../../models/dirModel.js";
 import File from "../../models/fileModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
-import { collectDirectoryContents } from "./collectDirectoryContents.js";
-import { updateParentDirectorySize } from "../file/index.js";
-import mongoose from "mongoose";
 import { generateBreadCrumb, generatePath } from "../../utils/generatePath.js";
+import { updateParentDirectorySize } from "../file/index.js";
+import { deleteS3Objects } from "../file/s3Services.js";
+import { collectDirectoryContents } from "./collectDirectoryContents.js";
 
 const getDirectoryDataService = async (userId, dirId = null) => {
   try {
@@ -33,7 +32,7 @@ const getDirectoryDataService = async (userId, dirId = null) => {
       );
 
     const files = (
-      await File.find({ parentDirId: directoryData?._id }).lean()
+      await File.find({ parentDirId: directoryData?._id, isUploading: false }).lean()
     ).map((file) => ({
       ...file,
       ...{
@@ -49,7 +48,7 @@ const getDirectoryDataService = async (userId, dirId = null) => {
     const directories = await Promise.all(
       childDirs.map(async (dir) => {
         const [fileCounts, dirCounts] = await Promise.all([
-          await File.countDocuments({ parentDirId: dir._id }),
+          await File.countDocuments({ parentDirId: dir._id, isUploading: false }),
           await Directory.countDocuments({ parentDirId: dir._id }),
         ]);
 
@@ -65,7 +64,12 @@ const getDirectoryDataService = async (userId, dirId = null) => {
       })
     );
 
-    return { ...directoryData, files, directory: directories, breadCrumb: generateBreadCrumb([...directoryData.path]), };
+    return {
+      ...directoryData,
+      files,
+      directory: directories,
+      breadCrumb: generateBreadCrumb([...directoryData.path]),
+    };
   } catch (error) {
     throw error;
   }
@@ -128,19 +132,23 @@ const deleteDirectoryService = async (dirId, userId) => {
 
     const { files, directories } = await collectDirectoryContents(dirId);
 
+    // Delete all files from S3;
+    if (files.length > 1) {
+      const keys = files.map(({ _id, name }) => ({
+        Key: `${_id}${extname(name)}`,
+      }));
+
+      await deleteS3Objects({
+        Keys: keys,
+      });
+    }
+
     const includeThisDir = [
       ...(directories?.map((dir) => dir._id) || []),
       dirId,
     ];
 
     await Directory.deleteMany({ _id: { $in: includeThisDir } });
-
-    for (const file of files) {
-      const { storedName, googleFileId } = file;
-      if (!googleFileId) {
-        await rm(path.join(absolutePath, storedName));
-      }
-    }
 
     await File.deleteMany({ _id: { $in: files?.map((file) => file._id) } });
     await updateParentDirectorySize(dirObj.parentDirId, -dirObj.size);

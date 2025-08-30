@@ -72,8 +72,6 @@ export const uploadInBatches = async (
   batchSize = 5, // or MAX_CONCURRENT_UPLOADS
   dirId,
   setProgressMap,
-  setStorageData,
-  storageData,
   showModal
 ) => {
   for (let i = 0; i < files.length; i += batchSize) {

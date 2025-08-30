@@ -27,7 +27,6 @@ import { RateLimiter } from "./utils/RateLimiter.js";
 // Connect to MongoDB
 await connectDB();
 
-export const absolutePath = import.meta.dirname + "/storage/";
 export const rootPath = import.meta.dirname;
 
 // Create Express App

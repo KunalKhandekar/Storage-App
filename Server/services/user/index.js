@@ -1,17 +1,18 @@
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { hash } from "bcrypt";
 import { StatusCodes } from "http-status-codes";
+import fs from "node:fs/promises";
+import path, { extname } from "node:path";
 import redisClient from "../../config/redis.js";
-import CustomError from "../../utils/ErrorResponse.js";
-import User from "../../models/userModel.js";
-import { absolutePath, rootPath } from "../../app.js";
-import { rm } from "node:fs/promises";
 import Directory from "../../models/dirModel.js";
 import File from "../../models/fileModel.js";
-import { hash } from "bcrypt";
-import path from "node:path";
-import { DirectoryServices } from "../index.js";
+import User from "../../models/userModel.js";
 import { canPerform } from "../../utils/canPerform.js";
+import CustomError from "../../utils/ErrorResponse.js";
 import { validateInputs } from "../../utils/ValidateInputs.js";
 import { nameSchema } from "../../validators/commonValidation.js";
+import { deleteS3Objects, s3Client } from "../file/s3Services.js";
+import { DirectoryServices } from "../index.js";
 
 const logoutUserService = async (token) => {
   await redisClient.del(`session:${token}`);
@@ -74,7 +75,6 @@ const logoutSpecificUserService = async (userId, currentUser) => {
 };
 
 const softDeleteUserService = async (userId, currentUser) => {
-
   // Only Superadmin or Admin can soft delete.
   if (currentUser.role !== "SuperAdmin" && currentUser.role !== "Admin") {
     throw new CustomError(
@@ -118,7 +118,6 @@ const softDeleteUserService = async (userId, currentUser) => {
 };
 
 const hardDeleteUserService = async (userId, currentUser) => {
-
   const user = await User.findOne({ _id: userId }).select("role");
 
   if (!user) {
@@ -144,12 +143,15 @@ const hardDeleteUserService = async (userId, currentUser) => {
   // Deleting all sessions of the user
   await redisClient.deleteManySessions(userId);
 
-  // delete all files of the user (virtual and local)
+  // delete all files of the user (virtual and in S3)
   const allFiles = await File.find({ userId: user._id });
-  for (const file of allFiles) {
-    await rm(path.join(absolutePath, file.storedName));
-    await file.deleteOne();
-  }
+  const keys = allFiles.map(({ _id, name }) => ({
+    Key: `${_id}${extname(name)}`,
+  }));
+  await deleteS3Objects({
+    Keys: keys,
+  });
+  await File.deleteMany({ userId: user._id });
 
   // delete all folder of the user
   await Directory.deleteMany({ userId: user._id });
@@ -217,18 +219,43 @@ const updatePasswordService = async (userId, oldPassword, newPassword) => {
 };
 
 const updateProfileService = async (userId, file, name) => {
-  const user = await User.findOne({ _id: userId }).select("-password");
+  const user = await User.findById(userId).select("-password");
+
   if (user.name !== name) {
     const parsedName = validateInputs(nameSchema, name);
     user.name = parsedName;
   }
-  if (file && file?.filename) {
-    // Delete the old Image
-    if (user.picture.includes("profilePictures")) {
-      await rm(`${rootPath}/profilePictures/${user.picture.split("/").pop()}`);
+
+  if (file && file.filename) {
+    // Delete old image from S3
+    if (user.picture?.includes(process.env.CLOUDFRONT_PROFILE_URL)) {
+      const oldKey = user.picture.split(
+        process.env.CLOUDFRONT_PROFILE_URL + "/"
+      )[1];
+      await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.AWS_BUCKET,
+          Key: oldKey,
+        })
+      );
     }
-    user.picture = `${process.env.BASE_URL}/profilePictures/${file.filename}`;
+
+    const filePath = path.join(file.destination, file.filename);
+    const fileBuffer = await fs.readFile(filePath);
+    const ext = path.extname(file.originalname);
+    const newKey = `profilePictures/${userId}-${Date.now()}${ext}`;
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET,
+        Key: newKey,
+        Body: fileBuffer,
+        ContentType: file.mimetype,
+      })
+    );
+    await fs.unlink(filePath);
+    user.picture = `${process.env.CLOUDFRONT_PROFILE_URL}/${newKey}`;
   }
+
   await user.save();
 };
 
@@ -262,12 +289,15 @@ const deleteUserService = async (userId) => {
   // Deleting all sessions of the user
   await redisClient.deleteManySessions(user._id);
 
-  // delete all files of the user (virtual and local)
+  // delete all files of the user (virtual and in S3)
   const allFiles = await File.find({ userId: user._id });
-  for (const file of allFiles) {
-    await rm(path.join(absolutePath, file.storedName));
-    await file.deleteOne();
-  }
+  const keys = allFiles.map(({ _id, name }) => ({
+    Key: `${_id}${extname(name)}`,
+  }));
+  await deleteS3Objects({
+    Keys: keys,
+  });
+  await File.deleteMany({ userId: user._id });
 
   // delete all folder of the user
   await Directory.deleteMany({ userId: user._id });
@@ -343,9 +373,7 @@ const getFileService = async (fileId, userId) => {
     throw new CustomError("File not found", StatusCodes.NOT_FOUND);
   }
 
-  const filePath = path.join(absolutePath, fileObj.storedName);
-
-  return { filePath, fileName: fileObj.name };
+  return fileObj;
 };
 
 export default {

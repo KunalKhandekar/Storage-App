@@ -1,4 +1,6 @@
 import {
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
   GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
@@ -6,8 +8,8 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const s3Client = new S3Client({ profile: "storageApp" });
-const bucket = "file-bucket-manager";
+export const s3Client = new S3Client({ profile: process.env.AWS_PROFILE });
+const bucket = process.env.AWS_BUCKET;
 
 export const generatePreSignedUploadURL = async ({ Key, ContentType }) => {
   const command = new PutObjectCommand({
@@ -23,7 +25,7 @@ export const generatePreSignedUploadURL = async ({ Key, ContentType }) => {
   return preSignedUploadURL;
 };
 
-export const generatePreSigendGetURL = async ({ Key, Action, Filename  }) => {
+export const generatePreSigendGetURL = async ({ Key, Action, Filename }) => {
   const command = new GetObjectCommand({
     Bucket: bucket,
     Key,
@@ -48,4 +50,27 @@ export const getFileContentLength = async ({ Key }) => {
 
   const metaData = await s3Client.send(command);
   return metaData?.ContentLength;
+};
+
+export const deleteS3Object = async ({ Key }) => {
+  const command = new DeleteObjectCommand({
+    Bucket: bucket,
+    Key,
+  });
+
+  const res = await s3Client.send(command);
+  return res;
+};
+
+export const deleteS3Objects = async ({ Keys }) => {
+  const command = new DeleteObjectsCommand({
+    Bucket: bucket,
+    Delete: {
+      Objects: Keys,
+      Quiet: false,
+    },
+  });
+
+  const res = await s3Client.send(command);
+  return res;
 };

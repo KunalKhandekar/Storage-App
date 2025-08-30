@@ -232,14 +232,12 @@ export const getSpecificUserDirectory = async (req, res, next) => {
 export const getFile = async (req, res, next) => {
   const { userId, fileId } = req.params;
   try {
-    const { fileName, filePath } = await UserServices.GetFileService(
+    const file = await UserServices.GetFileService(
       fileId,
       userId
     );
-    if (req.query.action === "download") {
-      return res.download(filePath, fileName);
-    }
-    res.sendFile(filePath);
+    req.file = file;
+    next();
   } catch (error) {
     next(error);
   }

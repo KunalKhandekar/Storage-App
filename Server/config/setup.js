@@ -145,7 +145,7 @@ const validations = [
           "name",
           "parentDirId",
           "size",
-          "isUploading"
+          "isUploading",
         ],
         additionalProperties: false,
         properties: {
@@ -214,7 +214,7 @@ const validations = [
             bsonType: "number",
           },
           isUploading: {
-            bsonType: "bool"
+            bsonType: "bool",
           },
           __v: {
             bsonType: "number",
@@ -282,7 +282,7 @@ for await (const v of validations) {
 
 await client.close();
 
-const requiredFolder = ["storage", "profilePictures"];
+const requiredFolder = ["profilePictures"];
 const absolutePath = import.meta.dirname;
 requiredFolder.forEach((folder) => {
   const path = absolutePath + `/../${folder}`;

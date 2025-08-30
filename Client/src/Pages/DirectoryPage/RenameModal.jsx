@@ -2,10 +2,27 @@ import { useEffect, useRef, useState } from "react";
 import { X, Loader2, File, Folder } from "lucide-react";
 import { renameFile_or_Directory } from "../../Apis/file_Dir_Api";
 
-export default function RenameModal({ item, onClose, onRename, ApiFunc = renameFile_or_Directory }) {
+export default function RenameModal({
+  item,
+  onClose,
+  onRename,
+  ApiFunc = renameFile_or_Directory,
+}) {
   const [newName, setNewName] = useState(item.name);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef(null);
+  const getFileExtension = (filename) => {
+    const dotIndex = filename.lastIndexOf(".");
+    return dotIndex !== -1 ? filename.substring(dotIndex) : "";
+  };
+  const isValid = newName.trim() && newName !== item.name;
+  const originalExtension =
+    item.type === "file" ? getFileExtension(item.name) : "";
+  const newExtension = item.type === "file" ? getFileExtension(newName) : "";
+  const isEmpty = !newName.trim();
+  const isSameName = newName === item.name;
+  const extensionChanged =
+    item.type === "file" && originalExtension !== newExtension;
 
   useEffect(() => {
     const input = inputRef.current;
@@ -21,17 +38,18 @@ export default function RenameModal({ item, onClose, onRename, ApiFunc = renameF
         input.select();
       }
     }, 100);
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Enter" && !isSubmitting) handleRename();
+      if (e.key === "Enter" && !isSubmitting && isValid && !extensionChanged)
+        handleRename();
       if (e.key === "Escape") onClose();
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [newName, isSubmitting]); 
+  }, [newName, isSubmitting, isValid, extensionChanged]);
 
   const handleRename = async () => {
     if (!newName.trim() || newName === item.name || isSubmitting) return;
@@ -52,22 +70,15 @@ export default function RenameModal({ item, onClose, onRename, ApiFunc = renameF
     }
   };
 
-  const getFileExtension = (filename) => {
-    const dotIndex = filename.lastIndexOf(".");
-    return dotIndex !== -1 ? filename.substring(dotIndex) : "";
-  };
-
-  const originalExtension = item.type === "file" ? getFileExtension(item.name) : "";
-  const newExtension = item.type === "file" ? getFileExtension(newName) : "";
-  
-  const isValid = newName.trim() && newName !== item.name;
-  const isEmpty = !newName.trim();
-  const isSameName = newName === item.name;
-  const extensionChanged = item.type === "file" && originalExtension !== newExtension;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-xl w-full max-w-md"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center space-x-3">
@@ -78,7 +89,10 @@ export default function RenameModal({ item, onClose, onRename, ApiFunc = renameF
             )}
             <h2 className="text-lg font-semibold">Rename {item.type}</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -95,11 +109,11 @@ export default function RenameModal({ item, onClose, onRename, ApiFunc = renameF
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${
-                isEmpty 
-                  ? "border-red-300 focus:ring-red-500" 
+                isEmpty
+                  ? "border-red-300 focus:ring-red-500"
                   : extensionChanged
                   ? "border-red-300 focus:ring-red-500"
-                  : isSameName 
+                  : isSameName
                   ? "border-yellow-300 focus:ring-yellow-500"
                   : "border-gray-300 focus:ring-blue-500"
               }`}
@@ -114,11 +128,14 @@ export default function RenameModal({ item, onClose, onRename, ApiFunc = renameF
           )}
           {extensionChanged && (
             <p className="text-sm text-red-600">
-              File extension cannot be changed (must end with {originalExtension})
+              File extension cannot be changed (must end with{" "}
+              {originalExtension})
             </p>
           )}
           {isSameName && !isEmpty && !extensionChanged && (
-            <p className="text-sm text-yellow-600">Name is the same as current</p>
+            <p className="text-sm text-yellow-600">
+              Name is the same as current
+            </p>
           )}
         </div>
 

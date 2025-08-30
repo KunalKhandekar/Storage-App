@@ -1,5 +1,4 @@
 import { Router } from "express";
-import multer from "multer";
 import {
   changePermission,
   changePermissionOfUser,
@@ -19,21 +18,18 @@ import {
   revokeUserAccess,
   shareLinkToggle,
   shareViaEmail,
-  shareViaLink,
-  uploadFile,
+  shareViaLink
 } from "../controllers/fileControllers.js";
 import { checkFileAccess } from "../middlewares/checkFileAccess.js";
 import { checkFileSharedViaEmail } from "../middlewares/checkFileShared.js";
 import { serveFile } from "../middlewares/serveFile.js";
 import validateRequest from "../middlewares/validateRequest.js";
-import { fileStorage } from "../utils/MulterSetup.js";
 
 // Import the limiters, Throttlers
 import { limiter } from "../utils/RateLimiter.js";
 import { throttler } from "../utils/Throttler.js";
 
-// Multer Instance for file uploading
-const upload = multer({ storage: fileStorage });
+
 const router = Router();
 
 ["id", "fileId", "userId"].forEach((param) =>
@@ -49,16 +45,6 @@ router.get(
   throttler.fileAccessThrottler,
   getFileById,
   serveFile
-);
-
-// POST /file/upload
-// Desc -> Upload a file.
-// Content-Type -> multipart/form-data
-router.post(
-  "/upload",
-  limiter.fileUploadLimiter,
-  upload.single("myfiles"),
-  uploadFile
 );
 
 // POST /file/upload/initiate

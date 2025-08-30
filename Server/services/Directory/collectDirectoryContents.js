@@ -9,7 +9,7 @@ export const collectDirectoryContents = async (dirId) => {
   ).lean();
 
   let files = await File.find({ parentDirId: dirId })
-    .select("storedName googleFileId")
+    .select("googleFileId name")
     .lean();
 
   for (const { _id } of directories) {

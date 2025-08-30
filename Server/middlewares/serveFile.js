@@ -1,7 +1,7 @@
 import { google } from "googleapis";
 import { extname } from "node:path";
 import { client } from "../services/auth/googleService.js";
-import { generatePreSigendGetURL } from "../services/file/s3Services.js";
+import { getCloudFrontSignedURL } from "../services/file/cloudFront.js";
 
 export const serveFile = async (req, res, next) => {
   const fileObj = req.file;
@@ -98,7 +98,7 @@ export const serveFile = async (req, res, next) => {
       });
     }
 
-    const s3URL = await generatePreSigendGetURL({
+    const s3URL = getCloudFrontSignedURL({
       Key: `${fileObj._id}${extname(fileObj.name)}`,
       Action: req.query.action,
       Filename: fileObj.name,

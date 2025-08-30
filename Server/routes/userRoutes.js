@@ -24,6 +24,7 @@ import validateRequest from "../middlewares/validateRequest.js";
 import { profileStorage } from "../utils/MulterSetup.js";
 import { limiter } from "../utils/RateLimiter.js";
 import { throttler } from "../utils/Throttler.js";
+import { serveFile } from "../middlewares/serveFile.js";
 
 const upload = multer({ storage: profileStorage });
 
@@ -176,6 +177,6 @@ router.get(
 // Desc   -> Get a specific file of a user (Admin only).
 // Params -> { userId: string, fileId: string }
 // Role   -> SuperAdmin | Admin | Manager Only
-router.get("/:userId/file/:fileId", limiter.getFileLimiter, throttler.getFileThrottler, checkRole, getFile);
+router.get("/:userId/file/:fileId", limiter.getFileLimiter, throttler.getFileThrottler, checkRole, getFile, serveFile);
 
 export default router;

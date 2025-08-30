@@ -1,12 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { rm } from "node:fs/promises";
-import path, { extname } from "node:path";
-import { absolutePath } from "../../app.js";
+import { extname } from "node:path";
 import Directory from "../../models/dirModel.js";
 import File from "../../models/fileModel.js";
 import User from "../../models/userModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
 import {
+  deleteS3Object,
   generatePreSignedUploadURL,
   getFileContentLength,
 } from "./s3Services.js";
@@ -33,38 +32,6 @@ export const updateParentDirectorySize = async (
       { $inc: { size: deltaSize } }
     );
   }
-};
-
-const uploadFileService = async (file, parentDirId, userId) => {
-  if (!file) {
-    throw new CustomError("No files uploaded", StatusCodes.BAD_REQUEST);
-  }
-
-  const { originalname, storedName, size } = file;
-
-  const parentDirectory = await Directory.findOne({
-    _id: parentDirId,
-    userId,
-  });
-
-  if (!parentDirectory) {
-    await rm(path.join(absolutePath, storedName));
-    throw new CustomError(
-      "You are not authorized to make this action",
-      StatusCodes.UNAUTHORIZED
-    );
-  }
-
-  const newFile = await File.create({
-    storedName,
-    userId,
-    size,
-    name: originalname,
-    parentDirId: parentDirectory._id,
-  });
-
-  await updateParentDirectorySize(parentDirectory._id, size);
-  return newFile;
 };
 
 const uploadFileInitiateService = async (
@@ -142,7 +109,8 @@ const uploadFileCompleteService = async (fileId, userId) => {
   const contentLength = await getFileContentLength({ Key: key });
 
   if (contentLength !== file.size) {
-    // Delete from S3 and also from DB;
+    await deleteS3Object({ Key: key });
+    await file.deleteOne();
     throw new CustomError(
       `File length mismatch. Expected ${file.size}, got ${contentLength}`,
       StatusCodes.BAD_REQUEST
@@ -192,13 +160,15 @@ const deleteFileService = async (id, userId) => {
     throw new CustomError("File not found", StatusCodes.NOT_FOUND);
   }
 
+  if (!file.googleFileId) {
+    await deleteS3Object({
+      Key: `${file._id}${extname(file.name)}`,
+    });
+  }
+
   await File.deleteOne({ _id: file._id });
 
   await updateParentDirectorySize(file.parentDirId, -file.size);
-
-  if (!file.googleFileId) {
-    await rm(path.join(absolutePath, file.storedName));
-  }
 
   return file;
 };
@@ -395,7 +365,6 @@ const renameFileByEditorService = async (file, name) => {
 };
 
 export default {
-  UploadFileService: uploadFileService,
   UploadFileInitiateService: uploadFileInitiateService,
   UploadFileCompleteService: uploadFileCompleteService,
   GetFileService: getFileService,
