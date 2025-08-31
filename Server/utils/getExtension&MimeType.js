@@ -30,12 +30,23 @@ export function getFileExtension(originalName, mimeType) {
 export function getExportMimeType(mimeType) {
   switch (mimeType) {
     case "application/vnd.google-apps.document":
-      return "application/pdf";
+      // Google Docs → Export as Word
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
     case "application/vnd.google-apps.spreadsheet":
-      return "application/pdf";
+      // Google Sheets → Export as Excel
+      return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
     case "application/vnd.google-apps.presentation":
-      return "application/pdf";
+      // Google Slides → Export as PowerPoint
+      return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+
+    case "application/vnd.google-apps.drawing":
+      // Google Drawings → Export as PNG
+      return "image/png";
+
     default:
+      // Fallback → PDF
       return "application/pdf";
   }
 }

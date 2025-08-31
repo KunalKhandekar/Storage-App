@@ -1,13 +1,20 @@
-"use client";
+import { useState } from "react";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { driveConnect } from "../Apis/authApi";
+import { useGlobalProgress } from "../Contexts/ProgressContext";
+import { useNavigate } from "react-router-dom";
+import { useModal } from "../Contexts/ModalContext";
 
-export default function DrivePickerDemo() {
+export default function ImportFromDrive({ setActionDone }) {
+  const navigate = useNavigate();
   const pickerRef = useRef(null);
   const [showPicker, setShowPicker] = useState(false);
   const tokenRef = useRef(null);
   const handledRef = useRef(false);
+
+  const { start, step, finish, reset } = useGlobalProgress();
+  const { showModal } = useModal();
 
   const clientId =
     "53857639641-1se37lrtof61kmpu74g521k95erfpmkc.apps.googleusercontent.com";
@@ -32,14 +39,42 @@ export default function DrivePickerDemo() {
     const onPicked = async (e) => {
       if (handledRef.current) return;
       handledRef.current = true;
-      const selection = e?.detail ?? null;
-      const response = await driveConnect({
-        token: tokenRef.current,
-        filesMetaData: selection.docs,
-      });
 
-      console.log(response.data);
+      const selection = e?.detail ?? null;
+      const docs = selection?.docs || [];
+
       setShowPicker(false);
+      start(docs.length || 0);
+
+      if ((docs?.length || 0) > 0) {
+        try {
+          for (let i = 0; i < docs.length; i++) {
+            const response = await driveConnect({
+              token: tokenRef.current,
+              filesMetaData: docs,
+              fileForUploading: docs[i],
+            });
+
+            if (response.success) {
+              step(1);
+            } else {
+              reset();
+              showModal("Error", response.message, "error");
+              handledRef.current = false;
+              return;
+            }
+          }
+
+          finish();
+          navigate("/");
+          setActionDone(true);
+        } catch (err) {
+          console.error("Drive import failed:", err);
+          showModal("Error", "Drive import failed. Please try again.", "error");
+          reset();
+        }
+      }
+
       handledRef.current = false;
     };
 
@@ -68,18 +103,25 @@ export default function DrivePickerDemo() {
       el.removeEventListener("picker-authenticated", onAuth);
       el.removeEventListener("picker-oauth-response", onAuth);
     };
-  }, [showPicker]);
+  }, [showPicker, start, step, finish]);
 
   return (
     <div>
       <button
-        type="button"
-        className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
         onClick={handleOpen}
         disabled={!clientId}
         aria-disabled={!clientId}
+        className="group relative inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:border-purple-400 hover:text-purple-700 hover:bg-purple-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 shadow-sm hover:shadow-md min-h-[48px] sm:min-w-[140px] lg:min-w-[160px]"
       >
-        {clientId ? "Open Drive Picker" : "Set NEXT_PUBLIC_GOOGLE_CLIENT_ID"}
+        <svg
+          className="w-4 h-4 mr-2 transition-transform group-hover:scale-110 flex-shrink-0"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+        </svg>
+        <span className="truncate">Import from Drive</span>
       </button>
 
       {showPicker ? (

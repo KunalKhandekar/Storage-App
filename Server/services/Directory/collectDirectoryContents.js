@@ -9,7 +9,7 @@ export const collectDirectoryContents = async (dirId) => {
   ).lean();
 
   let files = await File.find({ parentDirId: dirId })
-    .select("googleFileId name")
+    .select("googleFileId name originalKey pdfKey")
     .lean();
 
   for (const { _id } of directories) {

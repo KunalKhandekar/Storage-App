@@ -32,7 +32,10 @@ const getDirectoryDataService = async (userId, dirId = null) => {
       );
 
     const files = (
-      await File.find({ parentDirId: directoryData?._id, isUploading: false }).lean()
+      await File.find({
+        parentDirId: directoryData?._id,
+        isUploading: false,
+      }).lean()
     ).map((file) => ({
       ...file,
       ...{
@@ -48,7 +51,10 @@ const getDirectoryDataService = async (userId, dirId = null) => {
     const directories = await Promise.all(
       childDirs.map(async (dir) => {
         const [fileCounts, dirCounts] = await Promise.all([
-          await File.countDocuments({ parentDirId: dir._id, isUploading: false }),
+          await File.countDocuments({
+            parentDirId: dir._id,
+            isUploading: false,
+          }),
           await Directory.countDocuments({ parentDirId: dir._id }),
         ]);
 
@@ -134,9 +140,18 @@ const deleteDirectoryService = async (dirId, userId) => {
 
     // Delete all files from S3;
     if (files.length > 1) {
-      const keys = files.map(({ _id, name }) => ({
-        Key: `${_id}${extname(name)}`,
-      }));
+      const keys = [];
+      files.map((file) => {
+        if (file.googleFileId && file.pdfKey) {
+          keys.push({
+            Key: file.pdfKey,
+          });
+        }
+
+        keys.push({
+          Key: file.originalKey,
+        });
+      });
 
       await deleteS3Objects({
         Keys: keys,

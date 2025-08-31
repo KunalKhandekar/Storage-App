@@ -21,8 +21,11 @@ const fileSchema = new Schema(
     googleFileId: {
       type: String,
     },
-    // For GoogleDrive file
-    mimeType: {
+    originalKey: {
+      type: String,
+      required: true,
+    },
+    pdfKey: {
       type: String,
     },
     // For File-Sharing

@@ -3,6 +3,8 @@ import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 // Route Imports
 import authRoutes from "./routes/authRoutes.js";
@@ -19,6 +21,7 @@ import { port, secretKey } from "./utils/Constants.js";
 
 // Database Connection
 import { connectDB } from "./config/db.js";
+
 
 // Security Imports
 import helmet from "helmet";
@@ -91,7 +94,22 @@ app.use("/guest", guestRoutes);
 // Error Handler
 app.use(errorHandler);
 
-// Start Server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,
+  },
 });
+
+// store io globally
+app.set("io", io);
+
+httpServer.listen(4000, () => {
+  console.log("Server running on port 4000");
+});
+
+
+
+

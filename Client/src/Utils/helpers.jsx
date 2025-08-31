@@ -8,6 +8,7 @@ import {
   ImageIcon,
   ImageUp,
   Music,
+  Presentation,
   Video,
 } from "lucide-react";
 import {
@@ -221,13 +222,17 @@ export const getFileIcon = (item, viewMode = "list") => {
   const extension = item.name.split(".").pop()?.toLowerCase();
   const iconSize = viewMode === "grid" ? "w-8 h-8" : "w-5 h-5";
 
+  if (["ppt", "pptx"].includes(extension)) {
+    return <Presentation className={`${iconSize} text-orange-600`} />;
+  }
+
   // Images
   if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension)) {
     return <ImageIcon className={`${iconSize} text-green-500`} />;
   }
 
   // Videos
-  if (["mp4", "avi", "mov", "wmv", "flv", "mkv"].includes(extension)) {
+  if (["mp4", "avi", "mov", "wmv", "flv", "mkv", "webm"].includes(extension)) {
     return <Video className={`${iconSize} text-purple-500`} />;
   }
 

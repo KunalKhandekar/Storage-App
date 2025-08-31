@@ -5,9 +5,8 @@ export const serveFile = async (req, res, next) => {
   const fileObj = req.file;
   try {
     const s3URL = getCloudFrontSignedURL({
-      Key: `${fileObj._id}${extname(fileObj.name)}`,
+      File: fileObj,
       Action: req.query.action,
-      Filename: fileObj.name,
     });
 
     return res.redirect(s3URL);

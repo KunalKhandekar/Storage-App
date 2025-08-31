@@ -6,9 +6,11 @@ import User from "../../models/userModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
 import {
   deleteS3Object,
+  deleteS3Objects,
   generatePreSignedUploadURL,
   getFileContentLength,
 } from "./s3Services.js";
+import mongoose from "mongoose";
 
 export const updateParentDirectorySize = async (
   parentDirectoryId,
@@ -78,16 +80,21 @@ const uploadFileInitiateService = async (
   }
 
   const fileExt = extname(name);
+  const fileId = new mongoose.Types.ObjectId();
+  const uploadKey = `${fileId}${fileExt}`;
+
   const newFile = await File.create({
+    _id: fileId,
     userId,
     size,
     name,
     parentDirId: targetDirectory._id,
     isUploading: true,
+    originalKey: uploadKey,
   });
 
   const uploadURL = await generatePreSignedUploadURL({
-    Key: `${newFile._id}${fileExt}`,
+    Key: uploadKey,
     ContentType: contentType,
   });
 
@@ -105,7 +112,7 @@ const uploadFileCompleteService = async (fileId, userId) => {
     throw new CustomError("File not found.", StatusCodes.BAD_REQUEST);
   }
 
-  const key = `${file._id}${extname(file.name)}`;
+  const key = file.originalKey;
   const contentLength = await getFileContentLength({ Key: key });
 
   if (contentLength !== file.size) {
@@ -160,9 +167,13 @@ const deleteFileService = async (id, userId) => {
     throw new CustomError("File not found", StatusCodes.NOT_FOUND);
   }
 
-  if (!file.googleFileId) {
+  if (file.googleFileId && file.pdfKey) {
+    await deleteS3Objects({
+      Keys: [{ Key: file.originalKey }, { Key: file.pdfKey }],
+    });
+  } else {
     await deleteS3Object({
-      Key: `${file._id}${extname(file.name)}`,
+      Key: file.originalKey,
     });
   }
 

@@ -5,6 +5,7 @@ import { uploadInBatches } from "../../Apis/uploadApi";
 import ImportDrive from "../../components/ImportDrive";
 import { useStorage } from "../../Contexts/StorageContext";
 import { useModal } from "../../Contexts/ModalContext";
+import ImportFromDrive from "../../components/GooglePicker";
 
 const MAX_CONCURRENT_UPLOADS = 5;
 
@@ -12,7 +13,7 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
   const [progressMap, setProgressMap] = useState({});
   const [dragOver, setDragOver] = useState(false);
   const { dirId } = useParams();
-  const { showModal } = useModal()
+  const { showModal } = useModal();
 
   const handleFileUpload = async (selectedFiles) => {
     const fileList = Array.from(selectedFiles);
@@ -130,7 +131,7 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
           </button>
 
           {/* Import Drive Button */}
-          <ImportDrive setActionDone={setActionDone} />
+          <ImportFromDrive setActionDone={setActionDone} />
         </div>
       </div>
     </>

@@ -146,6 +146,7 @@ const validations = [
           "parentDirId",
           "size",
           "isUploading",
+          "originalKey",
         ],
         additionalProperties: false,
         properties: {
@@ -171,8 +172,11 @@ const validations = [
           googleFileId: {
             bsonType: "string",
           },
-          mimeType: {
+          originalKey: {
             bsonType: "string",
+          },
+          pdfKey: {
+            bsonType: ["string", "null"],
           },
           sharedViaLink: {
             bsonType: "object",
