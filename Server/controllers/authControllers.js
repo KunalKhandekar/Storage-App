@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import githubClient from "../services/auth/githubAuthService.js";
-import { connectGoogleDrive } from "../services/auth/googleService.js";
 import { AuthServices } from "../services/index.js";
 import { sanitizeObject } from "../utils/sanitizeInput.js";
 import { setCookie } from "../utils/setCookie.js";
@@ -81,18 +80,6 @@ export const loginWithGithub = async (req, res, next) => {
     return res.redirect(
       `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent(error.message)}`
     );
-  }
-};
-
-export const connectToDrive = async (req, res, next) => {
-  const code = req.body.code;
-  try {
-    const files = await connectGoogleDrive(code, req.user);
-    return CustomSuccess.send(res, "Files imported", StatusCodes.OK, {
-      files,
-    });
-  } catch (error) {
-    next(error);
   }
 };
 

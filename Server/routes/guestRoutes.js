@@ -23,8 +23,6 @@ router.get(
   getFileInfoAndURL
 );
 
-// Note: Google-hosted files cannot be served directly (Unauthorized).
-
 // GET /guest/file/view/:fileId
 // Desc -> Serve a file via a public link.
 // Params -> { fileId }

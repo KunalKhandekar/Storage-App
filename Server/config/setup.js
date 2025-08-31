@@ -69,12 +69,6 @@ const validations = [
           canLoginWithPassword: {
             bsonType: "bool",
           },
-          google_access_token: {
-            bsonType: "string",
-          },
-          google_refresh_token: {
-            bsonType: "string",
-          },
           maxStorageLimit: {
             bsonType: "number",
           },

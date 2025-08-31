@@ -51,12 +51,6 @@ const userSchema = new Schema(
       type: Boolean,
       required: true,
     },
-    google_access_token: {
-      type: String,
-    },
-    google_refresh_token: {
-      type: String,
-    },
     maxStorageLimit: {
       type: Number,
       default: 1 * 1024 ** 3,

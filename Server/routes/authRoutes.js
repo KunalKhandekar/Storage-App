@@ -56,15 +56,4 @@ router.get("/github", redirectToAuthURL);
 // Query -> { code: string, state: string }
 router.get("/github/callback", limiter.githubLimiter, loginWithGithub);
 
-// POST /auth/google/drive/connect
-// Desc  -> Connect and import files from the user's Google Drive.
-// Body  -> { code: string }
-// Auth  -> Requires user to be authenticated.
-router.post(
-  "/google/drive/connect",
-  checkAuth,
-  limiter.connectDriveLimiter,
-  connectToDrive
-);
-
 export default router;
