@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 import { useEffect, useRef } from "react";
-import { driveConnect } from "../Apis/authApi";
 import { useGlobalProgress } from "../Contexts/ProgressContext";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../Contexts/ModalContext";
+import { driveConnect } from "../Apis/file_Dir_Api";
 
 export default function ImportFromDrive({ setActionDone }) {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ export default function ImportFromDrive({ setActionDone }) {
   const tokenRef = useRef(null);
   const handledRef = useRef(false);
 
-  const { start, step, finish, reset } = useGlobalProgress();
+  const { start, step, finish, reset, active } = useGlobalProgress();
   const { showModal } = useModal();
 
   const clientId =
@@ -109,9 +109,18 @@ export default function ImportFromDrive({ setActionDone }) {
     <div>
       <button
         onClick={handleOpen}
-        disabled={!clientId}
-        aria-disabled={!clientId}
-        className="group relative inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:border-purple-400 hover:text-purple-700 hover:bg-purple-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 shadow-sm hover:shadow-md min-h-[48px] sm:min-w-[140px] lg:min-w-[160px]"
+        disabled={!clientId || active}
+        aria-disabled={!clientId || active}
+        title={`${
+          active ? "Importing Files" : "Import Google Files"
+        }`}
+        className={`group relative inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm min-h-[48px] sm:min-w-[140px] lg:min-w-[160px]
+    ${
+      active || !clientId
+        ? "bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed shadow-none"
+        : "bg-white text-gray-700 border-2 border-gray-300 hover:border-purple-400 hover:text-purple-700 hover:bg-purple-50 hover:shadow-md focus:ring-purple-500"
+    }
+  `}
       >
         <svg
           className="w-4 h-4 mr-2 transition-transform group-hover:scale-110 flex-shrink-0"

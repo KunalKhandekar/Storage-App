@@ -12,13 +12,14 @@ import {
   getSharedFileViaLink,
   getSharedWithMeFiles,
   getUserAccessList,
+  importFromDrive,
   initiateFileUpload,
   renameFile,
   renameFileSharedViaEmail,
   revokeUserAccess,
   shareLinkToggle,
   shareViaEmail,
-  shareViaLink
+  shareViaLink,
 } from "../controllers/fileControllers.js";
 import { checkFileAccess } from "../middlewares/checkFileAccess.js";
 import { checkFileSharedViaEmail } from "../middlewares/checkFileShared.js";
@@ -28,7 +29,6 @@ import validateRequest from "../middlewares/validateRequest.js";
 // Import the limiters, Throttlers
 import { limiter } from "../utils/RateLimiter.js";
 import { throttler } from "../utils/Throttler.js";
-
 
 const router = Router();
 
@@ -227,5 +227,10 @@ router.patch(
   checkFileSharedViaEmail,
   renameFileSharedViaEmail
 );
+
+// POST /file/drive-import
+// Desc -> Import all files from google Drive
+// Body -> { token: string, filesMetaData: Array, fileForUploading: object }
+router.post("/drive-import", importFromDrive);
 
 export default router;

@@ -8,7 +8,7 @@ const dateLessThan = new Date(Date.now() + 1000 * 60 * 60);
 export const getCloudFrontSignedURL = ({ File, Action }) => {
   const fileName = File.name;
   let Key = File.originalKey;
-  if ((Action !== "download") && File.googleFileId && File.pdfKey) {
+  if (Action !== "download" && File.googleFileId && File.pdfKey) {
     Key = File.pdfKey;
   }
   const encodedDisposition = encodeURIComponent(

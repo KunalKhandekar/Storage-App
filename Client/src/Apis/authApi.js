@@ -9,19 +9,6 @@ export const googleAuth = async (code) => {
   }
 };
 
-export const driveConnect = async ({ token, filesMetaData, fileForUploading }) => {
-  try {
-    const response = await axios.post("/auth/drive-import", {
-      token,
-      filesMetaData,
-      fileForUploading,
-    });
-    return response.data;
-  } catch (error) {
-    return error?.response?.data;
-  }
-};
-
 export const sendOTP = async (email, action, password) => {
   try {
     const response = await axios.post("/otp/send-otp", {

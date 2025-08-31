@@ -1,4 +1,4 @@
-import { formatFileSize, getMimeType } from "../Utils/helpers";
+import { getMimeType } from "../Utils/helpers";
 import axios from "./axios";
 
 export const uploadFile = async (file, dirId, setProgressMap, showModal) => {

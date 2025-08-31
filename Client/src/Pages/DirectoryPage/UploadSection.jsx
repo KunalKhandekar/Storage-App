@@ -2,14 +2,14 @@ import { FolderPlus, Upload } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { uploadInBatches } from "../../Apis/uploadApi";
-import ImportDrive from "../../components/ImportDrive";
-import { useStorage } from "../../Contexts/StorageContext";
-import { useModal } from "../../Contexts/ModalContext";
 import ImportFromDrive from "../../components/GooglePicker";
+import { useModal } from "../../Contexts/ModalContext";
+import { useGlobalProgress } from "../../Contexts/ProgressContext";
 
 const MAX_CONCURRENT_UPLOADS = 5;
 
 const UploadSection = ({ setShowCreateModal, setActionDone }) => {
+  const { active } = useGlobalProgress();
   const [progressMap, setProgressMap] = useState({});
   const [dragOver, setDragOver] = useState(false);
   const { dirId } = useParams();
@@ -108,16 +108,35 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center w-full sm:max-w-2xl mx-auto">
           {/* Upload Files Button */}
-          <label className="group relative inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl hover:from-blue-700 hover:to-blue-800 cursor-pointer transition-all duration-200 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-h-[48px] sm:min-w-[140px] lg:min-w-[160px] touch-manipulation">
+          <label
+          
+            className={`relative inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg min-h-[48px] sm:min-w-[140px] lg:min-w-[160px] touch-manipulation
+      ${
+        active
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+          : "text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:shadow-xl transform hover:-translate-y-0.5"
+      }
+    `}
+          >
             <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 transition-transform group-hover:scale-110 flex-shrink-0" />
             <span className="truncate">Upload Files</span>
+
+            {/* Hidden file input */}
             <input
               type="file"
               multiple
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={(e) => handleFileUpload(e.target.files)}
+              disabled={active}
+              title={`${
+          active ? "Uploading Files" : "Upload Files"
+        }`}
             />
-            <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+
+            {/* Hover overlay effect */}
+            {!active && (
+              <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+            )}
           </label>
 
           {/* Create Directory Button */}

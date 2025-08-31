@@ -1,4 +1,3 @@
-import { extname } from "node:path";
 import { getCloudFrontSignedURL } from "../services/file/cloudFront.js";
 
 export const serveFile = async (req, res, next) => {
