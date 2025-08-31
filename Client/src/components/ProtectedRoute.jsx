@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../Contexts/AuthContent";
+import { useAuth } from "../Contexts/AuthContext";
 import Layout from "./Layout";
 import AuthLoader from "./AuthLoader";
 

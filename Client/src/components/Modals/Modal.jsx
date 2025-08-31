@@ -1,6 +1,5 @@
 import { AlertCircle, CheckCircle, X } from "lucide-react";
 
-// Modal Component
 const Modal = ({ isOpen, onClose, title, children, type = "info" }) => {
   if (!isOpen) return null;
 

@@ -2,7 +2,7 @@ import { Download, ExternalLink, X, File, Image, Music } from "lucide-react";
 import { renderFilePreview } from "../../Utils/helpers";
 
 const FilePreviewModal = ({ file, onClose }) => {
-  const fileUrl = `http://localhost:4000/user/${file.userId}/file/${file._id}`;
+  const fileUrl = `${import.meta.env.BACKEND_URL}/user/${file.userId}/file/${file._id}`;
 
   return (
     <div

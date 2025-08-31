@@ -1,28 +1,24 @@
 import {
-  Archive,
   Edit3,
   Eye,
   File,
-  FileBoxIcon,
-  FileText,
-  ImageIcon,
-  ImageUp,
-  Music,
-  Presentation,
-  Video,
-} from "lucide-react";
-import {
   FileArchive,
   FileCode,
   FileJson,
   FileQuestion,
   FileSpreadsheet,
   FileSymlink,
+  FileText,
   FileType,
   Folder,
+  ImageIcon,
+  ImageUp,
+  Music,
+  Presentation,
+  Video
 } from "lucide-react";
-import { regenerateSession } from "../Apis/authApi";
 import { useState } from "react";
+import { regenerateSession } from "../Apis/authApi";
 
 export const UserAvatar = ({ user, size = "w-8 h-8" }) => {
   const [imageError, setImageError] = useState(false);
@@ -68,12 +64,12 @@ export const PermissionBadge = ({ permission }) => (
 
 export const formatDate = (dateString) => {
   return new Date(dateString).toLocaleString("en-US", {
-    month: "short",    // Jan, Feb, etc.
-    day: "numeric",    // 1, 2, 3...
-    year: "numeric",   // 2025
-    hour: "2-digit",   // 01, 02, ... 12
+    month: "short", // Jan, Feb, etc.
+    day: "numeric", // 1, 2, 3...
+    year: "numeric", // 2025
+    hour: "2-digit", // 01, 02, ... 12
     minute: "2-digit", // 00–59
-    hour12: true       // 12-hour format with AM/PM
+    hour12: true, // 12-hour format with AM/PM
   });
 };
 
@@ -294,7 +290,7 @@ const extensionToMime = {
   md: "text/markdown",
   csv: "text/csv",
   txt: "text/plain",
-  json: "application/json"
+  json: "application/json",
 };
 
 export function getMimeType(file) {

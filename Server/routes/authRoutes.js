@@ -1,29 +1,13 @@
 import { Router } from "express";
-import { StatusCodes } from "http-status-codes";
-import mongoose from "mongoose";
 import {
-  connectToDrive,
   DeleteAndCreateSession,
   loginUser,
   loginWithGithub,
   loginWithGoogle,
   redirectToAuthURL,
-  registerUser,
+  registerUser
 } from "../controllers/authControllers.js";
-import checkAuth from "../middlewares/auth.js";
-import Directory from "../models/dirModel.js";
-import File from "../models/fileModel.js";
-import { fetchAndUpload } from "../services/file/fetchAndUpload.js";
-import { getGoogleFileSize } from "../services/file/getGoogleFileSize.js";
-import { updateParentDirectorySize } from "../services/file/index.js";
-import CustomError from "../utils/ErrorResponse.js";
-import {
-  getExportMimeType,
-  getFileExtension,
-} from "../utils/getExtension&MimeType.js";
 import { limiter } from "../utils/RateLimiter.js";
-import CustomSuccess from "../utils/SuccessResponse.js";
-import { FileServices } from "../services/index.js";
 
 const router = Router();
 

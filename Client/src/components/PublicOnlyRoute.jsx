@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../Contexts/AuthContent";
+import { useAuth } from "../Contexts/AuthContext";
 import AuthLoader from "./AuthLoader";
 
 const PublicOnlyRoute = ({ children }) => {

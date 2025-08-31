@@ -2,7 +2,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { BsGithub } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { googleAuth } from "../Apis/authApi";
-import { useAuth } from "../Contexts/AuthContent";
+import { useAuth } from "../Contexts/AuthContext";
 import { useModal } from "../Contexts/ModalContext";
 import { showSessionLimitExceedModal } from "../Utils/helpers";
 

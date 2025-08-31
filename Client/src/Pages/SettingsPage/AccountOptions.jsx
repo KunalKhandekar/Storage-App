@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { deleteAccount, disableAccount } from "../../Apis/userApi";
 import { Trash2 } from "lucide-react";
 import { useModal } from "../../Contexts/ModalContext";
-import { useAuth } from "../../Contexts/AuthContent";
+import { useAuth } from "../../Contexts/AuthContext";
 
 const AccountOptions = ({
   option,

@@ -2,7 +2,7 @@ import { FolderPlus, Upload } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { uploadInBatches } from "../../Apis/uploadApi";
-import ImportFromDrive from "../../components/GooglePicker";
+import ImportFromDrive from "../../components/ImportFromDrive";
 import { useModal } from "../../Contexts/ModalContext";
 import { useGlobalProgress } from "../../Contexts/ProgressContext";
 

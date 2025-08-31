@@ -5,7 +5,7 @@ import StatusBadge from "./StatusBadge";
 import UserActions from "./UserActions";
 import { UserAvatar } from "../../Utils/helpers";
 import { getUserPermissions } from "../../Utils/getUserPermissions";
-import { FaEye } from "react-icons/fa"; // 👈 Import Eye icon
+import { FaEye } from "react-icons/fa";
 
 const UserTableRow = ({
   user,

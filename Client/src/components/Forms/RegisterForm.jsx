@@ -5,7 +5,7 @@ import CredentialsForm from "../../components/Forms/CredentialsForm";
 import OTPForm from "../../components/Forms/OTPForm";
 import SocialAuthButtons from "../../components/SocialAuthButtons";
 import { googleAuth, register, sendOTP } from "../../Apis/authApi";
-import { useAuth } from "../../Contexts/AuthContent";
+import { useAuth } from "../../Contexts/AuthContext";
 
 export default function RegistrationForm() {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export default function RegistrationForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const URL = "http://localhost:4000";
+  const URL = import.meta.env.BACKEND_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

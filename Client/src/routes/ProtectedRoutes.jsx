@@ -1,14 +1,13 @@
 import ProtectedRoute from "../components/ProtectedRoute";
+import { AdminUserView } from "../Pages/AdminUserView";
+import AdminView from "../Pages/AdminViewPage";
 import DirectoryView from "../Pages/DirectoryPage";
 import SettingsPage from "../Pages/SettingsPage";
-import AdminView from "../Pages/AdminViewPage";
-import { AdminUserView } from "../Pages/AdminUserView";
 import Dashboard from "../Pages/SharePage/Dashboard";
-import SharedWithMe from "../Pages/SharePage/SharedWithMe";
-import SharedByMe from "../Pages/SharePage/SharedByMe";
-import PermissionManager from "../Pages/SharePage/PermissionManager";
 import FileViewer from "../Pages/SharePage/FileViewer";
-import GooglePicker from "../components/GooglePicker";
+import PermissionManager from "../Pages/SharePage/PermissionManager";
+import SharedByMe from "../Pages/SharePage/SharedByMe";
+import SharedWithMe from "../Pages/SharePage/SharedWithMe";
 
 export const protectedRoutes = [
   {
@@ -90,12 +89,5 @@ export const protectedRoutes = [
         <FileViewer />
       </ProtectedRoute>
     ),
-  },{
-    path: "/google-picker",
-    element: (
-     <ProtectedRoute>
-        <GooglePicker />
-      </ProtectedRoute>
-    )
   }
 ];

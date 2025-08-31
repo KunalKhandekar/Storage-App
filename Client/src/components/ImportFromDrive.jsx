@@ -16,9 +16,8 @@ export default function ImportFromDrive({ setActionDone }) {
   const { start, step, finish, reset, active } = useGlobalProgress();
   const { showModal } = useModal();
 
-  const clientId =
-    "53857639641-1se37lrtof61kmpu74g521k95erfpmkc.apps.googleusercontent.com";
-  const appId = "AIzaSyCxrkyjEHqEC7alhhuUrlqDxlkQmMaDrRg";
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const appId = import.meta.env.VITE_GOOGLE_APP_ID;
   const scope = "https://www.googleapis.com/auth/drive.readonly";
 
   async function handleOpen() {

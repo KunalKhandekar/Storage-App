@@ -69,7 +69,7 @@ const LinkSharingCard = ({
                 type="text"
                 value={
                   linkSharing.link ||
-                  `http://localhost:5173/guest/access/${file?._id}?token=${file?.sharedViaLink?.token}`
+                  `${import.meta.env.BASE_URL}/guest/access/${file?._id}?token=${file?.sharedViaLink?.token}`
                 }
                 readOnly
                 className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"

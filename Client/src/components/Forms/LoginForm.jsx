@@ -5,7 +5,7 @@ import LoginCredentialForm from "../../components/Forms/LoginCredentialForm";
 import OTPForm from "../../components/Forms/OTPForm";
 import SocialAuthButtons from "../../components/SocialAuthButtons";
 import StepProgress from "../../components/StepProgress";
-import { useAuth } from "../../Contexts/AuthContent";
+import { useAuth } from "../../Contexts/AuthContext";
 import { showSessionLimitExceedModal } from "../../Utils/helpers";
 import { useModal } from "../../Contexts/ModalContext";
 
@@ -26,7 +26,7 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const URL = "http://localhost:4000";
+  const URL = import.meta.env.BACKEND_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

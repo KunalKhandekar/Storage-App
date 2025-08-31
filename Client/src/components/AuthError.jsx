@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { showSessionLimitExceedModal } from "../Utils/helpers";
-import { useAuth } from "../Contexts/AuthContent";
+import { useAuth } from "../Contexts/AuthContext";
 import { useModal } from "../Contexts/ModalContext";
 
 export default function AuthError() {

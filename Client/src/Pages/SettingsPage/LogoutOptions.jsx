@@ -2,7 +2,7 @@ import { LogOut } from "lucide-react";
 import { logout, logoutAll } from "../../Apis/authApi";
 import { useModal } from "../../Contexts/ModalContext";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Contexts/AuthContent";
+import { useAuth } from "../../Contexts/AuthContext";
 
 const LogoutOptions = () => {
   const navigate = useNavigate();
