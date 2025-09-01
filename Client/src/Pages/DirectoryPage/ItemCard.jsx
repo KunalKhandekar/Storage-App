@@ -29,7 +29,7 @@ const ItemCard = ({
     if (item.type === "directory") {
       navigate(`/directory/${item._id}`);
     } else {
-      window.open(`${import.meta.env.BACKEND_URL}/file/${item._id}`, "_blank");
+      window.open(`${import.meta.env.VITE_BACKEND_URL}/file/${item._id}`, "_blank");
     }
   };
 
@@ -75,7 +75,7 @@ const ItemCard = ({
       case "download":
         if (item.type === "file") {
           window.open(
-            `${import.meta.env.BACKEND_URL}/file/${item._id}?action=download`,
+            `${import.meta.env.VITE_BACKEND_URL}/file/${item._id}?action=download`,
             "_blank"
           );
         }

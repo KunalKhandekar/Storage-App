@@ -68,8 +68,8 @@ export default function FileViewer() {
   }
 
   const url = selfView
-    ? `${import.meta.env.BACKEND_URL}${selfView}?`
-    : `${import.meta.env.BACKEND_URL}/file/share/access/${file._id}/${
+    ? `${import.meta.env.VITE_BACKEND_URL}${selfView}?`
+    : `${import.meta.env.VITE_BACKEND_URL}/file/share/access/${file._id}/${
         file?.isSharedViaLink
           ? `link?token=${file?.shareViaLink?.token}`
           : "email"

@@ -12,6 +12,7 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
   const { active } = useGlobalProgress();
   const [progressMap, setProgressMap] = useState({});
   const [dragOver, setDragOver] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const { dirId } = useParams();
   const { showModal } = useModal();
 
@@ -22,7 +23,7 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
       initialProgress[file.name] = 0;
     });
     setProgressMap(initialProgress);
-
+    setIsUploading(true);
     try {
       await uploadInBatches(
         fileList,
@@ -32,6 +33,7 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
         showModal
       );
       setActionDone(true);
+      setIsUploading(false);
       // TODO: toast
     } catch (err) {
       // TODO: toast
@@ -109,10 +111,9 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center w-full sm:max-w-2xl mx-auto">
           {/* Upload Files Button */}
           <label
-          
             className={`relative inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg min-h-[48px] sm:min-w-[140px] lg:min-w-[160px] touch-manipulation
       ${
-        active
+        active || Object.keys(progressMap).length > 0
           ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
           : "text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:shadow-xl transform hover:-translate-y-0.5"
       }
@@ -127,14 +128,11 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
               multiple
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={(e) => handleFileUpload(e.target.files)}
-              disabled={active}
-              title={`${
-          active ? "Uploading Files" : "Upload Files"
-        }`}
+              disabled={active || Object.keys(progressMap).length > 0}
             />
 
             {/* Hover overlay effect */}
-            {!active && (
+            {!active || !(Object.keys(progressMap).length > 0)&& (
               <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
             )}
           </label>
@@ -150,7 +148,7 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
           </button>
 
           {/* Import Drive Button */}
-          <ImportFromDrive setActionDone={setActionDone} />
+          <ImportFromDrive setActionDone={setActionDone} progressMap={progressMap} />
         </div>
       </div>
     </>

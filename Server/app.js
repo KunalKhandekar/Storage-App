@@ -1,10 +1,8 @@
 // Required Packages
-import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
+import { StatusCodes } from "http-status-codes";
 
 // Route Imports
 import authRoutes from "./routes/authRoutes.js";
@@ -17,15 +15,13 @@ import userRoutes from "./routes/userRoutes.js";
 // Middleware & Utilities
 import checkAuth from "./middlewares/auth.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
-import { port, secretKey } from "./utils/Constants.js";
+import { secretKey } from "./utils/Constants.js";
 
 // Database Connection
 import { connectDB } from "./config/db.js";
 
-
 // Security Imports
 import helmet from "helmet";
-import { RateLimiter } from "./utils/RateLimiter.js";
 
 // Connect to MongoDB
 await connectDB();
@@ -94,22 +90,6 @@ app.use("/guest", guestRoutes);
 // Error Handler
 app.use(errorHandler);
 
-const httpServer = createServer(app);
-
-const io = new Server(httpServer, {
-  cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
-  },
-});
-
-// store io globally
-app.set("io", io);
-
-httpServer.listen(4000, () => {
+app.listen(4000, () => {
   console.log("Server running on port 4000");
 });
-
-
-
-

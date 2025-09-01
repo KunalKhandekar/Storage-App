@@ -31,7 +31,6 @@ export async function fetchAndUpload({
     },
   });
 
-  // Listen for progress events
   upload.on("httpUploadProgress", (progress) => {
     if (progress.loaded) size = progress.loaded;
   });

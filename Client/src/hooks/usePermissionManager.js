@@ -13,7 +13,7 @@ export const usePermissionManager = () => {
   const navigate = useNavigate();
   const { fileId } = useParams();
   const { showModal, showConfirmModal, closeConfirmModal } = useModal();
-  
+
   // States
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -34,16 +34,18 @@ export const usePermissionManager = () => {
       if (response.success) {
         const fileInfo = response.data.fileInfo;
         setFile(fileInfo);
-        
+
         // Set link sharing if enabled
         if (fileInfo?.sharedViaLink?.enabled) {
           setLinkSharing({
-            link: `http://localhost:5173/guest/access/${fileInfo._id}?token=${fileInfo.sharedViaLink.token}`,
+            link: `${import.meta.env.VITE_BASE_URL}/guest/access/${
+              fileInfo._id
+            }?token=${fileInfo.sharedViaLink.token}`,
             enabled: fileInfo.sharedViaLink.enabled,
             permission: fileInfo.sharedViaLink.permission,
           });
         }
-        
+
         setSharedUsers(fileInfo?.sharedWith || []);
       } else {
         console.log(response.message);
@@ -101,7 +103,7 @@ export const usePermissionManager = () => {
       const selectedUser = sharedUsers.find(
         (u) => u.userId._id === userId
       )?.userId;
-      
+
       showConfirmModal(
         "Revoke Access",
         `Are you sure you want to revoke ${selectedUser?.name}'s access? They will no longer be able to view or interact with this file.`,
@@ -148,7 +150,9 @@ export const usePermissionManager = () => {
         if (res.success) {
           setLinkSharing((prev) => ({
             ...prev,
-            link: `http://localhost:5173/guest/access/${file._id}?token=${file.sharedViaLink.token}`,
+            link: `${import.meta.env.VITE_BASE_URL}/guest/access/${
+              file._id
+            }?token=${file.sharedViaLink.token}`,
             enabled: newState,
           }));
         }
@@ -184,7 +188,7 @@ export const usePermissionManager = () => {
     linkSharing,
     sharedUsers,
     fileId,
-    
+
     // Functions
     fetchFilePermissionInfo,
     handleUpdatePermission,
@@ -192,7 +196,7 @@ export const usePermissionManager = () => {
     handleCopyLink,
     handleToggleLink,
     handleGoBack,
-    
+
     // State setters
     setFile,
     setLoading,

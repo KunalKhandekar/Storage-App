@@ -32,7 +32,7 @@ export const generatePreSigendGetURL = async ({ Key, Action, Filename }) => {
     ResponseContentDisposition:
       Action === "download"
         ? `attachment; filename="${Filename}"`
-        : `inline; filename="${Filename}"`, // allows browser preview
+        : `inline; filename="${Filename}"`,
   });
 
   const preSigendGetURL = await getSignedUrl(s3Client, command, {
