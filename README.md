@@ -1,7 +1,7 @@
 # 🚀 Storage App
 
 A full-stack cloud storage application that allows users to upload, manage, and share their files securely.  
-Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + MongoDB + Redis (Server)**.
+Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + MongoDB + Redis (Server)** with **AWS S3** cloud storage and **Google Drive Import** functionality.
 
 ---
 
@@ -10,6 +10,7 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
 - [✨ Features](#-features)
   - [🔐 Authentication & Security](#-authentication--security)
   - [📂 File Management](#-file-management)
+  - [☁️ Cloud Storage & Import](#️-cloud-storage--import)
   - [🏷️ Sharing & Permissions](#️-sharing--permissions)
   - [⚙️ Settings & Customization](#️-settings--customization)
   - [🛠️ Admin Dashboard](#️-admin-dashboard)
@@ -47,11 +48,21 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
 ### 📂 File Management
 
 - Upload any file (PDF, Images, Videos, Docs, etc.) with progress tracking.
+- **Cloud storage with AWS S3** for scalable and reliable file storage.
 - Supports **Grid and List views** for file navigation.
 - View file details (size, type, created date, modified date).
 - Search & filter files easily.
 - Rename, delete (soft & hard delete), and recover files.
-- Storage usage tracking.
+- Storage usage tracking with cloud-based quota management.
+
+### ☁️ Cloud Storage & Import
+
+- **AWS S3 Integration** for secure cloud file storage.
+- **CloudFront CDN** for fast file delivery and optimized performance.
+- **Google Drive Import** - seamlessly import files from Google Drive to your storage.
+- Batch import functionality for multiple files.
+- Progress tracking for import operations.
+- Automatic file type detection and metadata preservation.
 
 ### 🏷️ Sharing & Permissions
 
@@ -84,228 +95,235 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
 
 ```bash
 ├── Client
-    ├── .gitignore                # Git ignore rules for client
-    ├── eslint.config.js          # ESLint configuration for code linting
-    ├── index.html                # Root HTML file for Vite
-    ├── package-lock.json         # Auto-generated dependency lock file
-    ├── package.json              # Project dependencies & scripts
-    ├── src                       # Source code directory
-    │   ├── Apis                  # API service layer (Axios wrappers)
-    │   │   ├── adminApi.js
-    │   │   ├── authApi.js
-    │   │   ├── axios.js
-    │   │   ├── file_Dir_Api.js
-    │   │   ├── shareApi.js
-    │   │   ├── uploadApi.js
-    │   │   └── userApi.js
-    │   ├── App.jsx               # Root React component
-    │   ├── Contexts              # Global React contexts (state management)
-    │   │   ├── AuthContent.jsx
-    │   │   ├── ModalContainer.jsx
-    │   │   ├── ModalContext.jsx
-    │   │   └── StorageContext.jsx
-    │   ├── Pages                 # Main application pages
-    │   │   ├── AdminUserView     # Admin page for viewing a single user
-    │   │   │   ├── Breadcrumb.jsx
-    │   │   │   ├── ItemCard.jsx
-    │   │   │   └── index.jsx
-    │   │   ├── AdminViewPage     # Admin dashboard with role/user management
-    │   │   │   ├── DeleteModal.jsx
-    │   │   │   ├── EmptyState.jsx
-    │   │   │   ├── ErrorDisplay.jsx
-    │   │   │   ├── LoadingSpinner.jsx
-    │   │   │   ├── RoleBadge.jsx
-    │   │   │   ├── RoleChangeDropdown.jsx
-    │   │   │   ├── Sections      # Sub-sections inside AdminView
-    │   │   │   │   ├── Statistics.jsx
-    │   │   │   │   └── UserTable.jsx
-    │   │   │   ├── StatusBadge.jsx
-    │   │   │   ├── UserActions.jsx
-    │   │   │   ├── UserProfile.jsx
-    │   │   │   ├── UserTableRow.jsx
-    │   │   │   └── index.jsx
-    │   │   ├── DirectoryPage     # Core file/directory browser
-    │   │   │   ├── Breadcrumb.jsx
-    │   │   │   ├── CreateModal.jsx
-    │   │   │   ├── DirectoryView.jsx
-    │   │   │   ├── Dropdown.jsx
-    │   │   │   ├── ItemCard.jsx
-    │   │   │   ├── RenameModal.jsx
-    │   │   │   ├── ToolBar.jsx
-    │   │   │   ├── UploadSection.jsx
-    │   │   │   ├── index.jsx
-    │   │   │   └── view          # Directory view types
-    │   │   │       ├── GridView.jsx
-    │   │   │       └── ListView.jsx
-    │   │   ├── SettingsPage      # User settings & preferences
-    │   │   │   ├── AccountOptions.jsx
-    │   │   │   ├── ConnectedAccount.jsx
-    │   │   │   ├── LogoutOptions.jsx
-    │   │   │   ├── PasswordSettings.jsx
-    │   │   │   ├── ProfileSettings.jsx
-    │   │   │   ├── StorageUsage.jsx
-    │   │   │   └── index.jsx
-    │   │   └── SharePage         # Sharing-related views
-    │   │       ├── Dashboard     # Share dashboard
-    │   │       │   ├── Header.jsx
-    │   │       │   ├── QuickActions.jsx
-    │   │       │   ├── RecentActivity.jsx
-    │   │       │   ├── Stats.jsx
-    │   │       │   └── index.jsx
-    │   │       ├── FileViewer.jsx
-    │   │       ├── PermissionManager  # Manage file sharing permissions
-    │   │       │   ├── FileInfo.jsx
-    │   │       │   ├── Header.jsx
-    │   │       │   ├── LinkSharingCard.jsx
-    │   │       │   ├── SharedUsers.jsx
-    │   │       │   └── index.jsx
-    │   │       ├── SharedByMe    # Files user shared with others
-    │   │       │   ├── FileList.jsx
-    │   │       │   ├── Header.jsx
-    │   │       │   ├── SearchBar.jsx
-    │   │       │   └── index.jsx
-    │   │       └── SharedWithMe  # Files shared with the user
-    │   │           ├── FileList.jsx
-    │   │           ├── Header.jsx
-    │   │           ├── SearchAndFilter.jsx
-    │   │           └── index.jsx
-    │   ├── Utils                 # Helper functions
-    │   │   ├── getUserPermissions.js
-    │   │   └── helpers.jsx
-    │   ├── components            # Reusable UI components
-    │   │   ├── AdminHeader.jsx
-    │   │   ├── AuthError.jsx
-    │   │   ├── AuthLoader.jsx
-    │   │   ├── Forms             # Authentication forms
-    │   │   │   ├── CredentialsForm.jsx
-    │   │   │   ├── LoginCredentialForm.jsx
-    │   │   │   ├── LoginForm.jsx
-    │   │   │   ├── OTPForm.jsx
-    │   │   │   └── RegisterForm.jsx
-    │   │   ├── GuestFileAccess.jsx
-    │   │   ├── Header.jsx
-    │   │   ├── ImportDrive.jsx   # Import from external storage (Google Drive etc.)
-    │   │   ├── Layout.jsx        # App layout wrapper
-    │   │   ├── Modals            # App-wide modal components
-    │   │   │   ├── ConfrimationModal.jsx
-    │   │   │   ├── FileDetailsModal.jsx
-    │   │   │   ├── FilePreviewModal.jsx
-    │   │   │   ├── Modal.jsx
-    │   │   │   ├── ProgressModal.jsx
-    │   │   │   └── ShareModal.jsx
-    │   │   ├── NotFound.jsx      # 404 page
-    │   │   ├── ProtectedRoute.jsx # Guarded routes for authenticated users
-    │   │   ├── PublicOnlyRoute.jsx # Routes only accessible by guests
-    │   │   ├── RenderFile.jsx
-    │   │   ├── ShimmerUI         # Loading placeholders
-    │   │   │   ├── DirectoryShimmer.jsx
-    │   │   │   ├── PermissionManagerShimmer.jsx
-    │   │   │   ├── ShareDashboardShimmer.jsx
-    │   │   │   ├── SharedByMeShimmer.jsx
-    │   │   │   └── SharedWithMeShimmer.jsx
-    │   │   ├── SocialAuthButtons.jsx # Google/GitHub login buttons
-    │   │   └── StepProgress.jsx
-    │   ├── css
-    │   │   └── main.css          # Global styles
-    │   ├── hooks                 # Custom React hooks
-    │   │   ├── useAdminUserView.js
-    │   │   ├── useDirectory.js
-    │   │   ├── usePermissionManager.js
-    │   │   ├── useShareModal.js
-    │   │   ├── useUserSettings.js
-    │   │   └── useUsers.js
-    │   ├── main.jsx              # App entry point
-    │   └── routes                # Routing system
-    │       ├── GuestRoutes.jsx
-    │       ├── ProtectedRoutes.jsx
-    │       ├── PublicRoutes.jsx
-    │       └── index.jsx
-    └── vite.config.js            # Vite configuration file
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── src
+│   │   ├── Apis                   # Axios service layer (auth, files, share, upload, admin)
+│   │   │   ├── adminApi.js
+│   │   │   ├── authApi.js
+│   │   │   ├── axios.js
+│   │   │   ├── file_Dir_Api.js
+│   │   │   ├── shareApi.js
+│   │   │   ├── uploadApi.js
+│   │   │   └── userApi.js
+│   │   ├── App.jsx                # Root component
+│   │   ├── Contexts               # App-level state and modals
+│   │   │   ├── AuthContext.jsx
+│   │   │   ├── ModalContainer.jsx
+│   │   │   ├── ModalContext.jsx
+│   │   │   ├── ProgressContext.jsx
+│   │   │   └── StorageContext.jsx
+│   │   ├── Pages
+│   │   │   ├── AdminUserView      # Single user view (admin)
+│   │   │   │   ├── Breadcrumb.jsx
+│   │   │   │   ├── ItemCard.jsx
+│   │   │   │   └── index.jsx
+│   │   │   ├── AdminViewPage      # Admin dashboard (roles/users)
+│   │   │   │   ├── DeleteModal.jsx
+│   │   │   │   ├── EmptyState.jsx
+│   │   │   │   ├── ErrorDisplay.jsx
+│   │   │   │   ├── LoadingSpinner.jsx
+│   │   │   │   ├── RoleBadge.jsx
+│   │   │   │   ├── RoleChangeDropdown.jsx
+│   │   │   │   ├── Sections
+│   │   │   │   │   ├── Statistics.jsx
+│   │   │   │   │   └── UserTable.jsx
+│   │   │   │   ├── StatusBadge.jsx
+│   │   │   │   ├── UserActions.jsx
+│   │   │   │   ├── UserProfile.jsx
+│   │   │   │   ├── UserTableRow.jsx
+│   │   │   │   └── index.jsx
+│   │   │   ├── DirectoryPage      # File browser (grid/list)
+│   │   │   │   ├── Breadcrumb.jsx
+│   │   │   │   ├── CreateModal.jsx
+│   │   │   │   ├── DirectoryView.jsx
+│   │   │   │   ├── Dropdown.jsx
+│   │   │   │   ├── ItemCard.jsx
+│   │   │   │   ├── RenameModal.jsx
+│   │   │   │   ├── ToolBar.jsx
+│   │   │   │   ├── UploadSection.jsx
+│   │   │   │   ├── index.jsx
+│   │   │   │   └── view
+│   │   │   │       ├── GridView.jsx
+│   │   │   │       └── ListView.jsx
+│   │   │   ├── SettingsPage        # Profile, password, usage, sessions
+│   │   │   │   ├── AccountOptions.jsx
+│   │   │   │   ├── ConnectedAccount.jsx
+│   │   │   │   ├── LogoutOptions.jsx
+│   │   │   │   ├── PasswordSettings.jsx
+│   │   │   │   ├── ProfileSettings.jsx
+│   │   │   │   ├── StorageUsage.jsx
+│   │   │   │   └── index.jsx
+│   │   │   └── SharePage           # Share dashboard and managers
+│   │   │       ├── Dashboard
+│   │   │       │   ├── Header.jsx
+│   │   │       │   ├── QuickActions.jsx
+│   │   │       │   ├── RecentActivity.jsx
+│   │   │       │   ├── Stats.jsx
+│   │   │       │   └── index.jsx
+│   │   │       ├── FileViewer.jsx
+│   │   │       ├── PermissionManager
+│   │   │       │   ├── FileInfo.jsx
+│   │   │       │   ├── Header.jsx
+│   │   │       │   ├── LinkSharingCard.jsx
+│   │   │       │   ├── SharedUsers.jsx
+│   │   │       │   └── index.jsx
+│   │   │       ├── SharedByMe
+│   │   │       │   ├── FileList.jsx
+│   │   │       │   ├── Header.jsx
+│   │   │       │   ├── SearchBar.jsx
+│   │   │       │   └── index.jsx
+│   │   │       └── SharedWithMe
+│   │   │           ├── FileList.jsx
+│   │   │           ├── Header.jsx
+│   │   │           ├── SearchAndFilter.jsx
+│   │   │           └── index.jsx
+│   │   ├── Utils                  # Helpers/utilities
+│   │   │   ├── getUserPermissions.js
+│   │   │   └── helpers.jsx
+│   │   ├── components             # Reusable UI
+│   │   │   ├── AdminHeader.jsx
+│   │   │   ├── AuthError.jsx
+│   │   │   ├── AuthLoader.jsx
+│   │   │   ├── Forms
+│   │   │   │   ├── CredentialsForm.jsx
+│   │   │   │   ├── LoginCredentialForm.jsx
+│   │   │   │   ├── LoginForm.jsx
+│   │   │   │   ├── OTPForm.jsx
+│   │   │   │   └── RegisterForm.jsx
+│   │   │   ├── GlobalUploadProgess.jsx
+│   │   │   ├── GuestFileAccess.jsx
+│   │   │   ├── Header.jsx
+│   │   │   ├── ImportFromDrive.jsx
+│   │   │   ├── Layout.jsx
+│   │   │   ├── Modals
+│   │   │   │   ├── ConfrimationModal.jsx
+│   │   │   │   ├── FileDetailsModal.jsx
+│   │   │   │   ├── FilePreviewModal.jsx
+│   │   │   │   ├── Modal.jsx
+│   │   │   │   ├── ProgressModal.jsx
+│   │   │   │   └── ShareModal.jsx
+│   │   │   ├── NotFound.jsx
+│   │   │   ├── ProtectedRoute.jsx
+│   │   │   ├── PublicOnlyRoute.jsx
+│   │   │   ├── RenderFile.jsx
+│   │   │   ├── ShimmerUI
+│   │   │   │   ├── DirectoryShimmer.jsx
+│   │   │   │   ├── PermissionManagerShimmer.jsx
+│   │   │   │   ├── ShareDashboardShimmer.jsx
+│   │   │   │   ├── SharedByMeShimmer.jsx
+│   │   │   │   └── SharedWithMeShimmer.jsx
+│   │   │   ├── SocialAuthButtons.jsx
+│   │   │   └── StepProgress.jsx
+│   │   ├── css
+│   │   │   └── main.css
+│   │   ├── hooks                  # Custom hooks
+│   │   │   ├── useAdminUserView.js
+│   │   │   ├── useDirectory.js
+│   │   │   ├── usePermissionManager.js
+│   │   │   ├── useShareModal.js
+│   │   │   ├── useUserSettings.js
+│   │   │   └── useUsers.js
+│   │   ├── main.jsx
+│   │   └── routes
+│   │       ├── GuestRoutes.jsx
+│   │       ├── ProtectedRoutes.jsx
+│   │       ├── PublicRoutes.jsx
+│   │       └── index.jsx
+│   └── vite.config.js
 ```
 
 ### Server (Backend - Node + Express + MongoDB)
 
 ```bash
 ├── Server
-    ├── app.js                        # Entry point for the server (initializes Express app, middleware, and routes)
-    ├── config
-    │   ├── db.js                     # Database connection setup (MongoDB)
-    │   ├── redis.js                  # Redis client setup for caching and sessions
-    │   └── setup.js                  # Centralized app configuration (env, server setup, etc.)
-    ├── controllers                   # Handle request/response logic for each resource
-    │   ├── authControllers.js        # Login, register, OAuth, and session handling
-    │   ├── dirControllers.js         # Directory CRUD (create, list, delete, move)
-    │   ├── fileControllers.js        # File upload, download, delete, metadata handling
-    │   ├── otpControllers.js         # OTP generation & validation
-    │   └── userControllers.js        # User profile management & settings
-    ├── middlewares                   # Reusable middleware functions
-    │   ├── auth.js                   # Session authentication middleware
-    │   ├── checkAction.js            # Validate allowed user actions (login/register)
-    │   ├── checkFIleShared.js        # Check if a file is shared with the current user
-    │   ├── checkFileAccess.js        # Permission check before accessing a file
-    │   ├── checkRole.js              # Role-based access control (admin, user, .etc)
-    │   ├── errorHandler.js           # Global error handling middleware
-    │   ├── serveFile.js              # Middleware for streaming/serving files
-    │   └── validateRequest.js        # Request validation against mongoose Object Id.
-    ├── models                        # Database schemas/models
-    │   ├── dirModel.js               # Directory schema
-    │   ├── fileModel.js              # File schema )
-    │   ├── otpModel.js               # OTP schema
-    │   └── userModel.js              # User schema
-    ├── package-lock.json             # Auto-generated dependency lock file
-    ├── package.json                  # Server dependencies and scripts
-    ├── routes                        # Express route definitions
-    │   ├── authRoutes.js             # Routes for login, register, logout, etc.
-    │   ├── dirRoutes.js              # Routes for directory operations
-    │   ├── fileRoutes.js             # Routes for file operations
-    │   ├── guestRoutes.js            # Public/guest access routes
-    │   ├── otpRoutes.js              # Routes for OTP handling
-    │   └── userRoutes.js             # Routes for user profile/settings
-    ├── seeds
-    │   └── userSeed.js               # Script for seeding default users/admins
-    ├── services                      # Core business logic (decoupled from controllers)
-    │   ├── Directory
-    │   │   ├── collectDirectoryContents.js  # Collect all files/subdirectories in a folder
-    │   │   └── index.js                      # Export directory service functions
-    │   ├── auth
-    │   │   ├── checkSessionLimit.js          # Enforce max active sessions per user
-    │   │   ├── createRedisSession.js         # Create a Redis session for user login
-    │   │   ├── createUserWithRootDir.js      # Create user and assign root directory
-    │   │   ├── deleteOldRedisSession.js      # Remove expired/old sessions from Redis
-    │   │   ├── findAndValidateOAuthUser.js   # Check OAuth user validity
-    │   │   ├── githubAuthService.js          # GitHub OAuth logic
-    │   │   ├── googleService.js              # Google OAuth logic
-    │   │   ├── handleExistingUser.js         # Handle login for already registered users
-    │   │   ├── index.js                      # Export authentication services
-    │   │   ├── isValidCredentials.js         # Validate email/password credentials
-    │   │   ├── isValidOTP.js                 # Validate OTP code
-    │   │   ├── parseTempToken.js             # Parse temporary token (for recreation of session)
-    │   │   ├── registerNewOAuthUser.js       # Register a user via OAuth
-    │   │   └── userExists.js                 # Check if a user already exists
-    │   ├── file
-    │   │   ├── index.js                      # Export file services
-    │   │   ├── sharedByMeFiles.js            # Files shared by the logged-in user
-    │   │   └── sharedWithMeFiles.js          # Files shared with the logged-in user
-    │   ├── index.js                          # Entry point exporting all services
-    │   ├── otpService.js                     # OTP creation, validation, cleanup
-    │   └── user
-    │       └── index.js                      # User services (profile updates, etc.)
-    ├── utils                         # Utility/helper functions
-    │   ├── Constants.js              # Centralized constants
-    │   ├── ErrorResponse.js          # Custom error response class
-    │   ├── MulterSetup.js            # Multer setup for file uploads
-    │   ├── RateLimiter.js            # Middleware/service for rate-limiting
-    │   ├── SuccessResponse.js        # Custom success response format
-    │   ├── Throttler.js              # Throttling implementation
-    │   ├── ValidateInputs.js         # Generic input validation utilities
-    │   ├── canPerform.js             # Check if user can perform a specific action
-    │   ├── generatePath.js           # Generate file/folder paths
-    │   ├── sanitizeInput.js          # Sanitize user input for security
-    │   └── setCookie.js              # Utility for setting secure cookies
-    └── validators                    # Schema-based input validation
-        ├── authSchema.js             # Validation schema for auth routes
-        ├── commonValidation.js       # Reusable/common validation rules
-        └── fileSchema.js             # Validation schema for file operations
+│   ├── app.js                        # Express app bootstrap (middleware, routes)
+│   ├── config
+│   │   ├── db.js                     # MongoDB connection
+│   │   ├── redis.js                  # Redis client for sessions/caching
+│   │   └── setup.js                  # App-level config and env loading
+│   ├── controllers                   # Request handlers
+│   │   ├── authControllers.js
+│   │   ├── dirControllers.js
+│   │   ├── fileControllers.js
+│   │   ├── otpControllers.js
+│   │   └── userControllers.js
+│   ├── middlewares                   # Cross-cutting concerns
+│   │   ├── auth.js
+│   │   ├── checkAction.js
+│   │   ├── checkFIleShared.js
+│   │   ├── checkFileAccess.js
+│   │   ├── checkRole.js
+│   │   ├── errorHandler.js
+│   │   ├── serveFile.js
+│   │   └── validateRequest.js
+│   ├── models                        # Mongoose schemas
+│   │   ├── dirModel.js
+│   │   ├── fileModel.js
+│   │   ├── otpModel.js
+│   │   └── userModel.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── routes                        # Express routes
+│   │   ├── authRoutes.js
+│   │   ├── dirRoutes.js
+│   │   ├── fileRoutes.js
+│   │   ├── guestRoutes.js
+│   │   ├── otpRoutes.js
+│   │   └── userRoutes.js
+│   ├── seeds
+│   │   └── userSeed.js               # Seed default users/admins
+│   ├── services                      # Business logic
+│   │   ├── Directory
+│   │   │   ├── collectDirectoryContents.js
+│   │   │   └── index.js
+│   │   ├── auth
+│   │   │   ├── checkSessionLimit.js
+│   │   │   ├── createRedisSession.js
+│   │   │   ├── createUserWithRootDir.js
+│   │   │   ├── deleteOldRedisSession.js
+│   │   │   ├── findAndValidateOAuthUser.js
+│   │   │   ├── githubAuthService.js
+│   │   │   ├── googleService.js
+│   │   │   ├── handleExistingUser.js
+│   │   │   ├── index.js
+│   │   │   ├── isValidCredentials.js
+│   │   │   ├── isValidOTP.js
+│   │   │   ├── parseTempToken.js
+│   │   │   ├── registerNewOAuthUser.js
+│   │   │   └── userExists.js
+│   │   ├── file
+│   │   │   ├── cloudFront.js
+│   │   │   ├── fetchAndUpload.js
+│   │   │   ├── getGoogleFileSize.js
+│   │   │   ├── index.js
+│   │   │   ├── s3Services.js
+│   │   │   ├── sharedByMeFiles.js
+│   │   │   └── sharedWithMeFiles.js
+│   │   ├── index.js
+│   │   ├── otpService.js
+│   │   └── user
+│   │       └── index.js
+│   ├── utils                          # Utilities/helpers
+│   │   ├── Constants.js
+│   │   ├── ErrorResponse.js
+│   │   ├── MulterSetup.js
+│   │   ├── RateLimiter.js
+│   │   ├── SuccessResponse.js
+│   │   ├── Throttler.js
+│   │   ├── ValidateInputs.js
+│   │   ├── canPerform.js
+│   │   ├── generatePath.js
+│   │   ├── getExtension&MimeType.js
+│   │   ├── sanitizeInput.js
+│   │   └── setCookie.js
+│   └── validators                     # Validation schemas
+│       ├── authSchema.js
+│       ├── commonValidation.js
+│       └── fileSchema.js
 ```
 
 ---
@@ -357,6 +375,7 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
 </p>
 
 ### 🛠️ Admin Dashboard
+
 <p align="center">
   <img src="docs/ScreenShots/Admin/Dashboard.png" alt="Dashboard" width="45%" />
   <img src="docs/ScreenShots/Admin/Online-User.png" alt="Online Users" width="45%" />
@@ -364,15 +383,23 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
   <img src="docs/ScreenShots/Admin/Single User view.png" alt="View Directory" width="45%" />
 </p>
 
+### Import from Drive
+<p align="center">
+  <img src="docs/ScreenShots/GoogleDrive/SelectFiles.png" alt="SelectFiles" width="45%" />
+  <img src="docs/ScreenShots/GoogleDrive/ImportProgress.png" alt="Upload Progess" width="45%" />
+  <img src="docs/ScreenShots/GoogleDrive/ImportSuccess.png" alt="Upload Complete" width="45%" />
+  </p>
+  
 ---
 
 ## ⚡ Tech Stack
 
-- **Frontend**: React, TailwindCSS  
-- **Backend**: Node.js, Express.js  
-- **Database**: MongoDB, Redis.
-- **Authentication**: Bcrypt + OTP
-- **Storage**: Local/Multer , **(Future) Cloud (AWS S3)**
+- **Frontend**: React, TailwindCSS, Vite
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB, Redis
+- **Cloud Storage**: AWS S3, CloudFront CDN
+- **External APIs**: Google Drive API, Google OAuth2
+- **Authentication**: Bcrypt + OTP + OAuth (Google/GitHub)
 
 ---
 
@@ -387,71 +414,116 @@ cd Storage-App
 
 ## ⚙️ Environment Setup
 
-### Client ```.env```
-  ```bash
-  VITE_GOOGLE_CLIENT_ID=<your-google-client-id>
-  ```
+### Client `.env`
 
-### Server ```.env```
-  ```bash
-  # MongoDB
-  MONGODB_URL="mongodb://<username>:<password>@localhost:27017/StorageApp?replicaSet=rs0&authSource=admin"
+```bash
 
-  # OAuth Credentials
-  GOOGLE_CLIENT_ID=<your-google-client-id>
-  GOOGLE_CLIENT_SECRET=<your-google-client-secret>
-  GITHUB_CLIENT_ID=<your-github-client-id>
-  GITHUB_CLIENT_SECRET=<your-github-client-secret>
+# Backend & Frontend URLs
+VITE_BACKEND_URL="http://localhost:4000"
+VITE_BASE_URL="http://localhost:5173"
 
-  # Signed Secret
-  COOKIE_SECRET="<your-cookie-secret>"
+# Google Drive & OAuth
+VITE_GOOGLE_CLIENT_ID="<your-google-oauth-client-id>"
+VITE_GOOGLE_APP_ID="<your-google-app-id>"
+```
 
-  # Port
-  PORT=4000
+### Server `.env`
 
-  # Email (Resend API Key)
-  RESEND_KEY=<your-resend-api-key>
+```bash
+# MongoDB
+MONGODB_URL="mongodb://<user>:<password>@localhost:27017/StorageApp?replicaSet=rs0&authSource=admin"
 
-  # Base URLs
-  BASE_URL=http://localhost:4000
-  CLIENT_URL=http://localhost:5173
-  ```
+# OAuth credentials
+GOOGLE_CLIENT_ID="<your-google-oauth-client-id>"
+GOOGLE_CLIENT_SECRET="<your-google-oauth-client-secret>"
+GITHUB_CLIENT_ID="<your-github-oauth-client-id>"
+GITHUB_CLIENT_SECRET="<your-github-oauth-client-secret>"
+
+# Security & sessions
+COOKIE_SECRET="<your-random-cookie-secret>"
+
+# Server
+PORT=4000
+BASE_URL="http://localhost:4000"
+CLIENT_URL="http://localhost:5173"
+
+# Email (Resend)
+RESEND_KEY="<your-resend-api-key>"
+
+# AWS S3
+AWS_PROFILE="<your-aws-profile>"
+AWS_BUCKET="<your-s3-bucket-name>"
+
+# CloudFront
+CLOUDFRONT_URL="https://<your-cloudfront-domain>"
+CLOUDFRONT_PROFILE_URL="https://<your-cloudfront-profile-domain>"
+KEY_PAIR_ID="<your-cloudfront-key-pair-id>"
+CLOUDFRONT_PRIVATE_KEY="<paste-your-cloudfront-private-key>"
+```
 
 ## 🖥️ Client Setup
 
 1. Navigate to the **Client** folder:
-    ```bash
-    cd Client
-    ````
+   ```bash
+   cd Client
+   ```
 2. Install dependencies:
-    ```bash
-    npm install
-    ```
-3. Add your environment variables in ```.env```.
+   ```bash
+   npm install
+   ```
+3. Add your environment variables in `.env`.
 4. Run the development server:
-    ```bash
-    npm run dev
-    ```
+   ```bash
+   npm run dev
+   ```
 
-### ⚙️ Server Setup 
+### ⚙️ Server Setup
 
 1. Navigate to the **Server** folder:
-    ```bash
-    cd Server
-    ````
+   ```bash
+   cd Server
+   ```
 2. Install dependencies:
-    ```bash
-    npm install
-    ```
-3. Add your environment variables in ```.env```.
-4. Run setup script (for database and required folders):
+   ```bash
+   npm install
+   ```
+3. Add your environment variables in `.env`.
+4. **AWS Setup**: Configure your AWS credentials and ensure your S3 bucket and CloudFront distribution are properly set up.
+5. **Google Drive API Setup**: Enable Google Drive API in Google Cloud Console and configure OAuth consent screen.
+6. Run setup script (for database and required folders):
    ```bash
     npm run setup
-    ```
-5. Ensure Redis is running (via WSL or local setup).
-6. Run the development server:
-    ```bash
-    npm run dev
-    ```
+   ```
+7. Ensure Redis is running (via WSL or local setup).
+8. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 🔧 Additional Setup Requirements
+
+### AWS Configuration
+
+1. **Create S3 Bucket**: Set up your S3 bucket with appropriate permissions for file storage.
+2. **CloudFront Distribution**: Configure CloudFront for fast content delivery and signed URL generation.
+3. **IAM Permissions**: Ensure your AWS profile has the necessary permissions for S3 operations.
+4. **Private Key**: Generate and configure the CloudFront private key for signed URL generation.
+
+### Google Drive API Setup
+
+1. **Google Cloud Console**: Create a project and enable the Google Drive API.
+2. **OAuth 2.0 Credentials**: Configure OAuth 2.0 client IDs for both web application and server-side access.
+3. **Consent Screen**: Set up the OAuth consent screen with appropriate scopes for Drive access.
+4. **API Key**: Generate an API key for Google Drive operations (if required).
+
+### Key Features Enabled
+
+- **Seamless Google Drive Import**: Users can browse and import files directly from their Google Drive.
+- **Cloud Storage**: All files (uploaded and imported) are stored securely in AWS S3.
+- **Fast Delivery**: CloudFront CDN ensures fast file access worldwide.
+- **Scalable Architecture**: S3 storage eliminates local storage limitations.
+- **Secure File Access**: Signed URLs ensure secure, time-limited file access.
 
 ---
