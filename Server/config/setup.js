@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 import { connectDB } from "./db.js";
-import { existsSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
 
 await connectDB();
 const db = mongoose.connection.db;
@@ -26,6 +24,7 @@ const validations = [
           "isDeleted",
           "createdWith",
           "canLoginWithPassword",
+          "subscriptionId",
         ],
         additionalProperties: false,
         properties: {
@@ -71,6 +70,9 @@ const validations = [
           },
           maxStorageLimit: {
             bsonType: "number",
+          },
+          subscriptionId: {
+            bsonType: "objectId",
           },
           __v: {
             bsonType: "number",
@@ -279,15 +281,3 @@ for await (const v of validations) {
 }
 
 await client.close();
-
-const requiredFolder = ["profilePictures"];
-const absolutePath = import.meta.dirname;
-requiredFolder.forEach((folder) => {
-  const path = absolutePath + `/../${folder}`;
-  if (existsSync(path)) {
-    console.log(`${folder} folder already created.`);
-  } else {
-    mkdir(path);
-    console.log(`${folder} folder created.`);
-  }
-});

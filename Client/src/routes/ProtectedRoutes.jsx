@@ -2,6 +2,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { AdminUserView } from "../Pages/AdminUserView";
 import AdminView from "../Pages/AdminViewPage";
 import DirectoryView from "../Pages/DirectoryPage";
+import PlansPage from "../Pages/PlansPage";
 import SettingsPage from "../Pages/SettingsPage";
 import Dashboard from "../Pages/SharePage/Dashboard";
 import FileViewer from "../Pages/SharePage/FileViewer";
@@ -89,5 +90,13 @@ export const protectedRoutes = [
         <FileViewer />
       </ProtectedRoute>
     ),
-  }
+  },
+  {
+    path: "/plans",
+    element: (
+      <ProtectedRoute>
+        <PlansPage />
+      </ProtectedRoute>
+    ),
+  },
 ];

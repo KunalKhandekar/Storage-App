@@ -11,6 +11,8 @@ import fileRoutes from "./routes/fileRoutes.js";
 import guestRoutes from "./routes/guestRoutes.js";
 import otpRoutes from "./routes/otpRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
+import webhookRoutes from "./routes/webhookRoutes.js";
 
 // Middleware & Utilities
 import checkAuth from "./middlewares/auth.js";
@@ -66,18 +68,27 @@ app.post(
 app.use("/profilePictures", express.static("profilePictures"));
 app.use(express.json());
 app.use(cookieParser(secretKey));
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://192.168.0.107:5173",
+  "http://172.27.192.1:5173",
+];
+
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL,
-      "http://192.168.0.107:5173",
-      "http://172.27.192.1:5173",
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
 // Protected Routes
+app.use("/subscription", checkAuth, subscriptionRoutes);
 app.use("/file", checkAuth, fileRoutes);
 app.use("/directory", checkAuth, dirRoutes);
 app.use("/user", checkAuth, userRoutes);
@@ -86,6 +97,7 @@ app.use("/user", checkAuth, userRoutes);
 app.use("/otp", otpRoutes);
 app.use("/auth", authRoutes);
 app.use("/guest", guestRoutes);
+app.use("/webhook", webhookRoutes);
 
 // Error Handler
 app.use(errorHandler);

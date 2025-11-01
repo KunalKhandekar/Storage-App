@@ -55,6 +55,11 @@ const userSchema = new Schema(
       type: Number,
       default: 1 * 1024 ** 3,
     },
+    subscriptionId: {
+      type: Schema.Types.ObjectId,
+      ref: "Subscription",
+      default: null,
+    }
   },
   {
     strict: "throw",
