@@ -46,4 +46,16 @@ redisClient.deleteManySessions = async function (userId) {
   }
 };
 
+// Custom function to count redis user Sessions by userId
+redisClient.countUserSessions = async function (userId) {
+  try {
+    const result = await this.ft.search("userIdIdx", `@userId:{${userId}}`, {
+      LIMIT: { from: 0, size: 0 },
+    });
+    return result.total;
+  } catch (error) {
+    console.error("Error counting sessions of user:", error.message);
+  }
+};
+
 export default redisClient;

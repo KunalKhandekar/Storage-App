@@ -8,3 +8,12 @@ export const handleCreateSubscription = async (planId) => {
     return error?.response?.data;
   }
 };
+
+export const checkSubscriptionStatus = async () => {
+  try {
+    const response = await axios.get(`/subscription/status`);
+    return { success: true, ...response.data };
+  } catch (error) {
+    return error?.response?.data;
+  }
+};

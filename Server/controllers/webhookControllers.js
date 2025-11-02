@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 import { getPlanDetailsById } from "../utils/getPlanDetails.js";
 import { StatusCodes } from "http-status-codes";
 
+// route -> /webhook/razorpay
 export const razorpayWebhookController = async (req, res, next) => {
   const webhookBody = req.body;
   const webhookSignature = req.headers["x-razorpay-signature"];
@@ -36,7 +37,6 @@ export const razorpayWebhookController = async (req, res, next) => {
 
 async function handleActivateEvent(eventBody) {
   const webhookSubscription = eventBody.payload.subscription.entity;
-
   // update the user subscription document
   const updateSubscriptionDoc = await Subscription.findOneAndUpdate(
     {
@@ -45,10 +45,10 @@ async function handleActivateEvent(eventBody) {
     },
     {
       status: "active",
-      currentPeriodStart: webhookSubscription.current_start,
-      currentPeriodEnd: webhookSubscription.current_end,
-      startDate: webhookSubscription.start_at,
-      endDate: webhookSubscription.end_at,
+      currentPeriodStart: webhookSubscription.current_start * 1000,
+      currentPeriodEnd: webhookSubscription.current_end * 1000,
+      startDate: webhookSubscription.start_at * 1000,
+      endDate: webhookSubscription.end_at * 1000,
     },
     {
       new: true,
@@ -60,7 +60,7 @@ async function handleActivateEvent(eventBody) {
 
   // update the user with updated storageLimit
   await User.findByIdAndUpdate(webhookSubscription.notes.userId, {
-    maxStorageLimit: planDetails.maxStorageLimit,
+    maxStorageLimit: planDetails.limits.storageBytes,
     subscriptionId: updateSubscriptionDoc._id,
   });
 }

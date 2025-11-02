@@ -1,9 +1,13 @@
 import express from "express";
-import { createSubscription } from "../controllers/subscriptionControllers.js";
+import { checkSubscripitonStatus, createSubscription } from "../controllers/subscriptionControllers.js";
 
+// Subscription Router
 const router = express.Router();
 
-// Subscription Routes
+// Create Subscription
 router.post("/create", createSubscription);
+
+// Check subscription status
+router.get("/status", checkSubscripitonStatus);
 
 export default router;
