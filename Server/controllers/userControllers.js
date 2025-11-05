@@ -18,6 +18,7 @@ export const getUserInfo = async (req, res) => {
     maxStorageLimit: req.user?.maxStorageLimit,
     usedStorageLimit: rootDir?.size,
     availableStorageLimit: req.user?.maxStorageLimit - rootDir?.size,
+    maxFileSize: req.user?.maxFileSize,
   });
 };
 
@@ -232,10 +233,7 @@ export const getSpecificUserDirectory = async (req, res, next) => {
 export const getFile = async (req, res, next) => {
   const { userId, fileId } = req.params;
   try {
-    const file = await UserServices.GetFileService(
-      fileId,
-      userId
-    );
+    const file = await UserServices.GetFileService(fileId, userId);
     req.file = file;
     next();
   } catch (error) {

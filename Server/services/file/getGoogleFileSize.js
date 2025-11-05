@@ -2,21 +2,40 @@ import axios from "axios";
 import { getExportMimeType } from "../../utils/getExtension&MimeType.js";
 
 export async function getGoogleFileSize(file, token) {
-  const isGoogleNative = file.mimeType?.startsWith(
-    "application/vnd.google-apps"
-  );
-  const url = isGoogleNative
-    ? `https://www.googleapis.com/drive/v3/files/${file.id}/export`
-    : `https://www.googleapis.com/drive/v3/files/${file.id}`;
+  try {
+    // First try normal Drive metadata (for real files)
+    const metaRes = await axios.get(
+      `https://www.googleapis.com/drive/v3/files/${file.id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { fields: "size, mimeType" }
+      }
+    );
 
-  const params = isGoogleNative
-    ? { mimeType: getExportMimeType(file.mimeType) }
-    : { alt: "media" };
+    if (metaRes.data.size) {
+      return Number(metaRes.data.size);
+    }
 
-  const res = await axios.head(url, {
-    headers: { Authorization: `Bearer ${token}` },
-    params,
-  });
+    // If Google Doc — size = null, so export and measure size
+    const isGoogleNative = file.mimeType?.startsWith("application/vnd.google-apps");
+    if (isGoogleNative) {
+      const exportMime = getExportMimeType(file.mimeType);
 
-  return Number(res.headers["content-length"]) || 0;
+      const exportRes = await axios.get(
+        `https://www.googleapis.com/drive/v3/files/${file.id}/export`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { mimeType: exportMime },
+          responseType: "arraybuffer",
+        }
+      );
+
+      return exportRes.data.byteLength || 0;
+    }
+
+    return 0;
+  } catch (err) {
+    console.log("size fetch error:", err.message);
+    return 0;
+  }
 }

@@ -17,6 +17,7 @@ import {
   getFileExtension,
 } from "../../utils/getExtension&MimeType.js";
 import { fetchAndUpload } from "./fetchAndUpload.js";
+import { formatFileSize } from "../../utils/formatFileSize.js";
 
 export const updateParentDirectorySize = async (
   parentDirectoryId,
@@ -57,9 +58,17 @@ const uploadFileInitiateService = async (
   })
     .select("size")
     .lean();
+  const user = await User.findById(userId).select("maxFileSize").lean();
 
   if (!rootDirectory) {
     throw new CustomError("Root directory not found.", StatusCodes.NOT_FOUND);
+  }
+
+  if (size > user.maxFileSize) {
+    throw new CustomError(
+      `${name} size is larger than the file upload limit.`,
+      StatusCodes.FORBIDDEN
+    );
   }
 
   if (rootDirectory.size + size > maxStorageLimit) {
@@ -401,27 +410,40 @@ const importFileFromGoogleService = async (
       .select("size path")
       .session(session)
       .lean();
+    const user = await User.findById(userId).select("maxFileSize").lean();
 
     const availableSpace = maxStorageLimit - userRootDir.size;
 
     // Calculate real sizes for all files
     const fileSizes = await Promise.all(
-      filesMetaData.map(async (file) => {
-        if (file.sizeBytes && file.sizeBytes > 0) return file.sizeBytes;
-        return await getGoogleFileSize(file, token);
+      filesMetaData.map(async (file, i) => {
+        if (file.sizeBytes && file.sizeBytes > 0) {
+          return file.sizeBytes;
+        }
+        const size = await getGoogleFileSize(file, token);
+        filesMetaData[i].sizeBytes = size;
+        return size;
       })
     );
+
+    const invalidFile = filesMetaData.find(
+      (file) => file.sizeBytes > user.maxFileSize
+    );
+
+    if (invalidFile) {
+      throw new CustomError(
+        `${invalidFile.name} is too large (${formatFileSize(invalidFile.sizeBytes)}). 
+Your plan allows up to ${formatFileSize(user.maxFileSize)} only. 
+Upload stopped to avoid data loss. Upgrade to upload bigger files.`,
+        StatusCodes.FORBIDDEN
+      );
+    }
 
     const totalSize = fileSizes.reduce((acc, s) => acc + s, 0);
 
     if (totalSize > availableSpace) {
       throw new CustomError(
-        `Not enough storage space. Available: ${(
-          availableSpace /
-          (1024 * 1024)
-        ).toFixed(
-          2
-        )} MB, Required: ${(totalSize / (1024 * 1024)).toFixed(2)} MB.`,
+        `Not enough storage space. Available: ${formatFileSize(availableSpace)}, Required: ${formatFileSize(totalSize)}.`,
         StatusCodes.FORBIDDEN
       );
     }
@@ -504,7 +526,7 @@ const importFileFromGoogleService = async (
           originalKey: origUpload?.key,
           pdfKey: pdfUpload?.key || null,
           parentDirId: googleRootDir._id,
-          size: actualSize || origUpload?.size || 0,
+          size: actualSize,
           userId,
           googleFileId: id,
           isUploading: false,
@@ -513,8 +535,10 @@ const importFileFromGoogleService = async (
       { session }
     );
 
-    await Directory.updateOne(
-      { _id: googleRootDir._id },
+    // here i want to update many increment rootDirId also
+
+    await Directory.updateMany(
+      { _id: { $in: [googleRootDir._id, rootDirId] } },
       { $inc: { size: actualSize } },
       { session }
     );
