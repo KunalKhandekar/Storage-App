@@ -5,6 +5,8 @@ import { uploadInBatches } from "../../Apis/uploadApi";
 import ImportFromDrive from "../../components/ImportFromDrive";
 import { useModal } from "../../Contexts/ModalContext";
 import { useGlobalProgress } from "../../Contexts/ProgressContext";
+import { useAuth } from "../../Contexts/AuthContext";
+import { formatFileSize } from "../../Utils/helpers";
 
 const MAX_CONCURRENT_UPLOADS = 5;
 
@@ -12,18 +14,30 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
   const { active } = useGlobalProgress();
   const [progressMap, setProgressMap] = useState({});
   const [dragOver, setDragOver] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const { dirId } = useParams();
   const { showModal } = useModal();
+  const { user } = useAuth();
 
   const handleFileUpload = async (selectedFiles) => {
     const fileList = Array.from(selectedFiles);
+
+    // checking the file size before initiating uploads.
+    for (const file of fileList) {
+      if (file.size > user.maxFileSize) {
+        showModal(
+          "Upload Limit Exceeded",
+          `"${file.name}" exceeds your plan’s upload limit (${formatFileSize(user.maxFileSize)}).
+Upload didn’t start to avoid data loss. Upgrade to a higher plan to upload larger files effortlessly.`,
+          "error"
+        );
+        return;
+      }
+    }
     const initialProgress = {};
     fileList.forEach((file) => {
       initialProgress[file.name] = 0;
     });
     setProgressMap(initialProgress);
-    setIsUploading(true);
     try {
       await uploadInBatches(
         fileList,
@@ -33,7 +47,6 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
         showModal
       );
       setActionDone(true);
-      setIsUploading(false);
       // TODO: toast
     } catch (err) {
       // TODO: toast
@@ -132,9 +145,10 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
             />
 
             {/* Hover overlay effect */}
-            {!active || !(Object.keys(progressMap).length > 0)&& (
-              <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
-            )}
+            {!active ||
+              (!(Object.keys(progressMap).length > 0) && (
+                <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+              ))}
           </label>
 
           {/* Create Directory Button */}
@@ -148,7 +162,10 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
           </button>
 
           {/* Import Drive Button */}
-          <ImportFromDrive setActionDone={setActionDone} progressMap={progressMap} />
+          <ImportFromDrive
+            setActionDone={setActionDone}
+            progressMap={progressMap}
+          />
         </div>
       </div>
     </>

@@ -5,6 +5,8 @@ import { useGlobalProgress } from "../Contexts/ProgressContext";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../Contexts/ModalContext";
 import { driveConnect } from "../Apis/file_Dir_Api";
+import { useAuth } from "../Contexts/AuthContext";
+import { formatFileSize } from "../Utils/helpers";
 
 export default function ImportFromDrive({ setActionDone, progressMap }) {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ export default function ImportFromDrive({ setActionDone, progressMap }) {
 
   const { start, step, finish, reset, active } = useGlobalProgress();
   const { showModal } = useModal();
+  const { user } = useAuth();
 
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const appId = import.meta.env.VITE_GOOGLE_APP_ID;
@@ -43,35 +46,39 @@ export default function ImportFromDrive({ setActionDone, progressMap }) {
       const docs = selection?.docs || [];
 
       setShowPicker(false);
-      start(docs.length || 0);
 
-      if ((docs?.length || 0) > 0) {
-        try {
-          for (let i = 0; i < docs.length; i++) {
-            const response = await driveConnect({
-              token: tokenRef.current,
-              filesMetaData: docs,
-              fileForUploading: docs[i],
-            });
+      if (docs.length === 0) {
+        handledRef.current = false;
+        return;
+      }
 
-            if (response.success) {
-              step(1);
-            } else {
-              reset();
-              showModal("Error", response.message, "error");
-              handledRef.current = false;
-              return;
-            }
+      try {
+        start(docs.length || 0);
+
+        for (const file of docs) {
+          const response = await driveConnect({
+            token: tokenRef.current,
+            filesMetaData: docs,
+            fileForUploading: file,
+          });
+
+          if (!response.success) {
+            reset();
+            showModal("Error", response.message, "error");
+            handledRef.current = false;
+            return;
           }
 
-          finish();
-          navigate("/");
-          setActionDone(true);
-        } catch (err) {
-          console.error("Drive import failed:", err);
-          showModal("Error", "Drive import failed. Please try again.", "error");
-          reset();
+          step(1);
         }
+
+        finish();
+        navigate("/");
+        setActionDone(true);
+      } catch (err) {
+        console.error("Drive import failed:", err);
+        reset();
+        showModal("Error", "Drive import failed. Please try again.", "error");
       }
 
       handledRef.current = false;
@@ -110,9 +117,7 @@ export default function ImportFromDrive({ setActionDone, progressMap }) {
         onClick={handleOpen}
         disabled={Object.keys(progressMap).length > 0 || active}
         aria-disabled={Object.keys(progressMap).length > 0 || active}
-        title={`${
-          active ? "Importing Files" : "Import Google Files"
-        }`}
+        title={`${active ? "Importing Files" : "Import Google Files"}`}
         className={`group relative inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm min-h-[48px] sm:min-w-[140px] lg:min-w-[160px]
     ${
       active || Object.keys(progressMap).length > 0
