@@ -1,8 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import redisClient from "../../config/redis.js";
 import CustomError from "../../utils/ErrorResponse.js";
+import User from "../../models/userModel.js";
 
 export const checkSessionLimit = async (userId) => {
+  const user = await User.findById(userId).select("maxDevices").lean();
   const userSessions = await redisClient.ft.search(
     "userIdIdx",
     `@userId:{${userId}}`,
@@ -11,7 +13,7 @@ export const checkSessionLimit = async (userId) => {
     }
   );
 
-  if (userSessions.total >= 2) {
+  if (userSessions.total >= user.maxDevices) {
     const loginToken = crypto.randomUUID();
     await redisClient.set(
       `temp_login_token:${loginToken}`,
