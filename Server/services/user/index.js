@@ -13,6 +13,8 @@ import { validateInputs } from "../../utils/ValidateInputs.js";
 import { nameSchema } from "../../validators/commonValidation.js";
 import { deleteS3Objects, s3Client } from "../file/s3Services.js";
 import { DirectoryServices } from "../index.js";
+import { razorpayInstance } from "../razorpayService.js";
+import Subscription from "../../models/subscriptionModel.js";
 
 const logoutUserService = async (token) => {
   await redisClient.del(`session:${token}`);
@@ -148,9 +150,11 @@ const hardDeleteUserService = async (userId, currentUser) => {
   const keys = allFiles.map(({ _id, name }) => ({
     Key: `${_id}${extname(name)}`,
   }));
-  await deleteS3Objects({
-    Keys: keys,
-  });
+  if (keys.length > 0) {
+    await deleteS3Objects({
+      Keys: keys,
+    });
+  }
   await File.deleteMany({ userId: user._id });
 
   // delete all folder of the user
@@ -280,7 +284,7 @@ const disableUserService = async (userId) => {
 };
 
 const deleteUserService = async (userId) => {
-  const user = await User.findOne({ _id: userId });
+  const user = await User.findOne({ _id: userId }).populate("subscriptionId");
 
   if (!user) {
     throw new CustomError("User not found", StatusCodes.NOT_FOUND);
@@ -289,14 +293,30 @@ const deleteUserService = async (userId) => {
   // Deleting all sessions of the user
   await redisClient.deleteManySessions(user._id);
 
+  // cancelling the userSubscription and delete it from DB
+  if (user.subscriptionId) {
+    try {
+      await razorpayInstance.subscriptions.cancel(
+        user.subscriptionId.razorpaySubscriptionId,
+        false // cancel immediately
+      );
+      await Subscription.findByIdAndDelete(user.subscriptionId._id);
+    } catch (err) {
+      console.error("Razorpay cancel error:", err);
+    }
+  }
+
   // delete all files of the user (virtual and in S3)
   const allFiles = await File.find({ userId: user._id });
   const keys = allFiles.map(({ _id, name }) => ({
     Key: `${_id}${extname(name)}`,
   }));
-  await deleteS3Objects({
-    Keys: keys,
-  });
+
+  if (keys.length > 0) {
+    await deleteS3Objects({ Keys: keys });
+  }
+
+  // Remove file records
   await File.deleteMany({ userId: user._id });
 
   // delete all folder of the user

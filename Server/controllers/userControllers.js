@@ -16,8 +16,8 @@ export const getUserInfo = async (req, res) => {
     picture: req.user?.picture,
     role: req.user?.role,
     maxStorageLimit: req.user?.maxStorageLimit,
-    usedStorageLimit: rootDir.size,
-    availableStorageLimit: req.user?.maxStorageLimit - rootDir.size,
+    usedStorageLimit: rootDir?.size,
+    availableStorageLimit: req.user?.maxStorageLimit - rootDir?.size,
   });
 };
 

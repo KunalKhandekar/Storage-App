@@ -72,6 +72,7 @@ export const createSubscription = async (req, res, next) => {
           subscriptionDoc.razorpaySubscriptionId
         );
         // keeping the DB status as created because creating new again and updating the document.
+        // also another reason cancelling the subscription will trigger the webhook event. (More explanation in webhook controller)
 
         // Create new selected plan and update the document
         const subscription = await razorpayInstance.subscriptions.create({
@@ -83,7 +84,6 @@ export const createSubscription = async (req, res, next) => {
         await Subscription.findByIdAndUpdate(subscriptionDoc._id, {
           planId: planId,
           razorpaySubscriptionId: subscription.id,
-          status: subscription.status,
         });
 
         return CustomSuccess.send(
@@ -116,6 +116,7 @@ export const createSubscription = async (req, res, next) => {
       currentPeriodStart: null,
       endDate: null,
       startDate: null,
+      invoiceId: null,
       status: "created",
     });
 
@@ -134,17 +135,29 @@ export const checkSubscripitonStatus = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const userDetails = req.user;
+
     const subscriptionDoc = await Subscription.findOne({ userId }).lean();
+
+    // if user has active subscription
     if (subscriptionDoc && subscriptionDoc.status === "active") {
+      // get the plan details
       const planDetails = getPlanDetailsById(subscriptionDoc.planId);
+
+      // total files of the user
       const totalFiles = await File.countDocuments({ userId }).lean();
-      const now = new Date();
-      const filesUploadedThisMonth = await File.countDocuments({
-        createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) },
+
+      // total files uploaded during subscription period
+      const filesUploadedInSubscription = await File.countDocuments({
+        userId,
+        createdAt: { $gte: new Date(subscriptionDoc.startDate) },
       });
+
+      // Storage used based on root parent directory
       const rootDirSize = (
         await Directory.findById(userDetails.rootDirId).select("size").lean()
       ).size;
+
+      // number of files shared by the user
       const sharedFiles = await File.countDocuments({
         userId,
         $or: [
@@ -152,6 +165,8 @@ export const checkSubscripitonStatus = async (req, res, next) => {
           { sharedWith: { $not: { $size: 0 } } },
         ],
       });
+
+      // number of active device sessions
       const activeSession = await redisClient.countUserSessions(userId);
 
       return CustomSuccess.send(res, "Active plan found!", StatusCodes.OK, {
@@ -168,6 +183,7 @@ export const checkSubscripitonStatus = async (req, res, next) => {
           features: planDetails.features,
           cancellationScheduled: false, // for cancellation grace_period
           cancellationDate: null, // for cancellation grace_period
+          invoiceURL: `${process.env.RAZORPAY_INVOICE_LINK}${subscriptionDoc.invoiceId}`,
         },
         usage: {
           maxFileUploadSize: planDetails.limits.maxFileSize,
@@ -181,7 +197,7 @@ export const checkSubscripitonStatus = async (req, res, next) => {
           sharedFiles, // total files shared by user.
           devicesConnected: activeSession, // Total device login session
           maxDevices: planDetails.limits.maxDevices, // Max device as per the plan
-          filesUploadedThisMonth, // understand it from the createdAt field of files
+          filesUploadedInSubscription, // understand it from the createdAt field of files
         },
       });
     }
@@ -191,27 +207,28 @@ export const checkSubscripitonStatus = async (req, res, next) => {
   }
 };
 
-// {
-//   "subscription": {
-//     "hasActivePlan": true,
-//     "status": "active",
-//     "planId": "plan_Ra0GqWQ6p0ffYM",
-//     "planName": "Pro",
-//     "planPrice": "299",
-//     "billingCycle": "monthly",
-//     "nextBillingDate": "2024-11-02T00:00:00Z",
-//     "daysUntilRenewal": 30, // Calculate it
-//     "cancellationScheduled": false, // for cancellation grace_period
-//     "cancellationDate": null // for cancellation grace_period
-//   },
-//   "usage": {
-//     "storageUsed": 45200000000, //
-//     "storageTotal": 214748364800,
-//     "storagePercentage": 22.6,
-//     "totalFiles": 1247, // All files of the user
-//     "sharedFiles": 23, // total files shared by user.
-//     "devicesConnected": 2, // Total device login session
-//     "maxDevices": 3, // Max device as per the plan
-//     "filesUploadedThisMonth": 156, // understand it from the createdAt field of files
-//   },
-// }
+export const cancelSubscription = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const subscriptionDoc = await Subscription.findOne({ userId });
+    // Case 1 -> check don't have a subscription
+    if (!subscriptionDoc || subscriptionDoc.status !== "active") {
+      throw new CustomError("Subscription not found", StatusCodes.NOT_FOUND);
+    }
+
+    // Case 2 -> User has an acitve subscription
+    // Calling razorpay cancel subscription API
+    await razorpayInstance.subscriptions.cancel(
+      subscriptionDoc.razorpaySubscriptionId,
+      false
+    );
+
+    // only setting the state to cancelled, revoke of benefits will be handled by webhook call
+    subscriptionDoc.status = "cancelled";
+    await subscriptionDoc.save();
+
+    return CustomSuccess.send(res, "Subscription cancelled.", StatusCodes.OK);
+  } catch (error) {
+    next(error);
+  }
+};

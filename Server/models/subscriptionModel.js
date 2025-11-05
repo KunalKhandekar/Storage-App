@@ -24,7 +24,7 @@ const subscriptionSchema = new Schema(
         "active", // payment success
         "past_due", // next payment failed
         "paused",
-        "canceled", // canceled immediately
+        "cancelled", // canceled immediately
         "in_grace", // user canceled but plan valid until grace period end
       ],
       default: "created",
@@ -42,6 +42,14 @@ const subscriptionSchema = new Schema(
       default: null,
     },
     endDate: {
+      type: Date,
+      default: null,
+    },
+    invoiceId: {
+      type: String,
+      default: null,
+    },
+    cancelledAt: {
       type: Date,
       default: null,
     },

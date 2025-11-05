@@ -24,7 +24,6 @@ const validations = [
           "isDeleted",
           "createdWith",
           "canLoginWithPassword",
-          "subscriptionId",
         ],
         additionalProperties: false,
         properties: {
@@ -72,7 +71,13 @@ const validations = [
             bsonType: "number",
           },
           subscriptionId: {
-            bsonType: "objectId",
+            bsonType: [ "objectId", "null" ],
+          },
+          maxFileSize: {
+            bsonType: "number",
+          },
+          maxDevices: {
+            bsonType: "number",
           },
           __v: {
             bsonType: "number",

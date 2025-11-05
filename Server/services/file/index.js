@@ -277,6 +277,10 @@ const getFileInfoService = async (fileId) => {
     .select("name sharedViaLink userId")
     .populate("userId");
 
+  if (!file) {
+    throw new CustomError("File not found", StatusCodes.NOT_FOUND);
+  }
+
   const url = `${process.env.BASE_URL}/guest/file/view/${file._id}?token=${file.sharedViaLink.token}`;
 
   return {
@@ -412,7 +416,10 @@ const importFileFromGoogleService = async (
 
     if (totalSize > availableSpace) {
       throw new CustomError(
-        `Not enough storage space. Available: ${(availableSpace / (1024 * 1024)).toFixed(
+        `Not enough storage space. Available: ${(
+          availableSpace /
+          (1024 * 1024)
+        ).toFixed(
           2
         )} MB, Required: ${(totalSize / (1024 * 1024)).toFixed(2)} MB.`,
         StatusCodes.FORBIDDEN
@@ -546,5 +553,5 @@ export default {
   RevokeUserAccessService: revokeUserAccessService,
   GetUserAccessListService: getUserAccessListService,
   RenameFileByEditorService: renameFileByEditorService,
-  ImportFileFromGoogleService: importFileFromGoogleService
+  ImportFileFromGoogleService: importFileFromGoogleService,
 };

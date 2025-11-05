@@ -36,6 +36,7 @@ export const createUserWithRootDir = async (
     createdWith,
     ...(password && { password }),
     ...(picture && { picture }),
+    
   };
 
   await User.create([userPayload], { session });
