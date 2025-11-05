@@ -171,7 +171,9 @@ const hardDeleteUserService = async (userId, currentUser) => {
 };
 
 const recoverUserService = async (userId, currentUser) => {
-  const user = await User.findOne({ _id: userId }).select("role");
+  const user = await User.findOne({ _id: userId })
+    .select("role subscriptionId")
+    .populate("subscriptionId");
 
   if (!user) {
     throw new CustomError("User not found", StatusCodes.NOT_FOUND);
@@ -183,6 +185,20 @@ const recoverUserService = async (userId, currentUser) => {
       "Insufficient permissions to recover user",
       StatusCodes.FORBIDDEN
     );
+  }
+
+  // If user has a subscription (Resume it)
+  if (user.subscriptionId) {
+    // Calling razorpay resume subscription API
+    await razorpayInstance.subscriptions.resume(
+      user.subscriptionId.razorpaySubscriptionId,
+      { resume_at: "now" }
+    );
+
+    // Update the DB
+    await Subscription.findByIdAndUpdate(user.subscriptionId._id, {
+      status: "active",
+    });
   }
 
   user.isDeleted = false;
@@ -264,7 +280,7 @@ const updateProfileService = async (userId, file, name) => {
 };
 
 const disableUserService = async (userId) => {
-  const user = await User.findOne({ _id: userId });
+  const user = await User.findOne({ _id: userId }).populate("subscriptionId");
 
   if (!user) {
     throw new CustomError("User not found", StatusCodes.NOT_FOUND);
@@ -277,6 +293,20 @@ const disableUserService = async (userId) => {
 
   // Deleting all sessions of the user
   await redisClient.deleteManySessions(user._id);
+
+  // Pause the subscription of the user (If any subscription is there).
+  if (user.subscriptionId) {
+    // Calling razorpay pause subscription API
+    await razorpayInstance.subscriptions.pause(
+      user.subscriptionId.razorpaySubscriptionId,
+      { pause_at: "now" }
+    );
+
+    // updating the DB
+    await Subscription.findByIdAndUpdate(user.subscriptionId._id, {
+      status: "paused",
+    });
+  }
 
   // Soft deleting user
   user.isDeleted = true;
