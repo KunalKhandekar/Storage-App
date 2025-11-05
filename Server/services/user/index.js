@@ -84,7 +84,9 @@ const softDeleteUserService = async (userId, currentUser) => {
       StatusCodes.BAD_REQUEST
     );
   }
-  const user = await User.findOne({ _id: userId }).select("role isDeleted");
+  const user = await User.findOne({ _id: userId })
+    .select("role isDeleted subscriptionId")
+    .populate("subscriptionId");
 
   if (!user) {
     throw new CustomError("User not found", StatusCodes.NOT_FOUND);
@@ -113,6 +115,20 @@ const softDeleteUserService = async (userId, currentUser) => {
 
   // Deleting all sessions of the user
   await redisClient.deleteManySessions(userId);
+
+  // Pause the subscription of the user (If any subscription is there).
+  if (user.subscriptionId) {
+    // Calling razorpay pause subscription API
+    await razorpayInstance.subscriptions.pause(
+      user.subscriptionId.razorpaySubscriptionId,
+      { pause_at: "now" }
+    );
+
+    // updating the DB
+    await Subscription.findByIdAndUpdate(user.subscriptionId._id, {
+      status: "paused",
+    });
+  }
 
   // Soft deleting user
   user.isDeleted = true;

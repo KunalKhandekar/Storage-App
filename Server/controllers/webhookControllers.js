@@ -4,7 +4,7 @@ import Subscription from "../models/subscriptionModel.js";
 import User from "../models/userModel.js";
 import { getPlanDetailsById } from "../utils/getPlanDetails.js";
 import { StatusCodes } from "http-status-codes";
-import FileSerivces from "../services/file/index.js"
+import FileSerivces from "../services/file/index.js";
 import File from "../models/fileModel.js";
 
 // route -> /webhook/razorpay
@@ -32,6 +32,12 @@ export const razorpayWebhookController = async (req, res, next) => {
       break;
     case "subscription.cancelled":
       message = await handleCancelledEvent(webhookBody);
+      break;
+    case "subscription.paused":
+      message = "User account has been disabled";
+      break;
+    case "subscription.resumed":
+      message = "User account has been recovered";
       break;
     default:
       break;
