@@ -17,3 +17,12 @@ export const checkSubscriptionStatus = async () => {
     return error?.response?.data;
   }
 };
+
+export const cancelSubscription = async () => {
+  try {
+    const response = await axios.delete(`/subscription/cancel`);
+    return { success: true, ...response.data };
+  } catch (error) {
+    return error?.response?.data;
+  }
+};

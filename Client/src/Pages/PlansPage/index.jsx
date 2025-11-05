@@ -1,22 +1,24 @@
 import {
-  Check,
-  Zap,
-  Crown,
-  Sparkles,
   Calendar,
+  Check,
   CreditCard,
-  Users,
-  HardDrive,
-  Upload,
-  Share2,
+  Crown,
   FileText,
+  HardDrive,
+  Share2,
+  Sparkles,
+  Upload,
+  Users,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
+  cancelSubscription,
   checkSubscriptionStatus,
   handleCreateSubscription,
 } from "../../Apis/subscriptionApi";
 import { formatFileSize } from "../../Utils/helpers";
+import SubscriptionCancelModal from "./SubscriptionModal";
 
 const monthlyPlans = [
   {
@@ -180,6 +182,22 @@ export default function PricingPage() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    try {
+      const res = await cancelSubscription();
+      if (res.success) {
+        console.log("success response: " + res);
+        setHasActivePlan(false);
+        setSubscriptionDetails(null);
+        setUserUsage(null);
+      } else {
+        console.log(res.message);
+      }
+    } catch (error) {
+      console.error("Error in handling cancel Subscription: ", error);
+    }
+  };
+
   if (loading)
     return (
       <div className="w-full h-screen flex justify-center items-center bg-gray-50">
@@ -273,12 +291,15 @@ export default function PricingPage() {
                 <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
                   Change Plan
                 </button>
-                <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                  View Billing History
+                <button
+                  className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    window.open(subscriptionDetails.invoiceURL, "_blank");
+                  }}
+                >
+                  View invoice
                 </button>
-                <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                  Cancel Subscription
-                </button>
+                <SubscriptionCancelModal onConfirm={handleCancelSubscription} />
               </div>
             </div>
 
@@ -386,9 +407,11 @@ export default function PricingPage() {
                 </div>
               </div>
               <p className="text-2xl font-bold text-gray-900 mb-1">
-                {userUsage.filesUploadedThisMonth}
+                {userUsage.filesUploadedInSubscription}
               </p>
-              <p className="text-sm text-gray-600">Files Uploaded This Month</p>
+              <p className="text-sm text-gray-600">
+                Files Uploaded During subscription
+              </p>
             </div>
           </div>
 

@@ -45,7 +45,7 @@ const GuestFileAccess = () => {
           permission: res.data.permission,
         });
       } else {
-        setError("Failed to load file information");
+        setError(res.message);
       }
     } catch (error) {
       console.log(error);

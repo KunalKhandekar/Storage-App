@@ -181,7 +181,7 @@ export const showSessionLimitExceedModal = ({
 }) => {
   showConfirmModal(
     "Session Limit Exceeded",
-    "You are already logged in on two devices. To continue, one of your previous sessions must be logged out. Would you like to force logout from the older sessions and continue here?",
+    "Looks like you’re already signed in on the allowed number of devices for your plan. Would you like to sign out from older sessions and continue here?",
     async () => {
       const res = await regenerateSession(token);
       if (res.success) {

@@ -2,6 +2,7 @@ import { Share2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserDetails } from "../Apis/userApi";
+import { MdSubscriptions } from "react-icons/md";
 import { useStorage } from "../Contexts/StorageContext";
 
 const Header = () => {
@@ -24,9 +25,8 @@ const Header = () => {
         console.error("Error:", res.message);
       }
     };
-
     fetchUser();
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="sticky top-0 z-50 bg-white rounded-lg shadow-sm border border-gray-200 w-full">
@@ -44,6 +44,15 @@ const Header = () => {
 
           {/* Right actions */}
           <div className="flex items-center justify-center space-x-2 md:space-x-4">
+            <button
+              onClick={() => navigate("/plans")}
+              className="flex items-center space-x-2 px-2 py-2 md:px-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 hover:border-gray-300"
+            >
+              <MdSubscriptions className="w-4 h-4" />
+              <span className="font-medium hidden sm:inline">
+                Subscription
+              </span>
+            </button>
             <button
               onClick={() => navigate("/share")}
               className="flex items-center space-x-2 px-2 py-2 md:px-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 hover:border-gray-300"
