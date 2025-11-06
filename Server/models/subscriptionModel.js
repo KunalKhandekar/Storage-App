@@ -6,7 +6,6 @@ const subscriptionSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true,
     },
     planId: {
       type: String,
@@ -25,7 +24,7 @@ const subscriptionSchema = new Schema(
         "past_due", // next payment failed
         "paused",
         "cancelled", // canceled immediately
-        "in_grace", // user canceled but plan valid until grace period end
+        "pending_upgrade",
       ],
       default: "created",
     },

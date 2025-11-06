@@ -7,6 +7,11 @@ import { getPlanDetailsById } from "../utils/getPlanDetails.js";
 import File from "../models/fileModel.js";
 import Directory from "../models/dirModel.js";
 import redisClient from "../config/redis.js";
+import {
+  cancelSubscriptionService,
+  upgradeSubscriptionService,
+} from "../services/subscription/index.js";
+import { getPlanChangeType } from "../utils/getPlanChangeType.js";
 
 const getDayRemaining = (futureDate) => {
   const fDate = new Date(futureDate);
@@ -228,6 +233,76 @@ export const cancelSubscription = async (req, res, next) => {
     await subscriptionDoc.save();
 
     return CustomSuccess.send(res, "Subscription cancelled.", StatusCodes.OK);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePlan = async (req, res, next) => {
+  try {
+    const { changePlanId } = req.body;
+    const user = req.user;
+    const subscriptionDocument = await Subscription.findById(
+      user.subscriptionId
+    ).lean();
+
+    // Validate if user has an active subscription
+    if (!subscriptionDocument || subscriptionDocument.status !== "active") {
+      throw new CustomError(
+        "Active subscription not found",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    // get plan details for the current and desire plans
+    const currentPlan = getPlanDetailsById(subscriptionDocument.planId);
+    const desirePlan = getPlanDetailsById(changePlanId);
+
+    if (!desirePlan) {
+      throw new CustomError(
+        "Selected planId is not valid",
+        StatusCodes.NOT_FOUND
+      );
+    }
+
+    // Check whether user want to downgrade or upgrade the plan OR want to change the billing cylce
+    switch (getPlanChangeType(currentPlan, desirePlan)) {
+      case "invalid":
+        throw new CustomError(
+          "Invalid plan data received.",
+          StatusCodes.BAD_REQUEST
+        );
+
+      // From Pro -> Premium AND Billing-Cycle change
+      case "upgrade":
+      case "cycle-change":
+        const { newSubscriptionId } = await upgradeSubscriptionService({
+          userId: user._id,
+          desirePlan,
+        });
+        return CustomSuccess.send(
+          res,
+          "New subscription created for the selected plan",
+          StatusCodes.CREATED,
+          { newSubscriptionId }
+        );
+
+      // From Premium -> Pro
+      case "downgrade":
+        // check for maxLimit of the user before downgrading the plan.
+        break;
+
+      case "no-change":
+        throw new CustomError(
+          "Already on the same plan.",
+          StatusCodes.BAD_REQUEST
+        );
+    }
+
+    return CustomSuccess.send(res, "OK", StatusCodes.OK, {
+      currentPlan,
+      desirePlan,
+    });
   } catch (error) {
     next(error);
   }

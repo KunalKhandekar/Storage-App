@@ -6,6 +6,7 @@ import { getPlanDetailsById } from "../utils/getPlanDetails.js";
 import { StatusCodes } from "http-status-codes";
 import FileSerivces from "../services/file/index.js";
 import File from "../models/fileModel.js";
+import { razorpayInstance } from "../services/razorpayService.js";
 
 // route -> /webhook/razorpay
 export const razorpayWebhookController = async (req, res, next) => {
@@ -50,10 +51,40 @@ export const razorpayWebhookController = async (req, res, next) => {
 
 async function handleActivateEvent(eventBody) {
   const webhookSubscription = eventBody.payload.subscription.entity;
+  const userId = webhookSubscription.notes.userId;
+
+  const currentSubscription = await Subscription.findOne({
+    razorpaySubscriptionId: webhookSubscription.id,
+    userId,
+  });
+
+  if (!currentSubscription) {
+    return "No matching subscription found, webhook ignored";
+  }
+
+  if (currentSubscription.status === "pending_upgrade") {
+    // find the old_subscription from DB
+    const oldSubscription = await Subscription.findOne({
+      userId,
+      status: "active",
+    });
+
+    if (oldSubscription) {
+      // Cancel old Razorpay subscription
+      await razorpayInstance.subscriptions.cancel(
+        oldSubscription.razorpaySubscriptionId,
+        false // cancels the subscription immediately, not at the end of the cycle.
+      );
+
+      // Remove old subscription record
+      await Subscription.deleteOne({ _id: oldSubscription._id });
+    }
+  }
+
   // update the user subscription document
   const updateSubscriptionDoc = await Subscription.findOneAndUpdate(
     {
-      userId: webhookSubscription.notes.userId,
+      userId,
       razorpaySubscriptionId: webhookSubscription.id,
     },
     {
@@ -95,7 +126,7 @@ async function handleCancelledEvent(eventBody) {
     return "User not found, webhook ignored";
   }
 
-  const subscriptionDocument = await Subscription.findOne({ userId: user._id });
+  const subscriptionDocument = await Subscription.findOne({ userId: user._id, razorpaySubscriptionId: webhookSubscription.id });
   if (!subscriptionDocument) {
     return "Subscription not found for user, webhook ignored";
   }

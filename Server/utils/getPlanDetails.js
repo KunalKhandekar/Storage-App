@@ -1,6 +1,7 @@
 export const getPlanDetailsById = (planId) => {
   const plans = {
     plan_Ra0GqWQ6p0ffYM: {
+      id: 'plan_Ra0GqWQ6p0ffYM',
       name: "Pro",
       tagline: "For Students & Freelancers",
       price: 299,
@@ -22,6 +23,7 @@ export const getPlanDetailsById = (planId) => {
       },
     },
     plan_Ra0Hyby0MmmZyU: {
+      id: 'plan_Ra0Hyby0MmmZyU',
       name: "Premium",
       tagline: "For Professionals & Creators",
       price: 699,
@@ -43,6 +45,7 @@ export const getPlanDetailsById = (planId) => {
       },
     },
     plan_Ra0HCHX7tNXrQl: {
+      id: 'plan_Ra0HCHX7tNXrQl',
       name: "Pro",
       tagline: "For Students & Freelancers",
       price: 2999,
@@ -64,6 +67,7 @@ export const getPlanDetailsById = (planId) => {
       },
     },
     plan_Ra0IGCFRabuW1y: {
+      id: 'plan_Ra0IGCFRabuW1y',
       name: "Premium",
       tagline: "For Professionals & Creators",
       price: 6999,

@@ -1,5 +1,5 @@
 import express from "express";
-import { cancelSubscription, checkSubscripitonStatus, createSubscription } from "../controllers/subscriptionControllers.js";
+import { cancelSubscription, changePlan, checkSubscripitonStatus, createSubscription } from "../controllers/subscriptionControllers.js";
 
 // Subscription Router
 const router = express.Router();
@@ -12,5 +12,8 @@ router.get("/status", checkSubscripitonStatus);
 
 // Cancel the subscription & revoke the access.
 router.delete("/cancel", cancelSubscription)
+
+// Change plan (Downgrade || Upgrade)
+router.post("/changePlan", changePlan);
 
 export default router;
