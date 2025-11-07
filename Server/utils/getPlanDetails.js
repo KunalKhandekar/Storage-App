@@ -103,5 +103,8 @@ export const getPlanDetailsById = (planId) => {
   return plans[planId] || null;
 };
 
-// console.log(getPlanDetailsById("default"));
+export const getPlansEligibleForChange = (activePlanId) => {
+  const allPlanIds = ['plan_Ra0GqWQ6p0ffYM', 'plan_Ra0HCHX7tNXrQl', 'plan_Ra0Hyby0MmmZyU', 'plan_Ra0IGCFRabuW1y'];
 
+  return allPlanIds.filter((planId) => planId !== activePlanId);
+}

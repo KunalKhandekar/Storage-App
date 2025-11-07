@@ -62,7 +62,7 @@ async function handleActivateEvent(eventBody) {
     return "No matching subscription found, webhook ignored";
   }
 
-  if (currentSubscription.status === "pending_upgrade") {
+  if (currentSubscription.status === "pending") {
     // find the old_subscription from DB
     const oldSubscription = await Subscription.findOne({
       userId,

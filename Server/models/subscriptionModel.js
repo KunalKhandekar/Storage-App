@@ -22,9 +22,9 @@ const subscriptionSchema = new Schema(
         "created", // subscription created but not paid
         "active", // payment success
         "past_due", // next payment failed
-        "paused",
+        "paused", // disable user
         "cancelled", // canceled immediately
-        "pending_upgrade",
+        "pending", // plan-changing
       ],
       default: "created",
     },

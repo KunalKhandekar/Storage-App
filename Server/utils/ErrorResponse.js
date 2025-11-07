@@ -10,5 +10,6 @@ export default class CustomError extends Error {
 
     if (extra.code) this.code = extra.code;
     if (extra.details) this.details = extra.details;
+    if (extra.log) this.log = extra.log;
   }
 }

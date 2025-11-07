@@ -1,17 +1,20 @@
 import { StatusCodes } from "http-status-codes";
+import redisClient from "../config/redis.js";
+import Directory from "../models/dirModel.js";
+import File from "../models/fileModel.js";
 import Subscription from "../models/subscriptionModel.js";
 import { razorpayInstance } from "../services/razorpayService.js";
-import CustomError from "../utils/ErrorResponse.js";
-import CustomSuccess from "../utils/SuccessResponse.js";
-import { getPlanDetailsById } from "../utils/getPlanDetails.js";
-import File from "../models/fileModel.js";
-import Directory from "../models/dirModel.js";
-import redisClient from "../config/redis.js";
 import {
-  cancelSubscriptionService,
+  downgradeSubscriptionService,
   upgradeSubscriptionService,
 } from "../services/subscription/index.js";
+import CustomError from "../utils/ErrorResponse.js";
+import CustomSuccess from "../utils/SuccessResponse.js";
 import { getPlanChangeType } from "../utils/getPlanChangeType.js";
+import {
+  getPlanDetailsById,
+  getPlansEligibleForChange,
+} from "../utils/getPlanDetails.js";
 
 const getDayRemaining = (futureDate) => {
   const fDate = new Date(futureDate);
@@ -141,7 +144,10 @@ export const checkSubscripitonStatus = async (req, res, next) => {
     const userId = req.user._id;
     const userDetails = req.user;
 
-    const subscriptionDoc = await Subscription.findOne({ userId }).lean();
+    const subscriptionDoc = await Subscription.findOne({
+      userId,
+      _id: userDetails.subscriptionId,
+    }).lean();
 
     // if user has active subscription
     if (subscriptionDoc && subscriptionDoc.status === "active") {
@@ -214,8 +220,8 @@ export const checkSubscripitonStatus = async (req, res, next) => {
 
 export const cancelSubscription = async (req, res, next) => {
   try {
-    const userId = req.user._id;
-    const subscriptionDoc = await Subscription.findOne({ userId });
+    const user = req.user;
+    const subscriptionDoc = await Subscription.findOne({ userId: user._id, _id: user.subscriptionId });
     // Case 1 -> check don't have a subscription
     if (!subscriptionDoc || subscriptionDoc.status !== "active") {
       throw new CustomError("Subscription not found", StatusCodes.NOT_FOUND);
@@ -238,24 +244,67 @@ export const cancelSubscription = async (req, res, next) => {
   }
 };
 
+export const plansEligibleforChange = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const subscriptionId = req.user.subscriptionId;
+
+    // find user's active subscription
+    const subscriptionDoc = await Subscription.findOne({
+      _id: subscriptionId,
+      userId,
+      status: "active",
+    }).lean();
+
+    if (!subscriptionDoc) {
+      throw new CustomError("No active plan found!", StatusCodes.NOT_FOUND);
+    }
+
+    // eligible plan logic
+    const eligiblePlans = getPlansEligibleForChange(subscriptionDoc.planId);
+    // get the active plan details
+    const planDetails = getPlanDetailsById(subscriptionDoc.planId);
+
+    return CustomSuccess.send(
+      res,
+      "You're eligible for a plan change",
+      StatusCodes.OK,
+      {
+        activeSubscription: {
+          planId: subscriptionDoc.planId,
+          planName: planDetails.name,
+          planTagLine: planDetails.tagline,
+          planPrice: planDetails.price,
+          billingCycle: planDetails.billingCycle,
+          nextBillingDate: subscriptionDoc.currentPeriodEnd,
+          daysUntilRenewal: getDayRemaining(subscriptionDoc.currentPeriodEnd),
+          features: planDetails.features,
+        },
+        EligiblePlanIds: eligiblePlans,
+      }
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const changePlan = async (req, res, next) => {
   try {
     const { changePlanId } = req.body;
     const user = req.user;
-    const subscriptionDocument = await Subscription.findById(
+
+    const subscriptionDoc = await Subscription.findById(
       user.subscriptionId
     ).lean();
 
-    // Validate if user has an active subscription
-    if (!subscriptionDocument || subscriptionDocument.status !== "active") {
+    if (!subscriptionDoc || subscriptionDoc.status !== "active") {
       throw new CustomError(
         "Active subscription not found",
         StatusCodes.BAD_REQUEST
       );
     }
 
-    // get plan details for the current and desire plans
-    const currentPlan = getPlanDetailsById(subscriptionDocument.planId);
+    const currentPlan = getPlanDetailsById(subscriptionDoc.planId);
     const desirePlan = getPlanDetailsById(changePlanId);
 
     if (!desirePlan) {
@@ -265,44 +314,57 @@ export const changePlan = async (req, res, next) => {
       );
     }
 
-    // Check whether user want to downgrade or upgrade the plan OR want to change the billing cylce
-    switch (getPlanChangeType(currentPlan, desirePlan)) {
+    // Determine plan change type
+    const planChangeType = getPlanChangeType(currentPlan, desirePlan);
+
+    let result;
+
+    switch (planChangeType) {
       case "invalid":
         throw new CustomError(
           "Invalid plan data received.",
           StatusCodes.BAD_REQUEST
         );
 
-      // From Pro -> Premium AND Billing-Cycle change
-      case "upgrade":
-      case "cycle-change":
-        const { newSubscriptionId } = await upgradeSubscriptionService({
-          userId: user._id,
-          desirePlan,
-        });
-        return CustomSuccess.send(
-          res,
-          "New subscription created for the selected plan",
-          StatusCodes.CREATED,
-          { newSubscriptionId }
-        );
-
-      // From Premium -> Pro
-      case "downgrade":
-        // check for maxLimit of the user before downgrading the plan.
-        break;
-
       case "no-change":
         throw new CustomError(
           "Already on the same plan.",
           StatusCodes.BAD_REQUEST
         );
+
+      // Create a new plan in pending state
+      case "upgrade":
+      case "cycle-change": {
+        result = await upgradeSubscriptionService({
+          userId: user._id,
+          desirePlan,
+        });
+        break;
+      }
+
+      // 1. check for storage limit exceed 
+      // 2. create new plan
+      case "downgrade": {
+        result = await downgradeSubscriptionService({
+          user,
+          desirePlan,
+        });
+        break;
+      }
+
+      default:
+        throw new CustomError(
+          "Unknown plan change type.",
+          StatusCodes.BAD_REQUEST
+        );
     }
 
-    return CustomSuccess.send(res, "OK", StatusCodes.OK, {
-      currentPlan,
-      desirePlan,
-    });
+    return CustomSuccess.send(
+      res,
+      "New subscription created for the selected plan",
+      StatusCodes.CREATED,
+      { newSubscriptionId: result.newSubscriptionId }
+    );
   } catch (error) {
     next(error);
   }
