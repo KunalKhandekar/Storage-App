@@ -3,6 +3,7 @@ import { AdminUserView } from "../Pages/AdminUserView";
 import AdminView from "../Pages/AdminViewPage";
 import DirectoryView from "../Pages/DirectoryPage";
 import PlansPage from "../Pages/PlansPage";
+import ChangePlan from "../Pages/PlansPage/changePlanPage";
 import SettingsPage from "../Pages/SettingsPage";
 import Dashboard from "../Pages/SharePage/Dashboard";
 import FileViewer from "../Pages/SharePage/FileViewer";
@@ -96,6 +97,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <PlansPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/plans/change-plan",
+    element: (
+      <ProtectedRoute>
+        <ChangePlan />
       </ProtectedRoute>
     ),
   },

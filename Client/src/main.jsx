@@ -8,21 +8,23 @@ import { AuthProvider } from "./Contexts/AuthContext.jsx";
 import { StorageProvider } from "./Contexts/StorageContext.jsx";
 import { ProgressProvider } from "./Contexts/ProgressContext.jsx";
 import { GlobalUploadProgress } from "./components/GlobalUploadProgess.jsx";
+import { Toaster } from "sonner";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-  <AuthProvider>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <ModalProvider>
-        <ProgressProvider>
-          <StorageProvider>
-            <App />
-            <Modals />
-            <GlobalUploadProgress />
-          </StorageProvider>
-        </ProgressProvider>
-      </ModalProvider>
-    </GoogleOAuthProvider>
-  </AuthProvider>
- </StrictMode>
+    <AuthProvider>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+        <ModalProvider>
+          <ProgressProvider>
+            <StorageProvider>
+              <App />
+              <Toaster position="top-center" richColors />
+              <Modals />
+              <GlobalUploadProgress />
+            </StorageProvider>
+          </ProgressProvider>
+        </ModalProvider>
+      </GoogleOAuthProvider>
+    </AuthProvider>
+  </StrictMode>
 );

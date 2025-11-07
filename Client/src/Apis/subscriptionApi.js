@@ -26,3 +26,23 @@ export const cancelSubscription = async () => {
     return error?.response?.data;
   }
 };
+
+export const changePlan = async (planId) => {
+  try {
+    const response = await axios.post(`/subscription/changePlan`, {
+      changePlanId: planId,
+    });
+    return { success: true, ...response.data };
+  } catch (error) {
+    return error?.response?.data;
+  }
+};
+
+export const plansEligibleforChange = async () => {
+  try {
+    const response = await axios.get(`/subscription/change-eligibility`);
+    return { success: true, ...response.data };
+  } catch (error) {
+    return error?.response?.data;
+  }
+}

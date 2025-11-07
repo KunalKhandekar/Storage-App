@@ -19,13 +19,16 @@ import {
 } from "../../Apis/subscriptionApi";
 import { formatFileSize } from "../../Utils/helpers";
 import SubscriptionCancelModal from "./SubscriptionModal";
+import { openRazorpayPopup } from "../../Utils/openRazorpayPopup";
+import { useNavigate } from "react-router-dom";
 
-const monthlyPlans = [
+export const monthlyPlans = [
   {
     id: "free-monthly-001",
     name: "Free",
     tagline: "Starter Plan",
     bestFor: "Personal users who want to try the platform",
+    billingCycle: "Month",
     price: 0,
     icon: Sparkles,
     features: [
@@ -40,6 +43,7 @@ const monthlyPlans = [
   {
     id: "plan_Ra0GqWQ6p0ffYM",
     name: "Pro",
+    billingCycle: "Month",
     tagline: "For Students & Freelancers",
     bestFor: "Students, freelancers, or small teams who need more space",
     price: 299,
@@ -57,6 +61,7 @@ const monthlyPlans = [
   {
     id: "plan_Ra0Hyby0MmmZyU",
     name: "Premium",
+    billingCycle: "Month",
     tagline: "For Professionals & Creators",
     bestFor: "Professionals and creators handling large media files",
     price: 699,
@@ -72,10 +77,11 @@ const monthlyPlans = [
   },
 ];
 
-const yearlyPlans = [
+export const yearlyPlans = [
   {
     id: "free-yearly-001",
     name: "Free",
+    billingCycle: "Year",
     tagline: "Starter Plan",
     bestFor: "Personal users who want to try the platform",
     price: 0,
@@ -92,6 +98,7 @@ const yearlyPlans = [
   {
     id: "plan_Ra0HCHX7tNXrQl",
     name: "Pro",
+    billingCycle: "Year",
     tagline: "For Students & Freelancers",
     bestFor: "Students, freelancers, or small teams who need more space",
     price: 2999,
@@ -111,6 +118,7 @@ const yearlyPlans = [
   {
     id: "plan_Ra0IGCFRabuW1y",
     name: "Premium",
+    billingCycle: "Year",
     tagline: "For Professionals & Creators",
     bestFor: "Professionals and creators handling large media files",
     price: 6999,
@@ -135,6 +143,7 @@ export default function PricingPage() {
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
   const [userUsage, setUserUsage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleSubscriptionStatus = async () => {
@@ -169,7 +178,6 @@ export default function PricingPage() {
       console.log("Free plan selected");
       return;
     }
-
     setLoadingPlanId(planId);
     try {
       const res = await handleCreateSubscription(planId);
@@ -288,7 +296,7 @@ export default function PricingPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" onClick={() => navigate("/plans/change-plan")}>
                   Change Plan
                 </button>
                 <button
@@ -438,7 +446,7 @@ export default function PricingPage() {
                 <p className="text-sm text-gray-600 mb-3">
                   Want more storage and features?
                 </p>
-                <button className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" onClick={() => navigate("/plans/change-plan")}>
                   Upgrade to Premium
                 </button>
               </div>
@@ -648,24 +656,4 @@ export default function PricingPage() {
       </div>
     </div>
   );
-}
-
-function openRazorpayPopup({ subscriptionId }) {
-  console.log(subscriptionId);
-  const rzp = new Razorpay({
-    key: "rzp_test_Ra0B5WI7uIwO1z",
-    description: "testing the plans",
-    name: "Storage App",
-    subscription_id: subscriptionId,
-    image: "https://dzdw2zccyu2wu.cloudfront.net/overview/readme-typing.svg",
-    handler: async function (response) {
-      console.log(response);
-    },
-  });
-
-  rzp.on("payment.failed", function (response) {
-    console.log(response);
-  });
-
-  rzp.open();
 }
