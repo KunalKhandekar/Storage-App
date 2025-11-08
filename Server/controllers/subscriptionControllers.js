@@ -144,14 +144,31 @@ export const checkSubscripitonStatus = async (req, res, next) => {
     const userId = req.user._id;
     const userDetails = req.user;
 
+    // Find the user's current subscription
     const subscriptionDoc = await Subscription.findOne({
       userId,
       _id: userDetails.subscriptionId,
     }).lean();
 
-    // if user has active subscription
-    if (subscriptionDoc && subscriptionDoc.status === "active") {
-      // get the plan details
+    // Case 1 -> No subscription found
+    if (!subscriptionDoc) {
+      throw new CustomError(
+        "No active subscription found!",
+        StatusCodes.NOT_FOUND
+      );
+    }
+
+    // Case 2 -> Subscription renewal failed — inform user to retry payment
+    if (subscriptionDoc.status === "renewal_failed") {
+      throw new CustomError(
+        "Subscription renewal failed — please retry payment.",
+        StatusCodes.CONFLICT,
+        { details: "renewal_failed" }
+      );
+    }
+
+    // Case 3 -> Active subscription — calculate usage and plan details
+    if (subscriptionDoc.status === "active") {
       const planDetails = getPlanDetailsById(subscriptionDoc.planId);
 
       // total files of the user
@@ -163,10 +180,10 @@ export const checkSubscripitonStatus = async (req, res, next) => {
         createdAt: { $gte: new Date(subscriptionDoc.startDate) },
       });
 
-      // Storage used based on root parent directory
-      const rootDirSize = (
-        await Directory.findById(userDetails.rootDirId).select("size").lean()
-      ).size;
+      // Storage used based on root directory
+      const rootDirSize =
+        (await Directory.findById(userDetails.rootDirId).select("size").lean())
+          ?.size || 0;
 
       // number of files shared by the user
       const sharedFiles = await File.countDocuments({
@@ -192,27 +209,33 @@ export const checkSubscripitonStatus = async (req, res, next) => {
           nextBillingDate: subscriptionDoc.currentPeriodEnd,
           daysUntilRenewal: getDayRemaining(subscriptionDoc.currentPeriodEnd),
           features: planDetails.features,
-          cancellationScheduled: false, // for cancellation grace_period
-          cancellationDate: null, // for cancellation grace_period
+          cancellationScheduled: false,
+          cancellationDate: null,
           invoiceURL: `${process.env.RAZORPAY_INVOICE_LINK}${subscriptionDoc.invoiceId}`,
         },
         usage: {
           maxFileUploadSize: planDetails.limits.maxFileSize,
-          storageUsed: rootDirSize, //
+          storageUsed: rootDirSize,
           storageTotal: userDetails.maxStorageLimit,
           storagePercentage: (
             (rootDirSize / userDetails.maxStorageLimit) *
             100
           ).toFixed(1),
-          totalFiles: totalFiles, // All files of the user
-          sharedFiles, // total files shared by user.
-          devicesConnected: activeSession, // Total device login session
-          maxDevices: planDetails.limits.maxDevices, // Max device as per the plan
-          filesUploadedInSubscription, // understand it from the createdAt field of files
+          totalFiles,
+          sharedFiles,
+          devicesConnected: activeSession,
+          maxDevices: planDetails.limits.maxDevices,
+          filesUploadedInSubscription,
         },
       });
     }
-    throw new CustomError("No active plan found!", StatusCodes.NOT_FOUND);
+
+
+    // Subscription exists but with different status.
+    throw new CustomError(
+      "No active subscription found!",
+      StatusCodes.NOT_FOUND
+    );
   } catch (error) {
     next(error);
   }
@@ -221,7 +244,10 @@ export const checkSubscripitonStatus = async (req, res, next) => {
 export const cancelSubscription = async (req, res, next) => {
   try {
     const user = req.user;
-    const subscriptionDoc = await Subscription.findOne({ userId: user._id, _id: user.subscriptionId });
+    const subscriptionDoc = await Subscription.findOne({
+      userId: user._id,
+      _id: user.subscriptionId,
+    });
     // Case 1 -> check don't have a subscription
     if (!subscriptionDoc || subscriptionDoc.status !== "active") {
       throw new CustomError("Subscription not found", StatusCodes.NOT_FOUND);
@@ -342,7 +368,7 @@ export const changePlan = async (req, res, next) => {
         break;
       }
 
-      // 1. check for storage limit exceed 
+      // 1. check for storage limit exceed
       // 2. create new plan
       case "downgrade": {
         result = await downgradeSubscriptionService({

@@ -1,55 +1,88 @@
+import { StatusCodes } from "http-status-codes";
 import { validateWebhookSignature } from "razorpay/dist/utils/razorpay-utils.js";
-import CustomError from "../utils/ErrorResponse.js";
+import File from "../models/fileModel.js";
 import Subscription from "../models/subscriptionModel.js";
 import User from "../models/userModel.js";
-import { getPlanDetailsById } from "../utils/getPlanDetails.js";
-import { StatusCodes } from "http-status-codes";
 import FileSerivces from "../services/file/index.js";
-import File from "../models/fileModel.js";
 import { razorpayInstance } from "../services/razorpayService.js";
+import CustomError from "../utils/ErrorResponse.js";
+import { getPlanDetailsById } from "../utils/getPlanDetails.js";
+import Webhook from "../models/razorpayWebhookModel.js";
 
 // route -> /webhook/razorpay
 export const razorpayWebhookController = async (req, res, next) => {
   const webhookBody = req.body;
   const webhookSignature = req.headers["x-razorpay-signature"];
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  let message = "OK";
-  // verify signature from the header
-  const isValidRequest = validateWebhookSignature(
-    JSON.stringify(webhookBody),
-    webhookSignature,
-    webhookSecret
-  );
 
-  if (!isValidRequest) {
-    throw new CustomError("Signature not valid", StatusCodes.BAD_REQUEST);
+  try {
+    // Step 1 -> Verify webhook signature
+    const isValidRequest = validateWebhookSignature(
+      JSON.stringify(webhookBody),
+      webhookSignature,
+      webhookSecret
+    );
+
+    if (!isValidRequest) {
+      throw new CustomError("Invalid signature", StatusCodes.BAD_REQUEST);
+    }
+
+    const event = webhookBody?.event;
+
+    // Create a new Webhook document
+    const webhookDoc = await Webhook.create({
+      eventType: event,
+      signature: webhookSignature,
+      payload: webhookBody,
+      razorpaySubscriptionId:
+        webhookBody?.payload?.subscription?.entity?.id || null,
+      razorpayPaymentId: webhookBody?.payload?.payment?.entity?.id || null,
+      userId: webhookBody?.payload?.subscription?.entity?.notes?.userId || null,
+      status: "pending",
+    });
+
+    // Handle the event
+    let message = "Webhook received";
+    switch (event) {
+      case "subscription.charged":
+        message = await handleChargedEvent(webhookBody);
+        break;
+      case "subscription.activated":
+        message = await handleActivatedEvent(webhookBody);
+        break;
+      case "subscription.cancelled":
+        message = await handleCancelledEvent(webhookBody);
+        break;
+      case "subscription.pending":
+        message = await handlePaymentFailureEvent(webhookBody);
+        break;
+      case "subscription.paused":
+        message = "User account paused";
+        break;
+      case "subscription.resumed":
+        message = "User account resumed";
+        break;
+      default:
+        message = `Unhandled event: ${event}`;
+        break;
+    }
+
+    // Update webhook document as processed
+    webhookDoc.status = "processed";
+    webhookDoc.responseMessage = message;
+    webhookDoc.processedAt = new Date();
+    await webhookDoc.save();
+
+    // Responding to Razorpay
+    return res.status(StatusCodes.OK).send("Webhook processed successfully");
+  } catch (error) {
+    console.error("Razorpay webhook error:", error);
+    next(error);
   }
-
-  const event = req.body.event;
-
-  switch (event) {
-    case "subscription.activated":
-      message = await handleActivateEvent(webhookBody);
-      break;
-    case "subscription.cancelled":
-      message = await handleCancelledEvent(webhookBody);
-      break;
-    case "subscription.paused":
-      message = "User account has been disabled";
-      break;
-    case "subscription.resumed":
-      message = "User account has been recovered";
-      break;
-    default:
-      break;
-  }
-
-  console.log(event, message);
-
-  return res.status(StatusCodes.OK).send(message);
 };
 
-async function handleActivateEvent(eventBody) {
+
+async function handleActivatedEvent(eventBody) {
   const webhookSubscription = eventBody.payload.subscription.entity;
   const userId = webhookSubscription.notes.userId;
 
@@ -60,6 +93,10 @@ async function handleActivateEvent(eventBody) {
 
   if (!currentSubscription) {
     return "No matching subscription found, webhook ignored";
+  }
+
+  if (currentSubscription.status === "active") {
+    return "Subscription already active — webhook ignored";
   }
 
   if (currentSubscription.status === "pending") {
@@ -126,7 +163,10 @@ async function handleCancelledEvent(eventBody) {
     return "User not found, webhook ignored";
   }
 
-  const subscriptionDocument = await Subscription.findOne({ userId: user._id, razorpaySubscriptionId: webhookSubscription.id });
+  const subscriptionDocument = await Subscription.findOne({
+    userId: user._id,
+    razorpaySubscriptionId: webhookSubscription.id,
+  });
   if (!subscriptionDocument) {
     return "Subscription not found for user, webhook ignored";
   }
@@ -165,4 +205,52 @@ async function handleCancelledEvent(eventBody) {
 
     return "Cancelled subscription & revoked acess";
   }
+}
+
+async function handleChargedEvent(eventBody) {
+  const webhookSubscription = eventBody.payload.subscription.entity;
+  const userId = webhookSubscription.notes.userId;
+
+  // Find active or renewal_failed subscriptions
+  const subscriptionDoc = await Subscription.findOne({
+    userId,
+    razorpaySubscriptionId: webhookSubscription.id,
+    status: { $in: ["active", "renewal_failed"] },
+  });
+
+  if (!subscriptionDoc) {
+    return "Subscription not active yet — skipping renewal logic";
+  }
+
+  // Update billing cycle info
+  subscriptionDoc.currentPeriodStart = webhookSubscription.current_start * 1000;
+  subscriptionDoc.currentPeriodEnd = webhookSubscription.current_end * 1000;
+  subscriptionDoc.invoiceId = eventBody.payload.payment.entity.invoice_id;
+  subscriptionDoc.status = "active"; // incase of renewal_retry
+  await subscriptionDoc.save();
+
+  console.log(`🔁 Subscription renewed successfully for user ${userId}`);
+
+  return "Handled next_due — subscription renewed";
+}
+
+async function handlePaymentFailureEvent(eventBody) {
+  const webhookSubscription = eventBody.payload.subscription.entity;
+  const userId = webhookSubscription.notes.userId;
+
+  const subscription = await Subscription.findOne({
+    userId,
+    razorpaySubscriptionId: webhookSubscription.id,
+  });
+
+  if (!subscription) return "No subscription found in pending event";
+
+  subscription.status = "renewal_failed";
+  await subscription.save();
+
+  console.log(
+    `⚠️ Subscription pending for user ${userId} — awaiting retry or user action`
+  );
+
+  return "Handled subscription.pending event";
 }

@@ -25,7 +25,9 @@ const subscriptionSchema = new Schema(
         "paused", // disable user
         "cancelled", // canceled immediately
         "pending", // plan-changing
+        "renewal_failed", // next_due failed
       ],
+      
       default: "created",
     },
     currentPeriodStart: {
