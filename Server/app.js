@@ -24,6 +24,7 @@ import { connectDB } from "./config/db.js";
 
 // Security Imports
 import helmet from "helmet";
+import { startCronJobs } from "./cron/index.js";
 
 // Connect to MongoDB
 await connectDB();
@@ -104,4 +105,5 @@ app.use(errorHandler);
 
 app.listen(4000, () => {
   console.log("Server running on port 4000");
+  startCronJobs();
 });
