@@ -179,6 +179,12 @@ When automatic renewal fails (e.g., insufficient funds):
 
 ![alt text](image-7.png)
 
+## Added Cron Jobs
+
+> This check Will check for subscriptions with pending status which exceeds the limit of updatedAt more than 12 hours.
+
+![alt text](image-9.png)
+
 ---
 
 ## Summary
