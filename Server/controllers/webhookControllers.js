@@ -8,6 +8,7 @@ import { razorpayInstance } from "../services/razorpayService.js";
 import CustomError from "../utils/ErrorResponse.js";
 import { getPlanDetailsById } from "../utils/getPlanDetails.js";
 import Webhook from "../models/razorpayWebhookModel.js";
+import { cancelSubscriptionService } from "../services/subscription/index.js";
 
 // route -> /webhook/razorpay
 export const razorpayWebhookController = async (req, res, next) => {
@@ -56,6 +57,9 @@ export const razorpayWebhookController = async (req, res, next) => {
       case "subscription.pending":
         message = await handlePaymentFailureEvent(webhookBody);
         break;
+      case "subscription.halted":
+        message = await handleHaltedEvent(webhookBody);
+        break;
       case "subscription.paused":
         message = "User account paused";
         break;
@@ -63,9 +67,11 @@ export const razorpayWebhookController = async (req, res, next) => {
         message = "User account resumed";
         break;
       default:
-        message = `Unhandled event: ${event}`;
+        message = `Unhandled event: ${event}`; // authenticated // updated // completed
         break;
     }
+
+    console.log(`[${event}] - ${message}`);
 
     // Update webhook document as processed
     webhookDoc.status = "processed";
@@ -80,7 +86,6 @@ export const razorpayWebhookController = async (req, res, next) => {
     next(error);
   }
 };
-
 
 async function handleActivatedEvent(eventBody) {
   const webhookSubscription = eventBody.payload.subscription.entity;
@@ -176,8 +181,11 @@ async function handleCancelledEvent(eventBody) {
     return "User selected different plan, webhook ignored";
   }
 
-  // Case 3 -> Subscription cancelled event triggered due to user cancelled it from the UI/cancel-API.
-  if (subscriptionDocument.status === "cancelled") {
+  // Case 3 -> Subscription cancelled event triggered due to user cancelled it from the UI/cancel-API OR revoked the mandate
+  if (
+    subscriptionDocument.status === "cancelled" ||
+    webhookSubscription.status === "cancelled"
+  ) {
     // 0) get free-plan (default) details
     const defaultPlan = getPlanDetailsById("default");
 
@@ -253,4 +261,24 @@ async function handlePaymentFailureEvent(eventBody) {
   );
 
   return "Handled subscription.pending event";
+}
+
+async function handleHaltedEvent(eventBody) {
+  const webhookSubscription = eventBody.payload.subscription.entity;
+  const userId = webhookSubscription.notes.userId;
+
+  const subscription = await Subscription.findOne({
+    userId,
+    razorpaySubscriptionId: webhookSubscription.id,
+  });
+
+  if (!subscription) return "No subscription found in pending event";
+
+  const { success } = await cancelSubscriptionService(
+    subscription.razorpaySubscriptionId
+  );
+
+  return success
+    ? `Subscription cancelled for user ${userId} — retries exhausted`
+    : `Failed to cancel subscription for user ${userId}`;
 }
