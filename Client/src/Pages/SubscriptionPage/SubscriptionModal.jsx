@@ -38,7 +38,6 @@ const SubscriptionCancelModal = ({
   const handleConfirmCancel = async () => {
     setIsLoading(true);
     try {
-      // Call the parent's onConfirm function if provided
       if (onConfirm) {
         await onConfirm();
       }

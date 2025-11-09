@@ -1,6 +1,6 @@
 export function openRazorpayPopup({ subscriptionId }) {
   const rzp = new Razorpay({
-    key: "rzp_test_Ra0B5WI7uIwO1z",
+    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
     description: "testing the plans",
     name: "Storage App",
     subscription_id: subscriptionId,

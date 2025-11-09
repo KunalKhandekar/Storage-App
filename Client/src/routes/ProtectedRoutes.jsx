@@ -2,14 +2,14 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { AdminUserView } from "../Pages/AdminUserView";
 import AdminView from "../Pages/AdminViewPage";
 import DirectoryView from "../Pages/DirectoryPage";
-import PlansPage from "../Pages/PlansPage";
-import ChangePlan from "../Pages/PlansPage/changePlanPage";
+import ChangePlan from "../Pages/SubscriptionPage/changePlanPage";
 import SettingsPage from "../Pages/SettingsPage";
 import Dashboard from "../Pages/SharePage/Dashboard";
 import FileViewer from "../Pages/SharePage/FileViewer";
 import PermissionManager from "../Pages/SharePage/PermissionManager";
 import SharedByMe from "../Pages/SharePage/SharedByMe";
 import SharedWithMe from "../Pages/SharePage/SharedWithMe";
+import SubscriptionPage from "../Pages/SubscriptionPage";
 
 export const protectedRoutes = [
   {
@@ -96,7 +96,7 @@ export const protectedRoutes = [
     path: "/plans",
     element: (
       <ProtectedRoute>
-        <PlansPage />
+        <SubscriptionPage />
       </ProtectedRoute>
     ),
   },
