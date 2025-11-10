@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { plansEligibleforChange } from "../../../Apis/subscriptionApi";
@@ -16,7 +16,6 @@ const ChangePlan = () => {
     try {
       setLoading(true);
       const res = await plansEligibleforChange();
-
       if (res.success) {
         setActivePlan(res.data.activeSubscription);
         setPlansEligible(res.data.EligiblePlanIds);

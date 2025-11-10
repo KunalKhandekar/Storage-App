@@ -25,6 +25,7 @@ import { connectDB } from "./config/db.js";
 // Security Imports
 import helmet from "helmet";
 import { startCronJobs } from "./cron/index.js";
+import { eventController } from "./controllers/EventController.js";
 
 // Connect to MongoDB
 await connectDB();
@@ -99,6 +100,7 @@ app.use("/otp", otpRoutes);
 app.use("/auth", authRoutes);
 app.use("/guest", guestRoutes);
 app.use("/webhook", webhookRoutes);
+app.use("/events", eventController);
 
 // Error Handler
 app.use(errorHandler);

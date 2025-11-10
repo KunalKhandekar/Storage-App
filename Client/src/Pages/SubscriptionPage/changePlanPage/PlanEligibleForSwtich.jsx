@@ -4,9 +4,11 @@ import { changePlan } from "../../../Apis/subscriptionApi";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { monthlyPlans, yearlyPlans } from "../Plans";
+import { useAuth } from "../../../Contexts/AuthContext";
 
 const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
   const [loadingPlanId, setLoadingPlanId] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const razorpayScript = document.querySelector("#razorpay-script");
@@ -22,7 +24,10 @@ const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
     setLoadingPlanId(planId);
     const res = await changePlan(planId);
     if (res.success) {
-      openRazorpayPopup({ subscriptionId: res.data.newSubscriptionId });
+      openRazorpayPopup({
+        subscriptionId: res.data.newSubscriptionId,
+        userId: user._id,
+      });
     } else {
       toast.error(res.message);
     }

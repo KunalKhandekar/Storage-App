@@ -18,7 +18,14 @@ createRoot(document.getElementById("root")).render(
           <ProgressProvider>
             <StorageProvider>
               <App />
-              <Toaster position="top-center" richColors />
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                expand={false}
+                offset={{ bottom: '0px', right: "10px", left: "0px", top: "90px" }}
+                mobileOffset={{ top: "80px" }}
+              />
               <Modals />
               <GlobalUploadProgress />
             </StorageProvider>

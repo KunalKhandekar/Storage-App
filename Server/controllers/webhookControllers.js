@@ -9,6 +9,7 @@ import CustomError from "../utils/ErrorResponse.js";
 import { getPlanDetailsById } from "../utils/getPlanDetails.js";
 import Webhook from "../models/razorpayWebhookModel.js";
 import { cancelSubscriptionService } from "../services/subscription/index.js";
+import { sendEventToUser } from "./EventController.js";
 
 // route -> /webhook/razorpay
 export const razorpayWebhookController = async (req, res, next) => {
@@ -151,6 +152,12 @@ async function handleActivatedEvent(eventBody) {
     maxFileSize: planDetails.limits.maxFileSizeBytes,
     maxDevices: planDetails.limits.maxDevices,
     subscriptionId: updateSubscriptionDoc._id,
+  });
+
+  sendEventToUser(userId, {
+    type: "subscriptionActivated",
+    plan: planDetails.name,
+    message: "Your subscription has been activated!",
   });
 
   return "Activated event handled";

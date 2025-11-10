@@ -11,6 +11,7 @@ export const getUserInfo = async (req, res) => {
     .select("size")
     .lean();
   return CustomSuccess.send(res, null, StatusCodes.OK, {
+    _id: req.user?._id,
     email: req.user?.email,
     name: req.user?.name,
     picture: req.user?.picture,

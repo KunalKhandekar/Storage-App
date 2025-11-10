@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { handleCreateSubscription } from "../../Apis/subscriptionApi";
 import { openRazorpayPopup } from "../../Utils/openRazorpayPopup";
 import { Check, Crown, Sparkles, Zap } from "lucide-react";
+import { useAuth } from "../../Contexts/AuthContext";
 
 export const monthlyPlans = [
   {
@@ -120,6 +121,7 @@ export const yearlyPlans = [
 const Plans = ({ hasActivePlan }) => {
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [loadingPlanId, setLoadingPlanId] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const razorpayScript = document.querySelector("#razorpay-script");
@@ -136,7 +138,7 @@ const Plans = ({ hasActivePlan }) => {
     try {
       const res = await handleCreateSubscription(planId);
       const subscriptionId = res.data.subscriptionId;
-      openRazorpayPopup({ subscriptionId });
+      openRazorpayPopup({ subscriptionId, userId: user._id });
       setLoadingPlanId(null);
     } catch (error) {
       console.error("Subscription error:", error);
