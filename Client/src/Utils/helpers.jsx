@@ -175,8 +175,7 @@ export const showSessionLimitExceedModal = ({
   showModal,
   showConfirmModal,
   closeConfirmModal,
-  navigate,
-  setIsAuth,
+  checkAuthentication,
   token,
 }) => {
   showConfirmModal(
@@ -185,8 +184,7 @@ export const showSessionLimitExceedModal = ({
     async () => {
       const res = await regenerateSession(token);
       if (res.success) {
-        setIsAuth(true);
-        navigate("/");
+        await checkAuthentication();
       } else {
         showModal("Error", res.message || "Something went wrong.", "error");
       }

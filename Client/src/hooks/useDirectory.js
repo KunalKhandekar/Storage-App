@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getItemList } from "../Apis/file_Dir_Api";
+import { useAuth } from "../Contexts/AuthContext";
+import { toast } from "sonner";
 
 const useDirectory = () => {
   const [files, setFiles] = useState([]);
@@ -13,14 +15,14 @@ const useDirectory = () => {
   const [currentFile, setCurrentFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
+
   const { dirId } = useParams();
-  const navigate = useNavigate();
 
   const fetchDirectoryItems = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const res = await getItemList(dirId);
       if (res.success) {
@@ -30,11 +32,11 @@ const useDirectory = () => {
         setDirectories(directory);
       } else {
         console.log(res.message);
-        setError(res.message);
-        navigate("/login");
       }
     } catch (error) {
-      setError(error.message || "An error occurred while fetching directory items");
+      setError(
+        error.message || "An error occurred while fetching directory items"
+      );
       console.error("Error fetching directory items:", error);
     } finally {
       setLoading(false);
@@ -88,37 +90,37 @@ const useDirectory = () => {
     loading,
     error,
     breadCrumb,
-    
+
     // Modal state
     showCreateModal,
     showShareModal,
     currentFile,
-    
+
     // Dropdown state
     activeDropdown,
-    
+
     // Modal handlers
     handleCreateModalOpen,
     handleCreateModalClose,
     handleCreateSuccess,
     handleShareModalOpen,
     handleShareModalClose,
-    
+
     // Dropdown handlers
     handleDropdownClose,
     handleDropdownToggle,
-    
+
     // Action handlers
     handleActionComplete,
     refreshDirectory,
-    
+
     // state setters
     setActiveDropdown,
     setActionDone,
     setShowShareModal,
     setCurrentFile,
     setShowCreateModal,
-    
+
     // Route params
     dirId,
   };

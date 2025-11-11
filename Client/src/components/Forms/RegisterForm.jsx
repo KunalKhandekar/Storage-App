@@ -98,16 +98,6 @@ export default function RegistrationForm() {
     setSuccess("");
   };
 
-  const handleGoogleSuccess = async (res) => {
-    const result = await googleAuth(res);
-    if (result.success) {
-      setIsAuth(true);
-      navigate("/");
-    } else setError(result.message);
-  };
-
-  const handleGoogleError = () =>
-    setError("Google login failed. Please try again.");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-blue-50 py-12 px-4">
@@ -171,8 +161,7 @@ export default function RegistrationForm() {
         {currentStep === "credentials" && (
           <>
             <SocialAuthButtons
-              onGoogleSuccess={handleGoogleSuccess}
-              onGoogleError={handleGoogleError}
+              setError={setError}
               githubURL={`${URL}/auth/github`}
             />
           </>
@@ -181,12 +170,12 @@ export default function RegistrationForm() {
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <a
-              href="/login"
+            <button
+              onClick={() => navigate("/login")}
               className="text-indigo-600 hover:text-indigo-500 font-medium"
             >
               Sign in here
-            </a>
+            </button>
           </p>
         </div>
       </div>

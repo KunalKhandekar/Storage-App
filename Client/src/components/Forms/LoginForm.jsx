@@ -11,7 +11,7 @@ import { useModal } from "../../Contexts/ModalContext";
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const { setIsAuth } = useAuth();
+  const { checkAuthentication } = useAuth();
   const { showModal, showConfirmModal, closeConfirmModal } = useModal();
 
   const [formData, setFormData] = useState({
@@ -84,16 +84,14 @@ export default function LoginForm() {
     const { email, password, otp } = formData;
     const res = await login(email, password, otp);
     if (res.success) {
-      setIsAuth(true);
-      navigate("/");
+      await checkAuthentication();
     } else {
       if (res?.details?.sessionLimitExceed) {
         showSessionLimitExceedModal({
           showModal,
           showConfirmModal,
           closeConfirmModal,
-          navigate,
-          setIsAuth,
+          checkAuthentication,
           token: res?.details?.temp_token,
         });
       }
@@ -211,12 +209,12 @@ export default function LoginForm() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
-              <a
-                href="/register"
+              <button
+                onClick={() => navigate("/register")}
                 className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
               >
                 Sign up here
-              </a>
+              </button>
             </p>
           </div>
         </div>

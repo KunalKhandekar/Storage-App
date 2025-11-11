@@ -26,6 +26,7 @@ createRoot(document.getElementById("root")).render(
                 offset={{ bottom: '0px', right: "10px", left: "0px", top: "90px" }}
                 mobileOffset={{ top: "80px" }}
               />
+               <Toaster id="error" position="top-right" richColors />
               <Modals />
               <GlobalUploadProgress />
             </StorageProvider>

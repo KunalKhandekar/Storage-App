@@ -8,8 +8,7 @@ export default function AuthError() {
   const [params] = useSearchParams();
   const message = params.get("message");
   const loginToken = params.get("temp_token");
-  const navigate = useNavigate();
-  const { setIsAuth } = useAuth();
+  const { checkAuthentication } = useAuth();
   const { showModal, showConfirmModal, closeConfirmModal } = useModal();
   useEffect(() => {
     if (loginToken) {
@@ -17,8 +16,7 @@ export default function AuthError() {
         showModal,
         showConfirmModal,
         closeConfirmModal,
-        navigate,
-        setIsAuth,
+        checkAuthentication,
         token: loginToken,
       });
     }
