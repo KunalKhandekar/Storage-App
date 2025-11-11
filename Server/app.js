@@ -72,8 +72,8 @@ app.use(express.json());
 app.use(cookieParser(secretKey));
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  "http://192.168.0.107:5173",
-  "http://172.27.192.1:5173",
+  "http://192.168.0.107",
+  "https://overeffusively-plummy-clarinda.ngrok-free.dev",
 ];
 
 app.use(

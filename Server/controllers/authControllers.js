@@ -77,7 +77,6 @@ export const loginWithGithub = async (req, res, next) => {
         `${process.env.CLIENT_URL}/auth/error?temp_token=${encodeURIComponent(error?.details?.temp_token)}`
       );
     }
-    console.error("Mongo Error:", JSON.stringify(error, null, 2));
     return res.redirect(
       `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent(error.message)}`
     );

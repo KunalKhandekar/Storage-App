@@ -23,3 +23,15 @@ export const roleSchema = z.enum(["User", "Manager", "Admin", "SuperAdmin"], {
   required_error: "role is required",
   invalid_type_error: "Invalid role",
 });
+
+export const planIdSchema = z
+  .string()
+  .regex(/^plan_[A-Za-z0-9]{14,20}$/, "Invalid Razorpay plan ID format");
+
+export const createSubscriptionSchema = z.object({
+  planId: planIdSchema,
+});
+
+export const changePlanSchema = z.object({
+  changePlanId: planIdSchema,
+});

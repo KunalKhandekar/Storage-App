@@ -4,11 +4,16 @@ import CustomError from "../../utils/ErrorResponse.js";
 import { razorpayInstance } from "../razorpayService.js";
 import Directory from "../../models/dirModel.js";
 import { formatFileSize } from "../../utils/formatFileSize.js";
+import createSubscription from "./createSubscription.js";
+import subscriptionStatus from "./subscriptionStatus.js";
+import cancelSubscription from "./cancelSubscription.js";
+import getEligiblePlansForChange from "./getEligiblePlans.js";
+import changePlan from "./changePlan.js";
 
 /**
  * Create a new subscription on Razorpay
  */
-export const createSubscriptionService = async (planId, userId) => {
+export const createRazorpaySubscriptionService = async (planId, userId) => {
   const razorpayResponse = await razorpayInstance.subscriptions.create({
     plan_id: planId,
     total_count: 12,
@@ -33,7 +38,7 @@ export const cancelSubscriptionService = async (subscriptionId) => {
  * Helper function to create a new subscription record in DB and Razorpay
  */
 const handleNewSubscriptionCreation = async (userId, planId, status) => {
-  const { data } = await createSubscriptionService(planId, userId);
+  const { data } = await createRazorpaySubscriptionService(planId, userId);
   if (!data) {
     throw new CustomError(
       "Failed to create subscription",
@@ -92,4 +97,12 @@ export const downgradeSubscriptionService = async ({ user, desirePlan }) => {
 
   // 2. Proceed with subscription creation
   return handleNewSubscriptionCreation(user._id, desirePlan.id, "pending");
+};
+
+export default {
+  CreateSubscription: createSubscription,
+  Status: subscriptionStatus,
+  CancelSubscription: cancelSubscription,
+  GetEligiblePlansForChange: getEligiblePlansForChange,
+  ChangePlan: changePlan,
 };
