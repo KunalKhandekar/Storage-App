@@ -42,12 +42,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         reportUri: ["/csp-violation-report"],
-        frameAncestors: [
-          "'self'",
-          process.env.CLIENT_URL,
-          "http://192.168.0.107:5173",
-          "http://172.27.192.1:5173",
-        ],
+        frameAncestors: ["'self'", process.env.CLIENT_URL],
       },
     },
   })
@@ -70,11 +65,7 @@ app.post(
 app.use("/profilePictures", express.static("profilePictures"));
 app.use(express.json());
 app.use(cookieParser(secretKey));
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  "http://192.168.0.107",
-  "https://overeffusively-plummy-clarinda.ngrok-free.dev",
-];
+const allowedOrigins = [process.env.CLIENT_URL];
 
 app.use(
   cors({
@@ -105,7 +96,7 @@ app.use("/events", eventController);
 // Error Handler
 app.use(errorHandler);
 
-app.listen(4000, () => {
-  console.log("Server running on port 4000");
+app.listen(process.env.PORT, () => {
+  console.log("Server running on port " + process.env.PORT);
   startCronJobs();
 });

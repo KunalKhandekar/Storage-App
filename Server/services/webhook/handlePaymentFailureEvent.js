@@ -15,9 +15,5 @@ export default async function handlePaymentFailureEvent(eventBody) {
   subscription.status = "renewal_failed";
   await subscription.save();
 
-  console.log(
-    `⚠️ Subscription pending for user ${userId} — awaiting retry or user action`
-  );
-
   return "Handled subscription.pending event";
 }

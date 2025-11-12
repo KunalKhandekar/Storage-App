@@ -23,7 +23,5 @@ export default async function handleChargedEvent(eventBody) {
   subscriptionDoc.status = "active"; // incase of renewal_retry
   await subscriptionDoc.save();
 
-  console.log(`🔁 Subscription renewed successfully for user ${userId}`);
-
   return "Handled next_due — subscription renewed";
 }
