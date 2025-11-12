@@ -59,7 +59,6 @@ export function openRazorpayPopup({ subscriptionId, userId }) {
     },
     modal: {
       ondismiss: function () {
-        console.log("User closed the Razorpay popup.");
         if (waitingToastId) toast.dismiss(waitingToastId);
         toast.info("Payment window closed", {
           description: "You cancelled the payment process.",
@@ -80,7 +79,6 @@ export function openRazorpayPopup({ subscriptionId, userId }) {
   });
   
   rzp.on("payment.failed", function (response) {
-    console.log("Payment failed:", response);
     if (waitingToastId) toast.dismiss(waitingToastId);
     toast.error("Payment failed", {
       description: "There was an issue processing your payment",

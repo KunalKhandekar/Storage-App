@@ -1,12 +1,11 @@
 import { useState } from "react";
 
 import { useEffect, useRef } from "react";
-import { useGlobalProgress } from "../Contexts/ProgressContext";
 import { useNavigate } from "react-router-dom";
-import { useModal } from "../Contexts/ModalContext";
 import { driveConnect } from "../Apis/file_Dir_Api";
 import { useAuth } from "../Contexts/AuthContext";
-import { formatFileSize } from "../Utils/helpers";
+import { useModal } from "../Contexts/ModalContext";
+import { useGlobalProgress } from "../Contexts/ProgressContext";
 
 export default function ImportFromDrive({ setActionDone, progressMap }) {
   const navigate = useNavigate();

@@ -139,8 +139,6 @@ const Plans = ({ hasActivePlan }) => {
     try {
       const res = await handleCreateSubscription(planId);
       const subscriptionId = res.data.subscriptionId;
-
-      console.log("user from openpopup : "+ JSON.stringify(user));
       openRazorpayPopup({ subscriptionId, userId: user._id });
       setLoadingPlanId(null);
     } catch (error) {
