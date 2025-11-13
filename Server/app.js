@@ -26,6 +26,7 @@ import { connectDB } from "./config/db.js";
 import helmet from "helmet";
 import { startCronJobs } from "./cron/index.js";
 import { eventController } from "./controllers/EventController.js";
+import CustomSuccess from "./utils/SuccessResponse.js";
 
 // Connect to MongoDB
 await connectDB();
@@ -92,6 +93,10 @@ app.use("/auth", authRoutes);
 app.use("/guest", guestRoutes);
 app.use("/webhook", webhookRoutes);
 app.use("/events", eventController);
+
+app.get("/", (req, res) => {
+    return CustomSuccess.send(res, "App working fine", StatusCodes.OK);
+})
 
 // Error Handler
 app.use(errorHandler);
