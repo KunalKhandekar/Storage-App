@@ -4,5 +4,6 @@ export const setCookie = (res, sessionID, sessionExpiry) => {
     signed: true,
     maxAge: sessionExpiry,
     sameSite: "none",
+    secure: process.env.NODE_ENV === "production" ? true : false,
   });
 };
