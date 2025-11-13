@@ -8,7 +8,13 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export const s3Client = new S3Client({ profile: process.env.AWS_PROFILE });
+export const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 const bucket = process.env.AWS_BUCKET;
 
 export const generatePreSignedUploadURL = async ({ Key, ContentType }) => {
