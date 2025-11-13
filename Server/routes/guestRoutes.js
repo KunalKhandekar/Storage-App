@@ -7,7 +7,7 @@ import {
 import { serveFile } from "../middlewares/serveFile.js";
 import { limiter } from "../utils/RateLimiter.js";
 import { throttler } from "../utils/Throttler.js";
-import { checkFileSharedViaLink } from "../middlewares/checkFileShared.js";
+import { checkFileSharedViaLink } from "../middlewares/checkFileShare.js";
 
 const router = Router();
 

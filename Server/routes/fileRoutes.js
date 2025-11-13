@@ -22,7 +22,7 @@ import {
   shareViaLink,
 } from "../controllers/fileControllers.js";
 import { checkFileAccess } from "../middlewares/checkFileAccess.js";
-import { checkFileSharedViaEmail } from "../middlewares/checkFileShared.js";
+import { checkFileSharedViaEmail } from "../middlewares/checkFileShare.js";
 import { serveFile } from "../middlewares/serveFile.js";
 import validateRequest from "../middlewares/validateRequest.js";
 
