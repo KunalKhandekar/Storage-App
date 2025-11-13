@@ -236,7 +236,7 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
 │   └── vite.config.js
 ```
 
-### Server (Backend - Node + Express + MongoDB)
+### Server (Backend - Node + Express + MongoDB + AWS)
 
 ```bash
 ├── Server
@@ -251,7 +251,7 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
 │   │   ├── fileControllers.js
 │   │   ├── otpControllers.js
 │   │   └── userControllers.js
-│   ├── middlewares                   # Cross-cutting concerns
+│   ├── middlewares                   # Cross-cutting concern
 │   │   ├── auth.js
 │   │   ├── checkAction.js
 │   │   ├── checkFIleShared.js
