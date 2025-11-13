@@ -2,7 +2,7 @@ import { File, Folder } from "lucide-react";
 import FilePreviewModal from "../../components/Modals/FilePreviewModal";
 import Header from "../../components/AdminHeader";
 import { ItemCard } from "./ItemCard";
-import Breadcrumb from "./BreadCrumb";
+import Breadcrumb from "./Breadcrumb";
 import useAdminUserView from "../../hooks/useAdminUserView";
 
 export const AdminUserView = () => {
