@@ -38,7 +38,7 @@ export const usePermissionManager = () => {
         // Set link sharing if enabled
         if (fileInfo?.sharedViaLink?.enabled) {
           setLinkSharing({
-            link: `${import.meta.env.VITE_BASE_URL}/guest/access/${
+            link: `${window.location.origin}/guest/access/${
               fileInfo._id
             }?token=${fileInfo.sharedViaLink.token}`,
             enabled: fileInfo.sharedViaLink.enabled,
@@ -150,7 +150,7 @@ export const usePermissionManager = () => {
         if (res.success) {
           setLinkSharing((prev) => ({
             ...prev,
-            link: `${import.meta.env.VITE_BASE_URL}/guest/access/${
+            link: `${window.location.origin}/guest/access/${
               file._id
             }?token=${file.sharedViaLink.token}`,
             enabled: newState,
