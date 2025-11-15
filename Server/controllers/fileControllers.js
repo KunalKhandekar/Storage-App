@@ -46,15 +46,16 @@ export const initiateFileUpload = async (req, res, next) => {
       req.body
     );
 
-    const { uploadURL, newFileId } = await FileServices.UploadFileInitiateService(
-      rootDirId,
-      _id,
-      maxStorageLimit,
-      name,
-      size,
-      contentType,
-      parentDirId
-    );
+    const { uploadURL, newFileId } =
+      await FileServices.UploadFileInitiateService(
+        rootDirId,
+        _id,
+        maxStorageLimit,
+        name,
+        size,
+        contentType,
+        parentDirId
+      );
 
     return CustomSuccess.send(res, "Upload initiated", StatusCodes.OK, {
       uploadURL,
@@ -187,8 +188,9 @@ export const getSharedFileViaLink = async (req, res, next) => {
 
 export const getFileInfoAndURL = async (req, res, next) => {
   const fileId = req.params.fileId;
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
   try {
-    const fileInfo = await FileServices.GetFileInfoService(fileId);
+    const fileInfo = await FileServices.GetFileInfoService(fileId, baseUrl);
     return CustomSuccess.send(res, null, StatusCodes.OK, fileInfo);
   } catch (error) {
     next(error);
@@ -487,4 +489,4 @@ export const importFromDrive = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};

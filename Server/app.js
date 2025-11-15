@@ -35,6 +35,9 @@ export const rootPath = import.meta.dirname;
 
 // Create Express App
 const app = express();
+const allowedOrigins = process.env.CLIENT_URLS.split(",").map((url) =>
+  url.trim()
+);
 
 // Adding Security Headers
 app.use(
@@ -43,7 +46,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         reportUri: ["/csp-violation-report"],
-        frameAncestors: ["'self'", process.env.CLIENT_URL],
+        frameAncestors: ["'self'", ...allowedOrigins],
       },
     },
   })
@@ -66,7 +69,6 @@ app.post(
 app.use("/profilePictures", express.static("profilePictures"));
 app.use(express.json());
 app.use(cookieParser(secretKey));
-const allowedOrigins = [process.env.CLIENT_URL];
 
 app.use(
   cors({
@@ -95,8 +97,8 @@ app.use("/webhook", webhookRoutes);
 app.use("/events", eventController);
 
 app.get("/", (req, res) => {
-    return CustomSuccess.send(res, "App working fine", StatusCodes.OK);
-})
+  return CustomSuccess.send(res, "App working fine", StatusCodes.OK);
+});
 
 // Error Handler
 app.use(errorHandler);

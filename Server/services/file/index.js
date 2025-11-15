@@ -281,7 +281,7 @@ const getSharedFileViaLinkService = async (fileId, token) => {
   return file;
 };
 
-const getFileInfoService = async (fileId) => {
+const getFileInfoService = async (fileId, baseUrl) => {
   const file = await File.findById(fileId)
     .select("name sharedViaLink userId")
     .populate("userId");
@@ -290,7 +290,7 @@ const getFileInfoService = async (fileId) => {
     throw new CustomError("File not found", StatusCodes.NOT_FOUND);
   }
 
-  const url = `${process.env.BASE_URL}/guest/file/view/${file._id}?token=${file.sharedViaLink.token}`;
+  const url = `${baseUrl}/guest/file/view/${file._id}?token=${file.sharedViaLink.token}`;
 
   return {
     _id: file._id,
