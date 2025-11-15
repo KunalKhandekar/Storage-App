@@ -47,12 +47,10 @@ export const loginWithGoogle = async (req, res, next) => {
   }
 };
 
-export const redirectToAuthURL = async (req, res) => {
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
-
+export const redirectToAuthURL = async (_, res) => {
   const { state, url } = githubClient.getWebFlowAuthorizationUrl({
     scopes: ["read:user", "user:email"],
-    redirectUrl: `${baseUrl}/auth/github/callback`,
+    redirectUrl: `https://api.storemystuff.cloud/auth/github/callback`,
   });
 
   res.cookie("_github_state", state, {
