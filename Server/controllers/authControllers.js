@@ -47,19 +47,32 @@ export const loginWithGoogle = async (req, res, next) => {
   }
 };
 
-export const redirectToAuthURL = async (_, res) => {
-  const { state, url } = githubClient.getWebFlowAuthorizationUrl({
+export const redirectToAuthURL = async (req, res) => {
+  const clientOrigin = req.get("referer")?.replace(/\/$/, "");
+  const allowed = process.env.CLIENT_URLS.split(",");
+  if (!allowed.includes(clientOrigin)) {
+    return res.status(400).json({ error: "Unauthorized client" });
+  }
+  const { state: githubState, url } = githubClient.getWebFlowAuthorizationUrl({
     scopes: ["read:user", "user:email"],
     redirectUrl: `https://api.storemystuff.cloud/auth/github/callback`,
   });
 
-  res.cookie("_github_state", state, {
+  const combinedState = Buffer.from(
+    JSON.stringify({
+      githubState,
+      clientOrigin,
+    })
+  ).toString("base64");
+
+  res.cookie("_github_state", githubState, {
     httpOnly: true,
     signed: true,
     maxAge: 1000 * 60 * 10,
   });
 
-  res.redirect(url);
+  const redirectURL = `${url}&state=${combinedState}`;
+  res.redirect(redirectURL);
 };
 
 export const loginWithGithub = async (req, res, next) => {
@@ -67,18 +80,30 @@ export const loginWithGithub = async (req, res, next) => {
   const { code, state } = req.query;
 
   try {
+    const { githubState, clientOrigin } = JSON.parse(
+      Buffer.from(state, "base64").toString()
+    );
     const { sessionID, sessionExpiry } =
-      await AuthServices.LoginWithGitHubService(_github_state, code, state);
+      await AuthServices.LoginWithGitHubService(
+        _github_state,
+        code,
+        githubState
+      );
     setCookie(res, sessionID, sessionExpiry);
-    res.redirect(`${process.env.CLIENT_URL}/`);
+
+    return res.redirect(`${clientOrigin}/`);
   } catch (error) {
+    const fallback = process.env.DEFAULT_CLIENT_URL;
     if (error?.details?.sessionLimitExceed) {
       return res.redirect(
-        `${process.env.CLIENT_URL}/auth/error?temp_token=${encodeURIComponent(error?.details?.temp_token)}`
+        `${fallback}/auth/error?temp_token=${encodeURIComponent(
+          error?.details?.temp_token
+        )}`
       );
     }
+
     return res.redirect(
-      `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent(error.message)}`
+      `${fallback}/auth/error?message=${encodeURIComponent(error.message)}`
     );
   }
 };

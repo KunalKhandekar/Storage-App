@@ -3,7 +3,7 @@ export const setCookie = (res, sessionID, sessionExpiry) => {
     httpOnly: true,
     signed: true,
     maxAge: sessionExpiry,
-    sameSite: "none",
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production" ? true : false,
   });
 };
