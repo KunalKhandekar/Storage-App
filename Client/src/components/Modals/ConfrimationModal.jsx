@@ -1,4 +1,5 @@
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const ConfirmationModal = ({
   isOpen,
@@ -10,6 +11,8 @@ const ConfirmationModal = ({
   cancelText = "Cancel",
   type = "warning",
 }) => {
+  const [loading, setLoading] = useState(false);
+
   if (!isOpen) return null;
 
   const getIconAndColor = () => {
@@ -37,6 +40,16 @@ const ConfirmationModal = ({
 
   const { icon: Icon, color, buttonColor } = getIconAndColor();
 
+  const handleConfirm = async () => {
+    try {
+      setLoading(true);
+      await onConfirm();
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
@@ -54,15 +67,27 @@ const ConfirmationModal = ({
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            disabled={loading}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
             {cancelText}
           </button>
+
           <button
-            onClick={onConfirm}
-            className={`px-4 py-2 rounded-md text-white ${buttonColor}`}
+            onClick={handleConfirm}
+            disabled={loading}
+            className={`px-4 py-2 rounded-md text-white flex items-center gap-2 ${buttonColor} ${
+              loading ? "opacity-70 cursor-not-allowed" : ""
+            }`}
           >
-            {confirmText}
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin w-5 h-5" />
+                Processing...
+              </>
+            ) : (
+              confirmText
+            )}
           </button>
         </div>
       </div>
