@@ -188,7 +188,7 @@ export const getSharedFileViaLink = async (req, res, next) => {
 
 export const getFileInfoAndURL = async (req, res, next) => {
   const fileId = req.params.fileId;
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
+  const baseUrl = process.env.BASE_URL;
   try {
     const fileInfo = await FileServices.GetFileInfoService(fileId, baseUrl);
     return CustomSuccess.send(res, null, StatusCodes.OK, fileInfo);

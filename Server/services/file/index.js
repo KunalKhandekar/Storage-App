@@ -233,7 +233,7 @@ const shareViaEmailService = async (users, file) => {
 const shareviaLinkService = async (file, permission) => {
   if (file?.sharedViaLink?.token) {
     return {
-      link: `${process.env.CLIENT_URL}/guest/access/${file._id}?token=${file.sharedViaLink.token}`,
+      link: `${process.env.DEFAULT_CLIENT_URL}/guest/access/${file._id}?token=${file.sharedViaLink.token}`,
       permission: file.sharedViaLink.permission,
       enabled: file.sharedViaLink.enabled,
     };
@@ -248,7 +248,7 @@ const shareviaLinkService = async (file, permission) => {
   await file.save();
 
   return {
-    link: `${process.env.CLIENT_URL}/guest/access/${file._id}?token=${file.sharedViaLink.token}`,
+    link: `${process.env.DEFAULT_CLIENT_URL}/guest/access/${file._id}?token=${file.sharedViaLink.token}`,
     permission: file.sharedViaLink.permission,
     enabled: file.sharedViaLink.enabled,
   };
