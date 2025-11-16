@@ -1,4 +1,5 @@
 import redisClient from "../../config/redis.js";
+import CustomError from "../../utils/ErrorResponse.js";
 
 export const parseTempToken = async (token) => {
   const isTokenStored = await redisClient.get(`temp_login_token:${token}`);

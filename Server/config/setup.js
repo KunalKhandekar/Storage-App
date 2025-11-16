@@ -1,7 +1,23 @@
+import fs from "fs";
+import path from "path";
 import mongoose from "mongoose";
 import { connectDB } from "./db.js";
 
+const rootPath = import.meta.dirname;
+
+function ensureProfilePicturesFolder() {
+  const folderPath = path.join(rootPath, "..", "profilePictures");
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+    console.log("✔ profilePictures folder created at /src/profilePictures");
+  } else {
+    console.log("✔ profilePictures folder already exists");
+  }
+}
+
 await connectDB();
+
+ensureProfilePicturesFolder();
 const db = mongoose.connection.db;
 const client = mongoose.connection.getClient();
 
@@ -71,7 +87,7 @@ const validations = [
             bsonType: "number",
           },
           subscriptionId: {
-            bsonType: [ "objectId", "null" ],
+            bsonType: ["objectId", "null"],
           },
           maxFileSize: {
             bsonType: "number",
