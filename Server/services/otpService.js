@@ -7,7 +7,7 @@ const resend = new Resend(process.env.RESEND_KEY);
 export const sendOTPService = async (email, otp) => {
   try {
     const res = await resend.emails.send({
-      from: "StorageApp <StorageApp@kunalkhandekar.tech>",
+      from: "StoreMyStuff <no-reply@storemystuff.cloud>",
       to: [email],
       subject: "Your OTP for Authentication",
       text: `Your OTP is ${otp}`,
