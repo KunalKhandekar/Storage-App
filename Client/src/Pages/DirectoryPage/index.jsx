@@ -28,9 +28,9 @@ const DirectoryPage = () => {
   } = useDirectory();
 
   return (
-    <div className="max-w-7xl m-auto my-3">
+    <div className="m-auto">
       {/* Main Content */}
-      <main className="min-h-screen p-6 bg-gray-50 max-w-6xl mx-4 lg:m-auto rounded-lg shadow-sm border border-gray-200">
+      <main className="min-h-screen p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
         {/* Upload Progress */}
         <UploadSection
           setShowCreateModal={setShowCreateModal}

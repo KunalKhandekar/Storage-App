@@ -6,8 +6,13 @@ import { driveConnect } from "../Apis/file_Dir_Api";
 import { useAuth } from "../Contexts/AuthContext";
 import { useModal } from "../Contexts/ModalContext";
 import { useGlobalProgress } from "../Contexts/ProgressContext";
+import { FaGoogleDrive } from "react-icons/fa";
 
-export default function ImportFromDrive({ setActionDone, progressMap }) {
+export default function ImportFromDrive({
+  setActionDone,
+  progressMap,
+  mobileView = false,
+}) {
   const navigate = useNavigate();
   const pickerRef = useRef(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -109,6 +114,37 @@ export default function ImportFromDrive({ setActionDone, progressMap }) {
       el.removeEventListener("picker-oauth-response", onAuth);
     };
   }, [showPicker, start, step, finish]);
+
+  if (mobileView) {
+    return (
+      <>
+        <button
+          onClick={handleOpen}
+          disabled={Object.keys(progressMap).length > 0 || active}
+          aria-disabled={Object.keys(progressMap).length > 0 || active}
+          title={`${active ? "Importing Files" : "Import Google Files"}`}
+          className={` flex flex-col items-center gap-1 flex-1 touch-manipulation active:scale-95 transition-transform
+    ${active || Object.keys(progressMap).length > 0 ? "cursor-not-allowed" : ""}
+  `}
+        >
+          <div className="p-3 rounded-full bg-purple-500 active:bg-purple-600 transition-colors">
+            <FaGoogleDrive  className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-xs font-medium text-gray-700">Drive</span>
+        </button>
+
+        {showPicker ? (
+          <drive-picker
+            ref={pickerRef}
+            client-id={clientId}
+            app-id={appId}
+            scope={scope}
+            multiselect="true"
+          ></drive-picker>
+        ) : null}
+      </>
+    );
+  }
 
   return (
     <div>

@@ -72,9 +72,6 @@ const DirectoryView = ({
   return (
     <div className="min-h-full bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb */}
-        <Breadcrumb breadCrumb={breadCrumb} />
-
         {/* ToolBar -> Searching/Sorting/viewing */}
         <ToolBar
           searchTerm={searchTerm}
@@ -87,6 +84,9 @@ const DirectoryView = ({
           setSortOrder={setSortOrder}
           itemCount={filteredAndSortedItems.length}
         />
+
+        {/* Breadcrumb */}
+        <Breadcrumb breadCrumb={breadCrumb} />
 
         {/* Content */}
         {/* Items Grid/List */}

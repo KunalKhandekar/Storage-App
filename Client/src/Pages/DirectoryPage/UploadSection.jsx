@@ -26,8 +26,10 @@ const UploadSection = ({ setShowCreateModal, setActionDone }) => {
       if (file.size > user.maxFileSize) {
         showModal(
           "Upload Limit Exceeded",
-          `"${file.name}" exceeds your plan’s upload limit (${formatFileSize(user.maxFileSize)}).
-Upload didn’t start to avoid data loss. Upgrade to a higher plan to upload larger files effortlessly.`,
+          `"${file.name}" exceeds your plan's upload limit (${formatFileSize(
+            user.maxFileSize
+          )}).
+Upload didn't start to avoid data loss. Upgrade to a higher plan to upload larger files effortlessly.`,
           "error"
         );
         return;
@@ -47,9 +49,7 @@ Upload didn’t start to avoid data loss. Upgrade to a higher plan to upload lar
         showModal
       );
       setActionDone(true);
-      // TODO: toast
     } catch (err) {
-      // TODO: toast
       console.error("Some uploads failed");
     }
   };
@@ -103,9 +103,9 @@ Upload didn’t start to avoid data loss. Upgrade to a higher plan to upload lar
         </div>
       )}
 
-      {/* Hero Section */}
+      {/* Desktop Upload Area - Hidden on mobile */}
       <div
-        className={`mb-4 border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+        className={`hidden min-[800px]:block max-w-7xl mx-auto mb-4 border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           dragOver ? "border-blue-400 bg-blue-50" : "border-gray-300 bg-white"
         }`}
         onDrop={handleDrop}
@@ -125,12 +125,12 @@ Upload didn’t start to avoid data loss. Upgrade to a higher plan to upload lar
           {/* Upload Files Button */}
           <label
             className={`relative inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg min-h-[48px] sm:min-w-[140px] lg:min-w-[160px] touch-manipulation
-      ${
-        active || Object.keys(progressMap).length > 0
-          ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
-          : "text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:shadow-xl transform hover:-translate-y-0.5"
-      }
-    `}
+              ${
+                active || Object.keys(progressMap).length > 0
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+                  : "text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:shadow-xl transform hover:-translate-y-0.5"
+              }
+            `}
           >
             <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 transition-transform group-hover:scale-110 flex-shrink-0" />
             <span className="truncate">Upload Files</span>
@@ -165,7 +165,55 @@ Upload didn’t start to avoid data loss. Upgrade to a higher plan to upload lar
           <ImportFromDrive
             setActionDone={setActionDone}
             progressMap={progressMap}
+            mobileView={false}
           />
+        </div>
+      </div>
+
+      {/* Mobile FAB - Fixed Bottom Action Bar */}
+      <div className="min-[800px]:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+        <div className="flex items-center justify-between p-3 max-w-lg mx-auto">
+          {/* Upload Files */}
+          <label className="flex flex-col items-center gap-1 flex-1 touch-manipulation active:scale-95 transition-transform cursor-pointer">
+            <div
+              className={`p-3 rounded-full transition-colors ${
+                active || Object.keys(progressMap).length > 0
+                  ? "bg-gray-300"
+                  : "bg-blue-500 active:bg-blue-600"
+              }`}
+            >
+              <Upload className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xs font-medium text-gray-700">Upload</span>
+            <input
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFileUpload(e.target.files)}
+              disabled={active || Object.keys(progressMap).length > 0}
+            />
+          </label>
+
+          {/* Create Directory */}
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex flex-col items-center gap-1 flex-1 touch-manipulation active:scale-95 transition-transform"
+          >
+            <div className="p-3 rounded-full bg-green-500 active:bg-green-600 transition-colors">
+              <FolderPlus className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xs font-medium text-gray-700">
+              New Folder
+            </span>
+          </button>
+
+          {/* Import Drive */}
+          <ImportFromDrive
+            setActionDone={setActionDone}
+            progressMap={progressMap}
+            mobileView={true}
+          />
+
         </div>
       </div>
     </>

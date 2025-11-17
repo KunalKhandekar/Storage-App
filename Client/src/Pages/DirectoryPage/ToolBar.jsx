@@ -36,19 +36,19 @@ const ToolBar = ({
     setShowSortDropdown(false);
   };
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-6">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-2">
       <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
         {/* Left side - Search and Controls */}
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center flex-1 lg:flex-none">
           {/* Search Input */}
-          <div className="relative flex-1 sm:flex-none">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search files and folders..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-80 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg transition-colors text-sm placeholder-gray-500 focus:outline-none focus:ring-0 focus:border-gray-300"
+              className="w-full min-[1024px]:w-80  pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg transition-colors text-sm placeholder-gray-500 focus:outline-none focus:ring-0 focus:border-gray-300"
             />
 
             {searchTerm && (
@@ -63,7 +63,7 @@ const ToolBar = ({
         </div>
 
         {/* Right side - View Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end gap-3">
           {/* View Mode Toggle */}
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
