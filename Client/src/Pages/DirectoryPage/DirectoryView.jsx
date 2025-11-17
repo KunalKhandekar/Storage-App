@@ -6,6 +6,7 @@ import ItemCard from "./ItemCard";
 import ToolBar from "./ToolBar";
 
 const DirectoryView = ({
+  loading,
   allItems = [],
   breadCrumb,
   activeDropdown,
@@ -19,14 +20,16 @@ const DirectoryView = ({
     item: null,
   });
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState(localStorage.getItem("view") || "list");
+  const [viewMode, setViewMode] = useState(
+    localStorage.getItem("view") || "grid"
+  );
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
 
   const handleViewMode = (view) => {
     localStorage.setItem("view", view);
     setViewMode(view);
-  }
+  };
 
   const filteredAndSortedItems = useMemo(() => {
     const filtered = allItems.filter((item) =>
@@ -87,41 +90,45 @@ const DirectoryView = ({
 
         {/* Content */}
         {/* Items Grid/List */}
-          {filteredAndSortedItems.length > 0 ? (
-            <div
-              className={
-                viewMode === "grid"
-                  ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 max-w-none"
-                  : "space-y-2"
-              }
-            >
-              {filteredAndSortedItems.map((item) => (
-                <ItemCard
-                  key={item._id || item.id}
-                  item={item}
-                  viewMode={viewMode}
-                  activeDropdown={activeDropdown}
-                  setActiveDropdown={setActiveDropdown}
-                  setActionDone={setActionDone}
-                  setShowShareModal={setShowShareModal}
-                  setCurrentFile={setCurrentFile}
-                  onDetailsOpen={handleDetailsOpen}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Folder className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm ? "No results found" : "No files or folders"}
-              </h3>
-              <p className="text-gray-500">
-                {searchTerm
-                  ? `No items match "${searchTerm}". Try a different search term.`
-                  : "Upload some files or create a directory to get started"}
-              </p>
-            </div>
-          )}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          </div>
+        ) : filteredAndSortedItems.length > 0 ? (
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 max-w-none"
+                : "space-y-2"
+            }
+          >
+            {filteredAndSortedItems.map((item) => (
+              <ItemCard
+                key={item._id || item.id}
+                item={item}
+                viewMode={viewMode}
+                activeDropdown={activeDropdown}
+                setActiveDropdown={setActiveDropdown}
+                setActionDone={setActionDone}
+                setShowShareModal={setShowShareModal}
+                setCurrentFile={setCurrentFile}
+                onDetailsOpen={handleDetailsOpen}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Folder className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {searchTerm ? "No results found" : "No files or folders"}
+            </h3>
+            <p className="text-gray-500">
+              {searchTerm
+                ? `No items match "${searchTerm}". Try a different search term.`
+                : "Upload some files or create a directory to get started"}
+            </p>
+          </div>
+        )}
 
         {/* File Details Modal */}
         <FileDetailsModal

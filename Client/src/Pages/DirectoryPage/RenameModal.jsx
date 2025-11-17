@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Loader2, File, Folder } from "lucide-react";
 import { renameFile_or_Directory } from "../../Apis/file_Dir_Api";
+import { toast } from "sonner";
 
 export default function RenameModal({
   item,
@@ -61,7 +62,7 @@ export default function RenameModal({
         onRename(res);
         onClose();
       } else {
-        console.log(res.message);
+        toast.error(res.message);
       }
     } catch (error) {
       console.error("Error renaming:", error);

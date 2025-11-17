@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 const Header = ({ filteredFiles }) => {
   const navigate = useNavigate();
   return (
-    <div className="bg-white/70 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6 shadow-sm">
+    <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 sm:p-6 ">
       <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center space-x-3 sm:space-x-4">
           <button
             onClick={() => navigate("/share")}
-            className="group p-2 sm:p-2.5 hover:bg-white hover:shadow-md rounded-xl transition-all duration-200 border border-transparent hover:border-gray-200"
+            className="group p-2 sm:p-2.5 hover:bg-white hover:shadow-md rounded-xl transition-all duration-200 border border-transparent hover:border-gray-200 cursor-pointer"
           >
             <ArrowLeft
               size={16}

@@ -9,7 +9,7 @@ const LinkSharingCard = ({
   copySuccess,
 }) => {
   return (
-    <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="p-4 sm:p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">

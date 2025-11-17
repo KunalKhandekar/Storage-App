@@ -36,7 +36,7 @@ const ToolBar = ({
     setShowSortDropdown(false);
   };
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6 mb-6">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-6">
       <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
         {/* Left side - Search and Controls */}
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center flex-1 lg:flex-none">

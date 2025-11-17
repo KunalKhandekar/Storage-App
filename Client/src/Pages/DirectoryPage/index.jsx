@@ -27,10 +27,6 @@ const DirectoryPage = () => {
     setShowCreateModal,
   } = useDirectory();
 
-  if (loading) {
-    return <DirectoryShimmer />;
-  }
-
   return (
     <div className="max-w-7xl m-auto my-3">
       {/* Main Content */}
@@ -42,6 +38,7 @@ const DirectoryPage = () => {
         />
 
         <DirectoryView
+          loading={loading}
           activeDropdown={activeDropdown}
           setActionDone={handleActionComplete}
           setActiveDropdown={setActiveDropdown}

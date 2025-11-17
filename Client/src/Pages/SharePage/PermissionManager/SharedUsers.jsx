@@ -12,7 +12,7 @@ const SharedUsers = ({
   handleRevokeAccess,
 }) => {
   return (
-    <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden">
       <div className="p-4 sm:p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-green-100 rounded-lg">

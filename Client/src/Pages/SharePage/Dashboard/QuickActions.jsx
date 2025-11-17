@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const QuickActions = () => {
     const navigate = useNavigate();
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
       <div className="p-6 sm:p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
         <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
           Quick Actions

@@ -12,7 +12,7 @@ const Stats = ({stats}) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {/* Shared With Me Card */}
-      <div className="group relative overflow-hidden bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 hover:-translate-y-1">
+      <div className="group relative overflow-hidden bg-white rounded-2xl border border-gray-200">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div className="relative p-6">
           <div className="flex items-center justify-between mb-4">
@@ -45,7 +45,7 @@ const Stats = ({stats}) => {
       </div>
 
       {/* Shared By Me Card */}
-      <div className="group relative overflow-hidden bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-green-100/50 transition-all duration-300 hover:-translate-y-1">
+      <div className="group relative overflow-hidden bg-white rounded-2xl border border-gray-200">
         <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div className="relative p-6">
           <div className="flex items-center justify-between mb-4">
@@ -78,7 +78,7 @@ const Stats = ({stats}) => {
       </div>
 
       {/* Collaborators Card */}
-      <div className="group relative overflow-hidden bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-purple-100/50 transition-all duration-300 hover:-translate-y-1 sm:col-span-2 lg:col-span-1">
+      <div className="group relative overflow-hidden bg-white rounded-2xl border border-gray-200 ">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div className="relative p-6">
           <div className="flex items-center justify-between mb-4">

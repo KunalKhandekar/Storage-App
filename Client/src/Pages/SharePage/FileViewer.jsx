@@ -81,7 +81,7 @@ export default function FileViewer() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
           <div className="space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Header */}
-            <div className="bg-white/70 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 sm:p-6">
               <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center space-x-3 sm:space-x-4">
                   <button
@@ -147,7 +147,7 @@ export default function FileViewer() {
             <div className="flex justify-end gap-3">
               {file.permission === "editor" && (
                 <button
-                  className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200"
                   onClick={() => setIsRenameModal(true)}
                 >
                   <Pen size={14} />
@@ -158,7 +158,7 @@ export default function FileViewer() {
                 href={`${url}${
                   file.isSharedViaLink ? "action=download" : "?action=download"
                 }`}
-                className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200"
               >
                 <Download size={14} />
                 <span className="hidden sm:inline">Download</span>
@@ -167,7 +167,7 @@ export default function FileViewer() {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-all duration-200"
               >
                 <ExternalLink size={14} />
                 <span className="hidden sm:inline">Open</span>
@@ -175,7 +175,7 @@ export default function FileViewer() {
             </div>
 
             {/* File Preview */}
-            <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 rounded-lg">

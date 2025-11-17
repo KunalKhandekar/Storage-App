@@ -3,7 +3,7 @@ import { formatFileSize, formatTime, getFileIcon } from "../../../Utils/helpers"
 
 const FileInfo = ({ file }) => {
   return (
-    <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden">
       <div className="p-4 sm:p-6">
         <div className="flex items-center space-x-4">
           <div className="p-3 bg-gray-50 rounded-xl">

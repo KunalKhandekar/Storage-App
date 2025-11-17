@@ -64,7 +64,7 @@ const GuestFileAccess = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+        <div className="bg-white rounded-lg p-8 text-center">
           <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
           </div>
@@ -82,7 +82,7 @@ const GuestFileAccess = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-sm p-8 max-w-md w-full text-center">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
           <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-6 h-6 text-red-500" />
           </div>
@@ -106,7 +106,7 @@ const GuestFileAccess = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto p-4 sm:p-6">
           {/* File Info Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 mb-6">
             <div className="p-4 sm:p-6">
               {/* Mobile Layout - Stacked */}
               <div className="block sm:hidden">
@@ -208,7 +208,7 @@ const GuestFileAccess = () => {
           </div>
 
           {/* File Content */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-white rounded-lg border border-gray-200">
             {fileInfo.isAccessible === null ? (
               <div className="p-8 sm:p-12 text-center">
                 <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">

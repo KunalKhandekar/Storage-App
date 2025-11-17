@@ -4,7 +4,7 @@ import { DropdownMenu } from "../Dropdown";
 
 const GridView = ({item, handleOpen, handleAction, setActiveDropdown, activeDropdown, }) => {
   return (
-    <div className="group bg-white border border-gray-200 rounded-xl hover:shadow-lg hover:border-gray-300 transition-all duration-200">
+    <div className="group bg-white border border-gray-200 rounded-xl hover:shadow-sm hover:border-gray-300 transition-all duration-200">
       <div className="p-3 sm:p-4 cursor-pointer" onClick={handleOpen}>
         <div className="flex items-start justify-between mb-3">
           <div className="p-2 sm:p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl group-hover:from-gray-100 group-hover:to-gray-200 transition-all duration-200">
