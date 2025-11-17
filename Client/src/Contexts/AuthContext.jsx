@@ -28,9 +28,14 @@ export const AuthProvider = ({ children }) => {
     const interceptor = axiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
+        const location = window.location.pathname;
+
+        const noToastRoutes = ["/privacy-policy", "/terms-of-service"];
+
         if (
           error?.response?.status === 401 &&
-          error?.response?.data?.message === "No active session found"
+          error?.response?.data?.message === "No active session found" &&
+          !noToastRoutes.includes(location)
         ) {
           toast.error("No active session found", { toasterId: "error" });
           setIsAuth(false);
@@ -49,7 +54,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuth, user, setIsAuth, checkAuthentication }}>
+    <AuthContext.Provider
+      value={{ isAuth, user, setIsAuth, checkAuthentication }}
+    >
       {children}
     </AuthContext.Provider>
   );
