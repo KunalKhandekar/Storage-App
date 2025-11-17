@@ -70,7 +70,7 @@ const DirectoryView = ({
   };
 
   return (
-    <div className="min-h-full bg-gray-50">
+    <div className="min-h-full bg-gray-50 max-[800px]:pb-20">
       <div className="max-w-7xl mx-auto">
         {/* ToolBar -> Searching/Sorting/viewing */}
         <ToolBar

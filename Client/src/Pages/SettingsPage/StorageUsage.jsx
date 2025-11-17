@@ -90,7 +90,7 @@ const StorageUsage = ({ maxStorageLimit, usedStorageLimit }) => {
             </p>
           </div>
           <div
-            className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color}`}
+            className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color} flex-shrink-0 w-fit sm:w-auto text-center`}
           >
             {storageMetrics.usedPercentage}% used
           </div>
