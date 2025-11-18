@@ -185,6 +185,7 @@ export const showSessionLimitExceedModal = ({
       const res = await regenerateSession(token);
       if (res.success) {
         await checkAuthentication();
+        window.location.href = "/";
       } else {
         showModal("Error", res.message || "Something went wrong.", "error");
       }

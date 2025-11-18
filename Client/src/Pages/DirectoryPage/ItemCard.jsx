@@ -45,15 +45,15 @@ const ItemCard = ({
         try {
           const res = await deleteFile_or_Directory(item);
           if (res.success) {
-            showModal("Success", `${item.type} has been deleted!`, "success");
+            showModal("Success", `${item.name} has been deleted!`, "success");
             setActiveDropdown(null);
             setActionDone(true);
             closeConfirmModal();
           } else {
-            showModal("Error", "Failed to delete " + item.type, "error");
+            showModal("Error", "Failed to delete " + item.name, "error");
           }
         } catch {
-          showModal("Error", "Failed to delete " + item.type, "error");
+          showModal("Error", "Failed to delete " + item.name, "error");
         }
       },
       "warning"
