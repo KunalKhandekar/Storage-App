@@ -9,6 +9,7 @@ import { useAuth } from "../../../Contexts/AuthContext";
 const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
   const [loadingPlanId, setLoadingPlanId] = useState(null);
   const { user } = useAuth();
+  const razorpayMode = user?.razorpayMode;
 
   useEffect(() => {
     const razorpayScript = document.querySelector("#razorpay-script");
@@ -27,6 +28,7 @@ const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
       openRazorpayPopup({
         subscriptionId: res.data.newSubscriptionId,
         userId: user._id,
+        razorpayMode,
       });
     } else {
       toast.error(res.message);
@@ -36,7 +38,7 @@ const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
 
   const PlansEligibleForSwitch = useMemo(() => {
     return [...monthlyPlans, ...yearlyPlans].filter((plan) =>
-      plansEligible.includes(plan.id)
+      plansEligible.includes(plan.id[razorpayMode])
     );
   }, [plansEligible]);
 
@@ -63,7 +65,7 @@ const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
 
             return (
               <div
-                key={plan.id}
+                key={plan.id[razorpayMode]}
                 className={`bg-white rounded-lg border transition-all ${
                   isUpgrade
                     ? "border-green-500 shadow-lg"
@@ -110,8 +112,8 @@ const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
 
                   {/* Change Button */}
                   <button
-                    onClick={() => handleChangePlan(plan.id)}
-                    disabled={loadingPlanId === plan.id}
+                    onClick={() => handleChangePlan(plan.id[razorpayMode])}
+                    disabled={loadingPlanId === plan.id[razorpayMode]}
                     className={`w-full py-2.5 px-6 rounded-lg font-medium transition-all text-sm mb-6 flex items-center justify-center gap-2 ${
                       isUpgrade
                         ? "bg-green-600 text-white hover:bg-green-700"
@@ -119,11 +121,11 @@ const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
                         ? "bg-orange-600 text-white hover:bg-orange-700"
                         : "bg-blue-600 text-white hover:bg-blue-700"
                     } ${
-                      loadingPlanId === plan.id &&
+                      loadingPlanId === plan.id[razorpayMode] &&
                       "opacity-60 cursor-not-allowed"
                     }`}
                   >
-                    {loadingPlanId === plan.id ? (
+                    {loadingPlanId === plan.id[razorpayMode] ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>Processing...</span>

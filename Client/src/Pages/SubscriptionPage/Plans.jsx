@@ -6,7 +6,10 @@ import { useAuth } from "../../Contexts/AuthContext";
 
 export const monthlyPlans = [
   {
-    id: "free-monthly-001",
+    id: {
+      test: "free-monthly-001",
+      live: "free-monthly-001",
+    },
     name: "Free",
     tagline: "Starter Plan",
     bestFor: "Personal users who want to try the platform",
@@ -22,7 +25,10 @@ export const monthlyPlans = [
     ],
   },
   {
-    id: "plan_RWtFksDzZOsg2V",
+    id: {
+      test: "plan_Ra0GqWQ6p0ffYM",
+      live: "plan_RWtFksDzZOsg2V",
+    },
     name: "Pro",
     billingCycle: "Month",
     tagline: "For Students & Freelancers",
@@ -39,7 +45,10 @@ export const monthlyPlans = [
     popular: true,
   },
   {
-    id: "plan_RWtGxMLUNKVu35",
+    id: {
+      test: "plan_Ra0Hyby0MmmZyU",
+      live: "plan_RWtGxMLUNKVu35",
+    },
     name: "Premium",
     billingCycle: "Month",
     tagline: "For Professionals & Creators",
@@ -58,7 +67,10 @@ export const monthlyPlans = [
 
 export const yearlyPlans = [
   {
-    id: "free-yearly-001",
+    id: {
+      test: "free-yearly-001",
+      live: "free-yearly-001",
+    },
     name: "Free",
     billingCycle: "Year",
     tagline: "Starter Plan",
@@ -74,7 +86,10 @@ export const yearlyPlans = [
     ],
   },
   {
-    id: "plan_RWtGEM0EVl0gJE",
+    id: {
+      test: "plan_Ra0HCHX7tNXrQl",
+      live: "plan_RWtGEM0EVl0gJE",
+    },
     name: "Pro",
     billingCycle: "Year",
     tagline: "For Students & Freelancers",
@@ -93,7 +108,10 @@ export const yearlyPlans = [
     popular: true,
   },
   {
-    id: "plan_RWtGgZRP6VnyUc",
+    id: {
+      test: "plan_Ra0IGCFRabuW1y",
+      live: "plan_RWtGgZRP6VnyUc",
+    },
     name: "Premium",
     billingCycle: "Year",
     tagline: "For Professionals & Creators",
@@ -116,6 +134,7 @@ const Plans = ({ hasActivePlan }) => {
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [loadingPlanId, setLoadingPlanId] = useState(null);
   const { user } = useAuth();
+  const razorpayMode = user?.razorpayMode;
 
   useEffect(() => {
     const razorpayScript = document.querySelector("#razorpay-script");
@@ -128,12 +147,11 @@ const Plans = ({ hasActivePlan }) => {
   }, []);
 
   const handleSubmit = async (planId) => {
-    
     setLoadingPlanId(planId);
     try {
       const res = await handleCreateSubscription(planId);
       const subscriptionId = res.data.subscriptionId;
-      openRazorpayPopup({ subscriptionId, userId: user._id });
+      openRazorpayPopup({ subscriptionId, userId: user._id, razorpayMode });
       setLoadingPlanId(null);
     } catch (error) {
       console.error("Subscription error:", error);
@@ -191,7 +209,7 @@ const Plans = ({ hasActivePlan }) => {
 
             return (
               <div
-                key={plan.id}
+                key={plan.id[razorpayMode]}
                 className={`relative bg-white rounded-lg border  overflow-hidden transition-all ${
                   plan.popular
                     ? "border-blue-500 ring-2 ring-blue-500"
@@ -281,8 +299,10 @@ const Plans = ({ hasActivePlan }) => {
 
                   {/* CTA Button */}
                   <button
-                    onClick={() => handleSubmit(plan.id)}
-                    disabled={loadingPlanId === plan.id || isCurrentPlan}
+                    onClick={() => handleSubmit(plan.id[razorpayMode])}
+                    disabled={
+                      loadingPlanId === plan.id[razorpayMode] || isCurrentPlan
+                    }
                     className={`w-full py-2.5 px-6 rounded-lg font-medium transition-all text-sm mb-6 ${
                       isCurrentPlan
                         ? "bg-green-600 text-white cursor-default"
@@ -290,11 +310,11 @@ const Plans = ({ hasActivePlan }) => {
                         ? "bg-blue-600 text-white hover:bg-blue-700 "
                         : "bg-gray-900 text-white hover:bg-gray-800 "
                     } ${
-                      loadingPlanId === plan.id &&
+                      loadingPlanId === plan.id[razorpayMode] &&
                       "opacity-60 cursor-not-allowed"
                     }`}
                   >
-                    {loadingPlanId === plan.id ? (
+                    {loadingPlanId === plan.id[razorpayMode] ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>Processing...</span>

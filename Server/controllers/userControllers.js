@@ -20,6 +20,7 @@ export const getUserInfo = async (req, res) => {
     usedStorageLimit: rootDir?.size,
     availableStorageLimit: req.user?.maxStorageLimit - rootDir?.size,
     maxFileSize: req.user?.maxFileSize,
+    razorpayMode: process.env.PAYMENT_ENV,
   });
 };
 
