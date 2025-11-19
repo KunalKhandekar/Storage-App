@@ -53,7 +53,7 @@ const userSchema = new Schema(
     },
     maxStorageLimit: {
       type: Number,
-      default: 5368709120, // 5 GB
+      default: 524288000, // 500 MB
     },
     subscriptionId: {
       type: Schema.Types.ObjectId,

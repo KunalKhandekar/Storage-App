@@ -9,7 +9,6 @@ export const getPlanDetailsById = (planId) => {
       features: [
         "200 GB secure storage",
         "File upload limit: 2 GB per file",
-        "Password-protected sharing links",
         "Access from up to 3 devices",
         "Priority upload/download speed",
         "Email & chat support",
@@ -31,7 +30,6 @@ export const getPlanDetailsById = (planId) => {
       features: [
         "2 TB secure storage",
         "File upload limit: 10 GB per file",
-        "Password-protected sharing links",
         "Access from up to 3 devices",
         "Priority upload/download speed",
         "Priority customer support",
@@ -53,7 +51,6 @@ export const getPlanDetailsById = (planId) => {
       features: [
         "200 GB secure storage",
         "File upload limit: 2 GB per file",
-        "Password-protected sharing links",
         "Access from up to 3 devices",
         "Priority upload/download speed",
         "Email & chat support",
@@ -75,7 +72,6 @@ export const getPlanDetailsById = (planId) => {
       features: [
         "2 TB secure storage",
         "File upload limit: 10 GB per file",
-        "Password-protected sharing links",
         "Access from up to 3 devices",
         "Priority upload/download speed",
         "Priority customer support",
@@ -91,8 +87,8 @@ export const getPlanDetailsById = (planId) => {
     // default plan limits
     default: {
       limits: {
-        storage: "5 GB",
-        storageBytes: 5368709120,
+        storage: "500 MB",
+        storageBytes: 524288000,
         maxFileSize: "100 MB",
         maxFileSizeBytes: 104857600,
         maxDevices: 1,
