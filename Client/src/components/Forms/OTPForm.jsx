@@ -7,12 +7,14 @@ export default function OTPForm({
   handleResendOTP,
   loading,
 }) {
-
   const inputRef = useRef(null);
 
   useEffect(() => {
     inputRef.current.focus();
-  }, [])  
+    if (formData.email === "test@gmail.com") {
+      inputRef.current.value = "9999";
+    }
+  }, []);
   return (
     <>
       <div className="text-center p-4 bg-blue-50 rounded-lg">
@@ -27,10 +29,15 @@ export default function OTPForm({
           htmlFor="otp"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Verification Code
+          Verification Code{" "}
+          {formData.email === "test@gmail.com" && (
+            <p className="text-yellow-600 text-bold text-center">
+              (Click on Verify & Login - OTP is filled)
+            </p>
+          )}
         </label>
         <input
-        ref={inputRef}
+          ref={inputRef}
           id="otp"
           type="text"
           name="otp"
