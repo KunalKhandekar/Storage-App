@@ -9,7 +9,7 @@ export const razorpayWebhookController = async (req, res, next) => {
     const webhookBody = req.body;
     const webhookSignature = req.headers["x-razorpay-signature"];
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
- 
+
     const isValidRequest = validateWebhookSignature(
       JSON.stringify(webhookBody),
       webhookSignature,
@@ -21,16 +21,22 @@ export const razorpayWebhookController = async (req, res, next) => {
     }
 
     const event = webhookBody?.event;
-
+    const webhookSubscription = webhookBody.payload.subscription.entity;
+    const userId = webhookSubscription.notes.userId;
 
     const webhookDoc = await Webhook.create({
+      userId,
+      razorpaySubscriptionId: webhookSubscription.id,
       eventType: event,
       signature: webhookSignature,
       payload: webhookBody,
       status: "pending",
     });
 
-    const message = await WebhookServices.RazorpayEventHandler(event, webhookBody);
+    const message = await WebhookServices.RazorpayEventHandler(
+      event,
+      webhookBody
+    );
 
     webhookDoc.status = "processed";
     webhookDoc.responseMessage = message;
