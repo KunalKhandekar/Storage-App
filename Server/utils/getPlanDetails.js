@@ -181,6 +181,16 @@ const TEST_PLANS = {
 const plans = process.env.PAYMENT_ENV === "test" ? TEST_PLANS : LIVE_PLANS;
 
 export const getPlanDetailsById = (planId) => {
+  if (planId == "default")
+    return {
+      limits: {
+        storage: "500 MB",
+        storageBytes: 524288000,
+        maxFileSize: "100 MB",
+        maxFileSizeBytes: 104857600,
+        maxDevices: 1,
+      },
+    };
   return plans[planId] || null;
 };
 
