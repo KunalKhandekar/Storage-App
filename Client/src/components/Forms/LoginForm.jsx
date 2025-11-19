@@ -115,7 +115,7 @@ export default function LoginForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-lg w-full space-y-8">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">
@@ -192,26 +192,26 @@ export default function LoginForm() {
                   "Verify & Login"
                 )}
               </button>
+
+              {/* Divider and Google Login - Only show on credentials step */}
+              {currentStep === "credentials" && (
+                <>
+                  <SocialAuthButtons
+                    setError={setError}
+                    githubURL={`${URL}/auth/github`}
+                  />
+                </>
+              )}
             </form>
           </div>
 
-          {/* Divider and Google Login - Only show on credentials step */}
-          {currentStep === "credentials" && (
-            <>
-              <SocialAuthButtons
-                setError={setError}
-                githubURL={`${URL}/auth/github`}
-              />
-            </>
-          )}
-
           {/* Sign up link */}
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
               <button
                 onClick={() => navigate("/register")}
-                className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+                className="font-medium text-blue-600 hover:underline transition-colors duration-200"
               >
                 Sign up here
               </button>

@@ -1,7 +1,7 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import { BsGithub } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
-import { googleAuth, isAuthenticated } from "../Apis/authApi";
+import { googleAuth } from "../Apis/authApi";
 import { useAuth } from "../Contexts/AuthContext";
 import { useModal } from "../Contexts/ModalContext";
 import { showSessionLimitExceedModal } from "../Utils/helpers";
@@ -9,6 +9,8 @@ import { showSessionLimitExceedModal } from "../Utils/helpers";
 export default function SocialAuthButtons({ setError, githubURL }) {
   const { checkAuthentication } = useAuth();
   const { showModal, showConfirmModal, closeConfirmModal } = useModal();
+  const navigate = useNavigate();
+
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
       const { code } = response;
@@ -35,7 +37,7 @@ export default function SocialAuthButtons({ setError, githubURL }) {
 
   return (
     <>
-      <div className="relative mt-8">
+      <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300" />
         </div>
@@ -86,6 +88,32 @@ export default function SocialAuthButtons({ setError, githubURL }) {
           <BsGithub />
           Continue with GitHub
         </button>
+      </div>
+      
+      <div className="-mt-2 px-2 text-center text-sm text-gray-600 leading-relaxed">
+        <p className="max-w-md mx-auto">
+          By continuing, you agree to our{" "}
+          <button
+             onClick={() => window.open("/terms-of-service", "_blank")}
+            className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer font-medium inline-block"
+          >
+            Terms of Service
+          </button>
+          .{" "}
+          <span className="hidden sm:inline">
+            Learn how we collect, use, and protect your information in our{" "}
+          </span>
+          <span className="inline sm:hidden">
+            See our{" "}
+          </span>
+          <button
+            onClick={() => window.open("/privacy-policy", "_blank")}
+            className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer font-medium inline-block"
+          >
+            Privacy Policy
+          </button>
+          .
+        </p>
       </div>
     </>
   );

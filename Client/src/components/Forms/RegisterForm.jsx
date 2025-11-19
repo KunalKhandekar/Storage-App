@@ -101,7 +101,7 @@ export default function RegistrationForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-blue-50 py-12 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white rounded-xl shadow-lg p-8">
+      <div className="max-w-lg w-full space-y-8 bg-white rounded-xl shadow-lg p-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -167,12 +167,12 @@ export default function RegistrationForm() {
           </>
         )}
 
-        <div className="mt-8 text-center">
+        <div className="-mt-3 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
             <button
               onClick={() => navigate("/login")}
-              className="text-indigo-600 hover:text-indigo-500 font-medium"
+              className="text-blue-600 hover:underline font-medium"
             >
               Sign in here
             </button>
