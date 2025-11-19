@@ -22,7 +22,7 @@ export const monthlyPlans = [
     ],
   },
   {
-    id: "plan_Ra0GqWQ6p0ffYM",
+    id: "plan_RWtFksDzZOsg2V",
     name: "Pro",
     billingCycle: "Month",
     tagline: "For Students & Freelancers",
@@ -39,7 +39,7 @@ export const monthlyPlans = [
     popular: true,
   },
   {
-    id: "plan_Ra0Hyby0MmmZyU",
+    id: "plan_RWtGxMLUNKVu35",
     name: "Premium",
     billingCycle: "Month",
     tagline: "For Professionals & Creators",
@@ -74,7 +74,7 @@ export const yearlyPlans = [
     ],
   },
   {
-    id: "plan_Ra0HCHX7tNXrQl",
+    id: "plan_RWtGEM0EVl0gJE",
     name: "Pro",
     billingCycle: "Year",
     tagline: "For Students & Freelancers",
@@ -93,7 +93,7 @@ export const yearlyPlans = [
     popular: true,
   },
   {
-    id: "plan_Ra0IGCFRabuW1y",
+    id: "plan_RWtGgZRP6VnyUc",
     name: "Premium",
     billingCycle: "Year",
     tagline: "For Professionals & Creators",
