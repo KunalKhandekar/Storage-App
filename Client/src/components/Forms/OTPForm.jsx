@@ -8,11 +8,17 @@ export default function OTPForm({
   loading,
 }) {
   const inputRef = useRef(null);
+  const isTestEmail = formData.email === "test@gmail.com";
 
   useEffect(() => {
     inputRef.current.focus();
+    if (!inputRef.current) return;
+    inputRef.current.focus();
+
     if (formData.email === "test@gmail.com") {
-      inputRef.current.value = "9999";
+      handleChange({
+        target: { name: "otp", value: "9999" },
+      });
     }
   }, []);
   return (
@@ -30,9 +36,9 @@ export default function OTPForm({
           className="block text-sm font-medium text-gray-700 mb-2"
         >
           Verification Code{" "}
-          {formData.email === "test@gmail.com" && (
-            <p className="text-yellow-600 text-bold text-center">
-              (Click on Verify & Login - OTP is filled)
+          {isTestEmail && (
+            <p className="mt-2 text-center text-sm font-medium text-yellow-600">
+              Test OTP → <span className="font-bold">9999</span>
             </p>
           )}
         </label>
