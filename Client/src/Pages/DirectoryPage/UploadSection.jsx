@@ -48,6 +48,7 @@ Upload didn't start to avoid data loss. Upgrade to a higher plan to upload large
         setProgressMap,
         showModal
       );
+      setProgressMap({});
       setActionDone(true);
     } catch (err) {
       console.error("Some uploads failed");

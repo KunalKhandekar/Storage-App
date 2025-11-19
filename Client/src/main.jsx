@@ -24,7 +24,7 @@ createRoot(document.getElementById("root")).render(
                 closeButton
                 expand={false}
                 offset={{ bottom: '0px', right: "10px", left: "0px", top: "90px" }}
-                mobileOffset={{ top: "80px" }}
+                mobileOffset={{ top: "60px" }}
               />
                <Toaster id="error" position="top-right" richColors />
               <Modals />

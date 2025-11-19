@@ -53,10 +53,9 @@
   animation: slideOutRight 0.4s ease forwards;
 }
 
-.btn-head {
-  @apply flex items-center gap-1.5 sm:gap-2 
-    px-2 sm:px-3 py-1.5 text-sm text-gray-700 
-    border border-gray-200 rounded-lg 
-    hover:bg-gray-100 hover:border-gray-300 
-    transition-all active:scale-95;
+
+@layer components {
+  [data-sonner-toaster] {
+    @apply !z-[100];
+  }
 }

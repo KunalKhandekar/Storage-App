@@ -18,8 +18,8 @@ const SubscriptionCancelModal = ({
   }, [isOpen]);
 
   const freePlanLimits = {
-    storage: "5 GB",
-    storageBytes: 5368709120,
+    storage: "500 MB",
+    storageBytes: 524288000,
     maxFileSize: "100 MB",
     maxFileSizeBytes: 104857600,
     maxDevices: 1,

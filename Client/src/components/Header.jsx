@@ -161,7 +161,7 @@ const Header = () => {
 
           {/* MOBILE MENU - Absolute positioned */}
           {mobileMenuOpen && (
-            <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
+            <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg !z-[5000]">
               <nav className="px-3 py-2 space-y-1">
                 <button
                   onClick={() => {

@@ -14,9 +14,8 @@ export const monthlyPlans = [
     price: 0,
     icon: Sparkles,
     features: [
-      "5 GB secure storage",
+      "500 MB secure storage",
       "File upload limit: 100 MB per file",
-      "Basic sharing (link only)",
       "Access from 1 device",
       "Standard download speed",
       "Basic email support",
@@ -33,7 +32,6 @@ export const monthlyPlans = [
     features: [
       "200 GB secure storage",
       "File upload limit: 2 GB per file",
-      "Password-protected sharing links",
       "Access from up to 3 devices",
       "Priority upload/download speed",
       "Email & chat support",
@@ -51,7 +49,6 @@ export const monthlyPlans = [
     features: [
       "2 TB secure storage",
       "File upload limit: 10 GB per file",
-      "Password-protected sharing links",
       "Access from up to 3 devices",
       "Priority upload/download speed",
       "Priority customer support",
@@ -69,9 +66,8 @@ export const yearlyPlans = [
     price: 0,
     icon: Sparkles,
     features: [
-      "5 GB secure storage",
+      "500 MB secure storage",
       "File upload limit: 100 MB per file",
-      "Basic sharing (link only)",
       "Access from 1 device",
       "Standard download speed",
       "Basic email support",
@@ -90,7 +86,6 @@ export const yearlyPlans = [
     features: [
       "200 GB secure storage",
       "File upload limit: 2 GB per file",
-      "Password-protected sharing links",
       "Access from up to 3 devices",
       "Priority upload/download speed",
       "Email & chat support",
@@ -110,7 +105,6 @@ export const yearlyPlans = [
     features: [
       "2 TB secure storage",
       "File upload limit: 10 GB per file",
-      "Password-protected sharing links",
       "Access from up to 3 devices",
       "Priority upload/download speed",
       "Priority customer support",
