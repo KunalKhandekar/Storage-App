@@ -1,7 +1,7 @@
 export const getPlanDetailsById = (planId) => {
   const plans = {
-    plan_Ra0GqWQ6p0ffYM: {
-      id: 'plan_Ra0GqWQ6p0ffYM',
+    plan_RWtFksDzZOsg2V: {
+      id: "plan_RWtFksDzZOsg2V",
       name: "Pro",
       tagline: "For Students & Freelancers",
       price: 299,
@@ -21,8 +21,8 @@ export const getPlanDetailsById = (planId) => {
         maxDevices: 3,
       },
     },
-    plan_Ra0Hyby0MmmZyU: {
-      id: 'plan_Ra0Hyby0MmmZyU',
+    plan_RWtGxMLUNKVu35: {
+      id: "plan_RWtGxMLUNKVu35",
       name: "Premium",
       tagline: "For Professionals & Creators",
       price: 699,
@@ -42,8 +42,8 @@ export const getPlanDetailsById = (planId) => {
         maxDevices: 3,
       },
     },
-    plan_Ra0HCHX7tNXrQl: {
-      id: 'plan_Ra0HCHX7tNXrQl',
+    plan_RWtGEM0EVl0gJE: {
+      id: "plan_RWtGEM0EVl0gJE",
       name: "Pro",
       tagline: "For Students & Freelancers",
       price: 2999,
@@ -63,8 +63,8 @@ export const getPlanDetailsById = (planId) => {
         maxDevices: 3,
       },
     },
-    plan_Ra0IGCFRabuW1y: {
-      id: 'plan_Ra0IGCFRabuW1y',
+    plan_RWtGgZRP6VnyUc: {
+      id: "plan_RWtGgZRP6VnyUc",
       name: "Premium",
       tagline: "For Professionals & Creators",
       price: 6999,
@@ -100,7 +100,12 @@ export const getPlanDetailsById = (planId) => {
 };
 
 export const getPlansEligibleForChange = (activePlanId) => {
-  const allPlanIds = ['plan_Ra0GqWQ6p0ffYM', 'plan_Ra0HCHX7tNXrQl', 'plan_Ra0Hyby0MmmZyU', 'plan_Ra0IGCFRabuW1y'];
+  const allPlanIds = [
+    "plan_RWtFksDzZOsg2V",
+    "plan_RWtGxMLUNKVu35",
+    "plan_RWtGEM0EVl0gJE",
+    "plan_RWtGgZRP6VnyUc",
+  ];
 
   return allPlanIds.filter((planId) => planId !== activePlanId);
-}
+};
