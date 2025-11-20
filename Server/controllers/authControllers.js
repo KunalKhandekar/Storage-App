@@ -48,11 +48,6 @@ export const loginWithGoogle = async (req, res, next) => {
 };
 
 export const redirectToAuthURL = async (req, res) => {
-  const clientOrigin = req.get("referer")?.replace(/\/$/, "");
-  const allowed = process.env.CLIENT_URLS.split(",");
-  if (!allowed.includes(clientOrigin)) {
-    return res.status(400).json({ error: "Unauthorized client" });
-  }
   const { state: githubState, url } = githubClient.getWebFlowAuthorizationUrl({
     scopes: ["read:user", "user:email"],
     redirectUrl: `https://api.storemystuff.cloud/auth/github/callback`,
