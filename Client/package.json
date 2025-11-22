@@ -21,6 +21,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-file-viewer": "^0.1.13",
+    "react-google-drive-picker": "^1.2.2",
     "react-icons": "^5.5.0",
     "react-pdf": "^10.0.1",
     "react-player": "^3.3.1",
