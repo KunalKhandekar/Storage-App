@@ -471,28 +471,23 @@ Upload stopped to avoid data loss. Upgrade to upload bigger files.`,
     }
 
     const file = fileForUploading;
-    const id = file.id;
     const originalName = file.name || id;
-    const ext = getFileExtension(originalName, file.mimeType);
-    const fileId = new mongoose.Types.ObjectId();
+
     const isGoogleNative = file.mimeType?.startsWith(
       "application/vnd.google-apps"
     );
+    const id = file.id;
+    const fileId = new mongoose.Types.ObjectId();
+    const ext = getFileExtension(originalName, file.mimeType);
 
-    const actualSize =
-      file.sizeBytes && file.sizeBytes > 0
-        ? file.sizeBytes
-        : await getGoogleFileSize(file, token);
+    const downloadUrl = isGoogleNative
+      ? `https://www.googleapis.com/drive/v3/files/${id}/export?mimeType=${getExportMimeType(file.mimeType)}&supportsAllDrives=true`
+      : `https://www.googleapis.com/drive/v3/files/${id}?alt=media&supportsAllDrives=true`;
 
     const uploads = [
       fetchAndUpload({
-        url: isGoogleNative
-          ? `https://www.googleapis.com/drive/v3/files/${id}/export`
-          : `https://www.googleapis.com/drive/v3/files/${id}`,
+        url: downloadUrl,
         headers: { Authorization: `Bearer ${token}` },
-        params: isGoogleNative
-          ? { mimeType: getExportMimeType(file.mimeType) }
-          : { alt: "media" },
         key: `${fileId}${ext}`,
         bucket: process.env.AWS_BUCKET,
         contentType: file.mimeType,
@@ -502,9 +497,8 @@ Upload stopped to avoid data loss. Upgrade to upload bigger files.`,
     if (isGoogleNative) {
       uploads.push(
         fetchAndUpload({
-          url: `https://www.googleapis.com/drive/v3/files/${id}/export`,
+          url: `https://www.googleapis.com/drive/v3/files/${id}/export?mimeType=application/pdf&supportsAllDrives=true`,
           headers: { Authorization: `Bearer ${token}` },
-          params: { mimeType: "application/pdf" },
           key: `${fileId}.pdf`,
           bucket: process.env.AWS_BUCKET,
           contentType: "application/pdf",
@@ -513,6 +507,11 @@ Upload stopped to avoid data loss. Upgrade to upload bigger files.`,
     }
 
     const [origUpload, pdfUpload] = await Promise.all(uploads);
+
+    const actualSize =
+      file.sizeBytes && file.sizeBytes > 0
+        ? file.sizeBytes
+        : await getGoogleFileSize(file, token);
 
     const finalName = originalName.includes(".")
       ? originalName
@@ -535,8 +534,6 @@ Upload stopped to avoid data loss. Upgrade to upload bigger files.`,
       { session }
     );
 
-    // here i want to update many increment rootDirId also
-
     await Directory.updateMany(
       { _id: { $in: [googleRootDir._id, rootDirId] } },
       { $inc: { size: actualSize } },
@@ -555,7 +552,6 @@ Upload stopped to avoid data loss. Upgrade to upload bigger files.`,
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-
     throw err;
   }
 };

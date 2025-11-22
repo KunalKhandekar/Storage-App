@@ -15,6 +15,7 @@ import {
   initiateFileUploadSchema,
   shareViaEmailSchema,
 } from "../validators/fileSchema.js";
+import CustomError from "../utils/ErrorResponse.js";
 
 export const uploadFile = async (req, res, next) => {
   const file = req.file;
