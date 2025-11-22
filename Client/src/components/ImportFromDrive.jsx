@@ -17,6 +17,7 @@ export default function ImportFromDrive({
 
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const appId = import.meta.env.VITE_GOOGLE_APP_ID;
 
   const scope = ["https://www.googleapis.com/auth/drive.file"];
 
@@ -30,10 +31,10 @@ export default function ImportFromDrive({
       showModal("Error", "Unable to authenticate Google Drive", "error");
       return;
     }
-
     openPicker({
       clientId,
       developerKey: apiKey,
+      appId,
       token,
       multiselect: true,
       viewId: "DOCS",
@@ -49,7 +50,6 @@ export default function ImportFromDrive({
 
     try {
       start(files.length);
-
       for (const f of files) {
         const res = await driveConnect({
           token,
