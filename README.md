@@ -5,7 +5,7 @@ Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + Mon
 
 ---
 
-## 📚 Table of Contents
+## Table of Contents
 
 - [✨ Features](#-features)
   - [🔐 Authentication & Security](#-authentication--security)
