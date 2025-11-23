@@ -524,6 +524,6 @@ CLOUDFRONT_PRIVATE_KEY="<paste-your-cloudfront-private-key>"
 - **Cloud Storage**: All files (uploaded and imported) are stored securely in AWS S3.
 - **Fast Delivery**: CloudFront CDN ensures fast file access worldwide.
 - **Scalable Architecture**: S3 storage eliminates local storage limitations.
-- **Secure File Access**: Signed URLs ensure secure, time-limited file access.
+- **Secure File Access**: Signed URLs ensure secure, time-limited file access
 
 ---
