@@ -3,7 +3,7 @@ set -e
 SERVER_ALIAS="storageApp"
 REMOTE_DIR="/var/www/dist"
 
-echo "Building project..."
+echo "Building project.."
 npm run build
 
 echo "Uploading dist contents to EC2..."
