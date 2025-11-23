@@ -5,6 +5,7 @@ import { MdSubscriptions } from "react-icons/md";
 import { useAuth } from "../Contexts/AuthContext";
 import { useStorage } from "../Contexts/StorageContext";
 import { useNavigate } from "react-router-dom";
+import { Logo } from "./Logo";
 
 const Header = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -61,18 +62,15 @@ const Header = () => {
         }`}
       >
         <header className="px-3 sm:px-5 py-2.5 sm:py-3 max-w-7xl mx-auto relative">
-          <div className="flex items-center justify-between">
+          <div
+            className="flex items-center justify-between"
+          >
             {/* LEFT — Logo */}
-            <div
-              className="flex items-center gap-2 cursor-pointer flex-shrink-0"
-              onClick={() => navigate("/")}
-            >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg flex items-center justify-center">
-                <FaCloudUploadAlt className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-base sm:text-xl font-semibold text-gray-900 xs:hidden">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
+              <Logo />
+              <span className="text-lg font-bold tracking-tight">
                 Storemystuff
-              </h1>
+              </span>
             </div>
 
             {/* DESKTOP — Action Buttons */}
