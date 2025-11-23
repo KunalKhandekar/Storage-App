@@ -1,4 +1,4 @@
-# 🚀 Storemystuff.cloud
+# 🚀 Storemystuff
 
 A full-stack cloud storage application that allows users to upload, manage, and share their files securely.  
 Built with **React + Vite + TailwindCSS (Client)** and **Node.js + Express + MongoDB + Redis (Server)** with **AWS S3** cloud storage and **Google Drive Import** functionality.
