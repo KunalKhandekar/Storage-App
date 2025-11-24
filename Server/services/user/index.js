@@ -368,6 +368,12 @@ const deleteUserService = async (userId) => {
   // delete all folder of the user
   await Directory.deleteMany({ userId: user._id });
 
+  // remove the user from sharedWith Arrays if exist.
+  await File.updateMany(
+    { "sharedWith.userId": user._id },
+    { $pull: { sharedWith: { userId: user._id } } }
+  );
+
   // delete the user Data itself
   await user.deleteOne();
 };
