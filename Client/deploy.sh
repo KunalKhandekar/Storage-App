@@ -12,4 +12,4 @@ scp -r dist/. $SERVER_ALIAS:$REMOTE_DIR
 echo "Triggering remote S3 sync + CloudFront invalidation..."
 ssh $SERVER_ALIAS "bash /var/www/deploy-remote.sh"
 
-echo "Deployment finished successfully!"
+echo "Deployment finished successfully !"
