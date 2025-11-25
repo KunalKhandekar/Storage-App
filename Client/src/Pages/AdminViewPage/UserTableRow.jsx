@@ -3,7 +3,7 @@ import RoleBadge from "./RoleBadge";
 import RoleChangeDropdown from "./RoleChangeDropdown";
 import StatusBadge from "./StatusBadge";
 import UserActions from "./UserActions";
-import { UserAvatar } from "../../Utils/helpers";
+import { formatFileSize, UserAvatar } from "../../Utils/helpers";
 import { getUserPermissions } from "../../Utils/getUserPermissions";
 import { FaEye } from "react-icons/fa";
 
@@ -38,7 +38,7 @@ const UserTableRow = ({
               {user.name}
             </div>
             <div
-              className={`text-xs text-gray-500 sm:hidden ${
+              className={`text-xs text-gray-500 ${
                 user.isDeleted ? "line-through" : ""
               }`}
             >
@@ -48,13 +48,50 @@ const UserTableRow = ({
         </div>
       </td>
 
-      <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-        <div
-          className={`text-sm ${
-            user.isDeleted ? "text-red-900 line-through" : "text-gray-900"
-          }`}
-        >
-          {user.email}
+      <td className="px-3 sm:px-6 py-4 whitespace-nowrap sm:table-cell">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`text-sm font-medium ${
+                user.isDeleted ? "text-red-600 line-through" : "text-gray-900"
+              }`}
+            >
+              {formatFileSize(user.storage.usedStorage)}
+            </span>
+            <span className="text-xs text-gray-500">
+              of {formatFileSize(user.storage.totalStorage)}
+            </span>
+          </div>
+
+          {/* Progress bar */}
+          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${
+                user.isDeleted
+                  ? "bg-red-400"
+                  : user.storage.usedStorage / user.storage.totalStorage > 0.9
+                  ? "bg-red-500"
+                  : user.storage.usedStorage / user.storage.totalStorage > 0.7
+                  ? "bg-yellow-500"
+                  : "bg-blue-500"
+              }`}
+              style={{
+                width: `${Math.min(
+                  (user.storage.usedStorage / user.storage.totalStorage) * 100,
+                  100
+                )}%`,
+              }}
+            />
+          </div>
+
+          {/* Percentage indicator (optional) */}
+          <span className="text-xs text-gray-500">
+            {(
+              (user.storage.usedStorage / user.storage.totalStorage) *
+              100
+            ).toFixed(0)}
+            % used
+          </span>
         </div>
       </td>
 
@@ -82,6 +119,13 @@ const UserTableRow = ({
       </td>
 
       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
+        <UserActions
+          user={user}
+          currentUserRole={currentUser.role}
+          onLogout={onLogout}
+          onDelete={onDelete}
+          onRecover={onRecover}
+        />
         {canViewDirectory(user) && (
           <button
             onClick={() => navigate(`/users/${user._id}`)}
@@ -92,14 +136,6 @@ const UserTableRow = ({
             <FaEye className="w-4 h-4" />
           </button>
         )}
-
-        <UserActions
-          user={user}
-          currentUserRole={currentUser.role}
-          onLogout={onLogout}
-          onDelete={onDelete}
-          onRecover={onRecover}
-        />
       </td>
     </tr>
   );
