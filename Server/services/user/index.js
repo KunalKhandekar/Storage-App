@@ -34,7 +34,8 @@ const getAllUserService = async (currentUser) => {
   }
 
   const AllUsers = await User.find()
-    .select("name email picture role isDeleted")
+    .select("name email picture role isDeleted rootDirId maxStorageLimit")
+    .populate("rootDirId")
     .lean();
   const keys = await redisClient.keys("session:*");
   const sessions = await Promise.all(
@@ -54,6 +55,10 @@ const getAllUserService = async (currentUser) => {
       role: user.role,
       isDeleted: user.isDeleted,
       isLoggedIn: sessionUserIds.has(user._id.toString()),
+      storage: {
+        usedStorage: user.rootDirId.size,
+        totalStorage: user.maxStorageLimit || 0,
+      },
     };
   });
 
