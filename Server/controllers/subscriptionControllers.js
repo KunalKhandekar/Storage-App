@@ -1,9 +1,10 @@
+import Subscription from "../models/subscriptionModel.js";
 import { SubscriptionServices } from "../services/index.js";
 import CustomSuccess from "../utils/SuccessResponse.js";
 import { validateInputs } from "../utils/ValidateInputs.js";
 import {
   changePlanSchema,
-  createSubscriptionSchema
+  createSubscriptionSchema,
 } from "../validators/commonValidation.js";
 
 export const createSubscription = async (req, res, next) => {
@@ -67,6 +68,38 @@ export const changePlan = async (req, res, next) => {
       user
     );
     return CustomSuccess.send(res, message, status, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifySubscriptionId = async (req, res, next) => {
+  try {
+    const { subscriptionId, userId } = req.query;
+    if (!subscriptionId || !userId) {
+      throw new Error(
+        "Missing required query parameters: subscriptionId and userId"
+      );
+    }
+
+    const subscription = await Subscription.findOne({
+      razorpaySubscriptionId: subscriptionId,
+      userId,
+    })
+      .lean()
+      .exec();
+
+    if (!subscription) {
+      return CustomSuccess.send(res, "Subscription ID is invalid", 403, {
+        isValid: false,
+        status: subscription ? subscription.status : "not_found",
+      });
+    }
+
+    return CustomSuccess.send(res, "Subscription ID is valid", 200, {
+      isValid: true,
+      status: subscription.status,
+    });
   } catch (error) {
     next(error);
   }

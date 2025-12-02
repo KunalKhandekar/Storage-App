@@ -29,6 +29,9 @@ import { startCronJobs } from "./cron/index.js";
 import { eventController } from "./controllers/EventController.js";
 import CustomSuccess from "./utils/SuccessResponse.js";
 
+// controllers
+import { verifySubscriptionId } from "./controllers/subscriptionControllers.js";
+
 // Connect to MongoDB
 await connectDB();
 
@@ -96,6 +99,9 @@ app.use("/auth", authRoutes);
 app.use("/guest", guestRoutes);
 app.use("/webhook", webhookRoutes);
 app.use("/events", eventController);
+
+// Verify subscription id route
+app.use("/verify-subscription", verifySubscriptionId);
 
 app.get("/", (req, res) => {
   return CustomSuccess.send(res, "App working fine", StatusCodes.OK);
