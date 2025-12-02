@@ -40,7 +40,9 @@ export const eventController = (req, res, next) => {
 
 // helper function for sending event to clients
 export const sendEventToUser = (userId, data) => {
+  console.log("Sending event to user:", userId, "Data:", data);
   clients.forEach((client) => {
+    console.log("Checking client:", client.userId, "for userId:", userId);
     if (client.userId === userId) {
       client.res.write(`data: ${JSON.stringify(data)}\n\n`);
     }
