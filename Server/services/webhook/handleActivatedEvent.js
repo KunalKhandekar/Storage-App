@@ -69,8 +69,7 @@ export default async function handleActivatedEvent(eventBody) {
     maxDevices: planDetails.limits.maxDevices,
     subscriptionId: updateSubscriptionDoc._id,
   });
-
-  console.log("Subscription activated for user, trying to send event ... :", userId);
+  
   sendEventToUser(userId, {
     type: "subscriptionActivated",
     plan: planDetails.name,

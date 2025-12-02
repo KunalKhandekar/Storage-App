@@ -21,14 +21,6 @@ export const eventController = (req, res, next) => {
     `User ${userId} - [${clientId}] connected via SSE. Total clients: ${clients.length}`
   );
 
-  // send first response immediately
-  res.write(`data: ${JSON.stringify({ type: "connected" })}\n\n`);
-
-  // send periodic heartbeat
-  const interval = setInterval(() => {
-    res.write(`: heartbeat\n\n`);
-  }, 20000);
-
   req.on("close", () => {
     clearInterval(interval);
     clients = clients.filter(c => c.id !== clientId);
@@ -40,9 +32,7 @@ export const eventController = (req, res, next) => {
 
 // helper function for sending event to clients
 export const sendEventToUser = (userId, data) => {
-  console.log("Sending event to user:", userId, "Data:", data);
   clients.forEach((client) => {
-    console.log("Checking client:", client.userId, "for userId:", userId);
     if (client.userId === userId) {
       client.res.write(`data: ${JSON.stringify(data)}\n\n`);
     }

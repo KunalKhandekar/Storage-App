@@ -43,6 +43,7 @@ export default async function handleCancelledEvent(eventBody) {
       maxStorageLimit: defaultPlan.limits.storageBytes,
       maxDevices: defaultPlan.limits.maxDevices,
       maxFileSize: defaultPlan.limits.maxFileSizeBytes,
+      isDeleted: false, // In case user was marked deleted due to paused subscription
     });
 
     // 2) Delete all the files uploaded under the subscription period.
