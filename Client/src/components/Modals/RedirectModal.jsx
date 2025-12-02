@@ -1,60 +1,55 @@
-import { ArrowUpRight, Loader2, ShieldCheck, X } from "lucide-react"
-import { useEffect, useState, useCallback } from "react"
+import { ArrowUpRight, Loader2, ShieldCheck, X } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 
-const RedirectModal = ({
-  isOpen,
-  onClose,
-  redirectUrl,
-  message = "You are being redirected to a secure external payment gateway",
-}) => {
-  const [countdown, setCountdown] = useState(3)
-  const [isExiting, setIsExiting] = useState(false)
+const RedirectModal = ({ isOpen, onClose, redirectUrl }) => {
+  const [countdown, setCountdown] = useState(3);
+  const [isExiting, setIsExiting] = useState(false);
 
   const handleClose = useCallback(() => {
-    setIsExiting(true)
+    setIsExiting(true);
     setTimeout(() => {
-      setIsExiting(false)
-      onClose()
-    }, 200)
-  }, [onClose])
+      setIsExiting(false);
+      onClose();
+    }, 200);
+  }, [onClose]);
 
   useEffect(() => {
     if (!isOpen) {
-      setCountdown(3)
-      return
+      setCountdown(3);
+      return;
     }
 
     if (countdown === 0) {
-      window.location.href = redirectUrl
-      return
+      window.location.href = redirectUrl;
+      return;
     }
 
     const timer = setInterval(() => {
-      setCountdown((prev) => prev - 1)
-    }, 1000)
+      setCountdown((prev) => prev - 1);
+    }, 1000);
 
-    return () => clearInterval(timer)
-  }, [isOpen, countdown, redirectUrl])
+    return () => clearInterval(timer);
+  }, [isOpen, countdown, redirectUrl]);
 
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === "Escape") handleClose()
-    }
+      if (e.key === "Escape") handleClose();
+    };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape)
-      document.body.style.overflow = "hidden"
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape)
-      document.body.style.overflow = ""
-    }
-  }, [isOpen, handleClose])
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, handleClose]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
-  const progress = ((3 - countdown) / 3) * 100
+  const progress = ((3 - countdown) / 3) * 100;
 
   return (
     <div
@@ -62,7 +57,11 @@ const RedirectModal = ({
         isExiting ? "opacity-0" : "animate-backdrop-enter"
       } transition-opacity duration-200`}
     >
-      <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={handleClose} aria-hidden="true" />
+      <div
+        className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+        onClick={handleClose}
+        aria-hidden="true"
+      />
 
       <div
         className={`relative w-full max-w-sm max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl ${
@@ -100,11 +99,17 @@ const RedirectModal = ({
           </div>
 
           <div className="text-center space-y-2 sm:space-y-3">
-            <h3 id="redirect-title" className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">
+            <h3
+              id="redirect-title"
+              className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight"
+            >
               Redirecting you now
             </h3>
 
-            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-[260px] mx-auto">{message}</p>
+            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-[260px] mx-auto">
+              You are being redirected to a{" "}
+              <strong>secure payment gateway</strong> for subscription
+            </p>
 
             <div className="py-3 sm:py-4">
               <div className="inline-flex items-center justify-center gap-2">
@@ -116,7 +121,9 @@ const RedirectModal = ({
                   {countdown}
                 </div>
               </div>
-              <p className="text-[10px] sm:text-xs text-gray-400 mt-1">seconds remaining</p>
+              <p className="text-[10px] sm:text-xs text-gray-400 mt-1">
+                seconds remaining
+              </p>
             </div>
 
             <div className="flex items-center justify-center gap-1.5 text-[10px] sm:text-xs text-gray-500 bg-gray-50 py-1.5 px-2.5 sm:px-3 rounded-full w-fit mx-auto">
@@ -136,8 +143,7 @@ const RedirectModal = ({
         </div>
       </div>
     </div>
-    
-  )
-}
+  );
+};
 
-export default RedirectModal
+export default RedirectModal;

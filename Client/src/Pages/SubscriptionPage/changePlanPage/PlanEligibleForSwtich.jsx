@@ -17,7 +17,7 @@ const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
     setLoadingPlanId(planId);
     const res = await changePlan(planId);
     if (res.success) {
-       const url = `https://payments.kunalkhandekar.me?subscriptionId=${subscriptionId}&userId=${user._id}`;
+      const url = `https://payments.kunalkhandekar.me?subscriptionId=${res.data.newSubscriptionId}&userId=${user._id}`;
       setRedirectUrl(url);
       setShowRedirectModal(true);
     } else {
@@ -32,7 +32,7 @@ const PlanEligibleForSwtich = ({ plansEligible, activePlan }) => {
     );
   }, [plansEligible]);
 
-const handleCloseModal = () => {
+  const handleCloseModal = () => {
     setShowRedirectModal(false);
     setRedirectUrl("");
   };
@@ -189,7 +189,6 @@ const handleCloseModal = () => {
         isOpen={showRedirectModal}
         onClose={handleCloseModal}
         redirectUrl={redirectUrl}
-        message="You are being redirected to external payment gateway for subscription"
       />
     </>
   );

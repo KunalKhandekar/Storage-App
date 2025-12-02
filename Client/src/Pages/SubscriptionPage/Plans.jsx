@@ -367,7 +367,6 @@ const Plans = ({ hasActivePlan }) => {
         isOpen={showRedirectModal}
         onClose={handleCloseModal}
         redirectUrl={redirectUrl}
-        message="You are being redirected to external payment gateway for subscription"
       />
     </>
   );
