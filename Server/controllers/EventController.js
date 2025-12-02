@@ -5,6 +5,7 @@ export const eventController = (req, res, next) => {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.flushHeaders(); // send the header immediately
 
   const userId = req.query.userId;
@@ -20,8 +21,17 @@ export const eventController = (req, res, next) => {
     `User ${userId} - [${clientId}] connected via SSE. Total clients: ${clients.length}`
   );
 
+  // send first response immediately
+  res.write(`data: ${JSON.stringify({ type: "connected" })}\n\n`);
+
+  // send periodic heartbeat
+  const interval = setInterval(() => {
+    res.write(`: heartbeat\n\n`);
+  }, 20000);
+
   req.on("close", () => {
-    clients = clients.filter((c) => c.id !== clientId);
+    clearInterval(interval);
+    clients = clients.filter(c => c.id !== clientId);
     console.log(
       `User ${userId} - [${clientId}] disconnected. Total clients: ${clients.length}`
     );
