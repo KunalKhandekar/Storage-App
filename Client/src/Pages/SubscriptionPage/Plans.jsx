@@ -27,7 +27,7 @@ export const monthlyPlans = [
   {
     id: {
       test: "plan_Ra0GqWQ6p0ffYM",
-      live: "plan_RdW5Pb54TubmmC",
+      live: "plan_RWtFksDzZOsg2V",
     },
     name: "Pro",
     billingCycle: "Month",

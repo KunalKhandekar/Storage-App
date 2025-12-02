@@ -1,6 +1,6 @@
 const LIVE_PLANS = {
-  plan_RdW5Pb54TubmmC: {
-    id: "plan_RdW5Pb54TubmmC",
+  plan_RWtFksDzZOsg2V: {
+    id: "plan_RWtFksDzZOsg2V",
     name: "Pro",
     tagline: "For Students & Freelancers",
     price: 299,
