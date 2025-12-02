@@ -22,7 +22,6 @@ export const eventController = (req, res, next) => {
   );
 
   req.on("close", () => {
-    clearInterval(interval);
     clients = clients.filter(c => c.id !== clientId);
     console.log(
       `User ${userId} - [${clientId}] disconnected. Total clients: ${clients.length}`
