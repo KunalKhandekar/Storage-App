@@ -28,8 +28,8 @@ export default function PrivacyPolicy() {
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
-              <a href="mailto:kunalkhandekar.dev@gmail.com" className="text-blue-600 hover:underline">
-                kunalkhandekar.dev@gmail.com
+              <a href="mailto:support@storemystuff.cloud" className="text-blue-600 hover:underline">
+                support@storemystuff.cloud
               </a>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function PrivacyPolicy() {
             <li>Contact us with privacy concerns</li>
           </ul>
           <p className="mb-6">
-            For account or data deletion requests, contact: <a href="mailto:kunalkhandekar.dev@gmail.com" className="text-blue-600 hover:underline">kunalkhandekar.dev@gmail.com</a>
+            For account or data deletion requests, contact: <a href="mailto:support@storemystuff.cloud" className="text-blue-600 hover:underline">support@storemystuff.cloud</a>
           </p>
 
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Children's Privacy</h2>
@@ -228,7 +228,7 @@ export default function PrivacyPolicy() {
 
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">13. Contact Us</h2>
           <p className="mb-8">
-            If you have any questions or concerns regarding privacy or data usage, contact us at: <a href="mailto:kunalkhandekar.dev@gmail.com" className="text-blue-600 hover:underline font-medium">kunalkhandekar.dev@gmail.com</a>
+            If you have any questions or concerns regarding privacy or data usage, contact us at: <a href="mailto:support@storemystuff.cloud" className="text-blue-600 hover:underline font-medium">support@storemystuff.cloud</a>
           </p>
         </div>
 

@@ -28,10 +28,10 @@ const RenewalFailed = () => {
                 <p>
                   For assistance, please contact our support team at{" "}
                   <a
-                    href="mailto:support@talkative.app"
+                    href="mailto:support@storemystuff.cloud"
                     className="font-medium underline hover:text-red-800"
                   >
-                    kunalkhandekar.dev@gmail.com
+                    support@storemystuff.cloud
                   </a>
                   .
                 </p>

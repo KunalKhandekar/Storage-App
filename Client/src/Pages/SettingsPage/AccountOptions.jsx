@@ -74,7 +74,7 @@ const AccountOptions = ({
             if (res.success) {
               showModal(
                 "Account Disabled",
-                "Your account has been disabled. Contact support to reactivate.",
+                "Your account has been disabled. Contact support@storemystuff.cloud to reactivate.",
                 "success"
               );
               setIsAuth(false)

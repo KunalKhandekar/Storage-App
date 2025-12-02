@@ -26,8 +26,8 @@ export default function TermsOfService() {
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
-              <a href="mailto:kunalkhandekar.dev@gmail.com" className="text-blue-600 hover:underline">
-                kunalkhandekar.dev@gmail.com
+              <a href="mailto:support@storemystuff.cloud" className="text-blue-600 hover:underline">
+                support@storemystuff.cloud
               </a>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function TermsOfService() {
 
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">12. Reporting Abuse/Misuse</h2>
           <p className="mb-3">
-            If you discover illegal or harmful content being shared via StoreMyStuff, report it to <a href="mailto:kunalkhandekar.dev@gmail.com" className="text-blue-600 hover:underline">kunalkhandekar.dev@gmail.com</a>
+            If you discover illegal or harmful content being shared via StoreMyStuff, report it to <a href="mailto:support@storemystuff.cloud" className="text-blue-600 hover:underline">support@storemystuff.cloud</a>
           </p>
           <p className="mb-6 text-sm text-gray-600">
             We will take appropriate action based on the severity and laws of India.
