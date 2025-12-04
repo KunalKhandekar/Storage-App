@@ -5,10 +5,14 @@ import File from "../../models/fileModel.js";
 import User from "../../models/userModel.js";
 import CustomError from "../../utils/ErrorResponse.js";
 import {
+  abortMultipartUpload,
+  completeMultipartUpload,
   deleteS3Object,
   deleteS3Objects,
+  generatePartPresignedURL,
   generatePreSignedUploadURL,
   getFileContentLength,
+  initiateMultipartUpload,
 } from "./s3Services.js";
 import mongoose from "mongoose";
 import { getGoogleFileSize } from "./getGoogleFileSize.js";
@@ -43,21 +47,27 @@ export const updateParentDirectorySize = async (
   }
 };
 
-const uploadFileInitiateService = async (
+/**
+ * Upload file initiation (determines simple or multipart based on file size)
+ */
+export const uploadFileInitiateService = async (
   rootDirId,
   userId,
   maxStorageLimit,
   name,
   size,
   contentType,
-  parentDirId
+  parentDirId,
+  isMultipart
 ) => {
+  // Validate directory and storage space
   const rootDirectory = await Directory.findOne({
     _id: rootDirId,
     userId,
   })
     .select("size")
     .lean();
+
   const user = await User.findById(userId).select("maxFileSize").lean();
 
   if (!rootDirectory) {
@@ -106,44 +116,164 @@ const uploadFileInitiateService = async (
     parentDirId: targetDirectory._id,
     isUploading: true,
     originalKey: uploadKey,
+    uploadId: null,
+    isMultipart,
   });
 
-  const uploadURL = await generatePreSignedUploadURL({
-    Key: uploadKey,
-    ContentType: contentType,
-  });
+  if (isMultipart) {
+    // Initiate multipart upload on S3
+    const uploadId = await initiateMultipartUpload({
+      Key: uploadKey,
+      ContentType: contentType,
+    });
 
-  return { uploadURL, newFileId: newFile._id };
+    // Update file with uploadId
+    await File.updateOne({ _id: fileId }, { uploadId });
+
+    return { uploadId, fileId: String(fileId), uploadURL: null };
+  } else {
+    // Generate presigned URL for simple PUT upload
+    const uploadURL = await generatePreSignedUploadURL({
+      Key: uploadKey,
+      ContentType: contentType,
+    });
+
+    return { uploadId: null, fileId: String(fileId), uploadURL };
+  }
 };
 
-const uploadFileCompleteService = async (fileId, userId) => {
+/**
+ * Get presigned URL for a specific part in multipart upload
+ */
+export const getPartPresignedURLService = async (
+  fileId,
+  partNumber,
+  userId
+) => {
   const file = await File.findOne({
     _id: fileId,
     userId,
     isUploading: true,
+    isMultipart: true,
   });
 
   if (!file) {
-    throw new CustomError("File not found.", StatusCodes.BAD_REQUEST);
-  }
-
-  const key = file.originalKey;
-  const contentLength = await getFileContentLength({ Key: key });
-
-  if (contentLength !== file.size) {
-    await deleteS3Object({ Key: key });
-    await file.deleteOne();
     throw new CustomError(
-      `File length mismatch. Expected ${file.size}, got ${contentLength}`,
+      "File not found or is not a multipart upload.",
       StatusCodes.BAD_REQUEST
     );
   }
 
-  file.isUploading = false;
-  await file.save();
+  if (!file.uploadId) {
+    throw new CustomError(
+      "Multipart upload not initialized.",
+      StatusCodes.BAD_REQUEST
+    );
+  }
 
-  await updateParentDirectorySize(file.parentDirId, file.size);
+  const presignedURL = await generatePartPresignedURL({
+    Key: file.originalKey,
+    uploadId: file.uploadId,
+    partNumber,
+  });
+
+  return presignedURL;
 };
+
+/**
+ * Complete file upload (handles both simple and multipart)
+ */
+export const uploadFileCompleteService = async (
+  fileId,
+  userId,
+  parts = [],
+) => {
+  const file = await File.findOne({
+    _id: fileId,
+    userId,
+    isUploading: true,
+  })
+
+  if (!file) {
+    throw new CustomError("File not found.", StatusCodes.BAD_REQUEST)
+  }
+
+  try {
+    if (file.isMultipart) {
+      // Complete multipart upload
+      if (!file.uploadId) {
+        throw new CustomError("Multipart upload ID not found.", StatusCodes.BAD_REQUEST)
+      }
+
+      if (!parts || parts.length === 0) {
+        throw new CustomError("No parts provided for multipart completion.", StatusCodes.BAD_REQUEST)
+      }
+
+      await completeMultipartUpload({
+        Key: file.originalKey,
+        uploadId: file.uploadId,
+        parts,
+      })
+    } else {
+      // Verify simple upload
+      const contentLength = await getFileContentLength({
+        Key: file.originalKey,
+      })
+
+      if (contentLength !== file.size) {
+        await deleteS3Object({ Key: file.originalKey })
+        await file.deleteOne()
+        throw new CustomError(
+          `File length mismatch. Expected ${file.size}, got ${contentLength}`,
+          StatusCodes.BAD_REQUEST,
+        )
+      }
+    }
+
+    // Mark file as uploaded and update directory size
+    file.isUploading = false
+    await file.save()
+    await updateParentDirectorySize(file.parentDirId, file.size)
+  } catch (error) {
+    // Clean up on error
+    if (file.isMultipart && file.uploadId) {
+      try {
+        await abortMultipartUpload({
+          Key: file.originalKey,
+          uploadId: file.uploadId,
+        })
+      } catch (abortErr) {
+        console.error("Failed to abort multipart upload:", abortErr)
+      }
+    }
+    throw error
+  }
+}
+
+/**
+ * Abort multipart upload
+ */
+export const abortUploadService = async (fileId, userId) => {
+  const file = await File.findOne({
+    _id: fileId,
+    userId,
+  })
+
+  if (!file) {
+    throw new CustomError("File not found.", StatusCodes.BAD_REQUEST)
+  }
+
+  if (!file.isMultipart || !file.uploadId) {
+    throw new CustomError("This is not a multipart upload.", StatusCodes.BAD_REQUEST)
+  }
+
+  await abortMultipartUpload({
+    Key: file.originalKey,
+    uploadId: file.uploadId,
+  })
+
+  await file.deleteOne()
+}
 
 const getFileService = async (id, userId) => {
   const file = await File.findOne({
@@ -529,6 +659,8 @@ Upload stopped to avoid data loss. Upgrade to upload bigger files.`,
           userId,
           googleFileId: id,
           isUploading: false,
+          isMultipart: false,
+          uploadId: null,
         },
       ],
       { session }
@@ -574,4 +706,6 @@ export default {
   GetUserAccessListService: getUserAccessListService,
   RenameFileByEditorService: renameFileByEditorService,
   ImportFileFromGoogleService: importFileFromGoogleService,
+  GetPartPresignedURLService: getPartPresignedURLService,
+  UploadFileAbortService: abortUploadService,
 };

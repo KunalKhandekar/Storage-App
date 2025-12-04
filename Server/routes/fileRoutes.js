@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  abortFileUpload,
   changePermission,
   changePermissionOfUser,
   completeFileUpload,
@@ -7,6 +8,7 @@ import {
   getDashboardInfo,
   getFileById,
   getFileInfoById,
+  getPresignedPartUploadURL,
   getSharedByMeFiles,
   getSharedFileViaEmail,
   getSharedFileViaLink,
@@ -49,13 +51,23 @@ router.get(
 
 // POST /file/upload/initiate
 // Desc -> Checks validations and return presigned S3 URL
-// Body -> { name: string, size: number, contentType: string, parentDirId: "<optional; defaults to req.user.rootDirId> }
+// Body -> { name: string, size: number, contentType: string, parentDirId: "<optional; defaults to req.user.rootDirId>, isMultipart: boolean }
 router.post("/upload/initiate", initiateFileUpload);
+
+// GET /file/upload/part-url/:fileId
+// Desc -> Generate presigned URL for uploading a part in multipart upload
+// Params -> { fileId }
+router.get("/upload/part-url/:fileId", getPresignedPartUploadURL);
 
 // POST /file/upload/complete/:fileId
 // Desc -> Completes the necessary S3 Validations and change the DB state.
 // Params -> { fileId }
 router.post("/upload/complete/:fileId", completeFileUpload);
+
+// POST /file/upload/abort/:fileId
+// Desc -> Aborts a multipart upload and cleans up S3 objects.
+// Params -> { fileId }
+router.post("/upload/abort/:fileId", abortFileUpload);
 
 // DELETE /file/:id
 // Desc -> Delete a file by ID.

@@ -57,7 +57,7 @@ const fileSchema = new Schema(
         sharedAt: {
           type: Date,
           default: Date.now,
-        }
+        },
       },
     ],
     size: {
@@ -67,12 +67,19 @@ const fileSchema = new Schema(
     isUploading: {
       type: Boolean,
       required: true,
-    }
+    },
+    uploadId: {
+      type: String,
+    },
+    isMultipart: {
+      type: Boolean,
+      required: true,
+    },
   },
   {
     strict: "throw",
-    timestamps: true
-  },
+    timestamps: true,
+  }
 );
 
 const File = model("File", fileSchema);

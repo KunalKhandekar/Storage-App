@@ -15,4 +15,5 @@ export const initiateFileUploadSchema = z.object({
   size: z.coerce.number().gt(1, "Size should be greater than 1 Byte."),
   contentType: z.string().min(1, "Content-Type is required"),
   parentDirId: z.string().optional(),
+  isMultipart: z.boolean(),
 });

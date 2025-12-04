@@ -17,51 +17,71 @@ import {
 } from "../validators/fileSchema.js";
 import CustomError from "../utils/ErrorResponse.js";
 
-export const uploadFile = async (req, res, next) => {
-  const file = req.file;
-  const parentDirId = req.headers.parentdirid || req.user.rootDirId;
-  const userId = req.user._id;
+// export const uploadFile = async (req, res, next) => {
+//   const file = req.file;
+//   const parentDirId = req.headers.parentdirid || req.user.rootDirId;
+//   const userId = req.user._id;
+//   try {
+//     const newFile = await FileServices.UploadFileService(
+//       file,
+//       parentDirId,
+//       userId
+//     );
+
+//     return CustomSuccess.send(
+//       res,
+//       "File uploaded",
+//       StatusCodes.CREATED,
+//       newFile
+//     );
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+export const initiateFileUpload = async (req, res, next) => {
+  const { rootDirId, _id, maxStorageLimit } = req.user;
   try {
-    const newFile = await FileServices.UploadFileService(
-      file,
+    const { name, size, contentType, parentDirId, isMultipart } =
+      validateInputs(initiateFileUploadSchema, req.body);
+
+    const { uploadId, fileId, uploadURL } = await FileServices.UploadFileInitiateService(
+      rootDirId,
+      _id,
+      maxStorageLimit,
+      name,
+      size,
+      contentType,
       parentDirId,
-      userId
+      isMultipart
     );
 
-    return CustomSuccess.send(
-      res,
-      "File uploaded",
-      StatusCodes.CREATED,
-      newFile
-    );
+    return CustomSuccess.send(res, "Upload initiated", StatusCodes.OK, {
+      uploadId,
+      fileId,
+      uploadURL,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-export const initiateFileUpload = async (req, res, next) => {
-  const { rootDirId, _id, maxStorageLimit } = req.user;
+export const getPresignedPartUploadURL = async (req, res, next) => {
+  const { fileId } = req.params;
+  const { partNumber } = req.query;
+  const userId = req.user._id;
   try {
-    const { name, size, contentType, parentDirId } = validateInputs(
-      initiateFileUploadSchema,
-      req.body
+    const uploadURL = await FileServices.GetPartPresignedURLService(
+      fileId,
+      parseInt(partNumber, 10),
+      userId,
     );
-
-    const { uploadURL, newFileId } =
-      await FileServices.UploadFileInitiateService(
-        rootDirId,
-        _id,
-        maxStorageLimit,
-        name,
-        size,
-        contentType,
-        parentDirId
-      );
-
-    return CustomSuccess.send(res, "Upload initiated", StatusCodes.OK, {
-      uploadURL,
-      fileId: newFileId,
-    });
+    return CustomSuccess.send(
+      res,
+      "Presigned URL for part upload generated",
+      StatusCodes.OK,
+      { presignedURL: uploadURL }
+    );
   } catch (error) {
     next(error);
   }
@@ -69,10 +89,22 @@ export const initiateFileUpload = async (req, res, next) => {
 
 export const completeFileUpload = async (req, res, next) => {
   const { fileId } = req.params;
+  const parts = req.body?.parts || [];
   const userId = req.user._id;
   try {
-    await FileServices.UploadFileCompleteService(fileId, userId);
+    await FileServices.UploadFileCompleteService(fileId, userId, parts);
     return CustomSuccess.send(res, "File uploaded", StatusCodes.OK);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const abortFileUpload = async (req, res, next) => {
+  const { fileId } = req.params;
+  const userId = req.user._id;
+  try {
+    await FileServices.UploadFileAbortService(fileId, userId);
+    return CustomSuccess.send(res, "File upload aborted", StatusCodes.OK);
   } catch (error) {
     next(error);
   }

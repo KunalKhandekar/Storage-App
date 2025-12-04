@@ -237,6 +237,12 @@ const validations = [
           isUploading: {
             bsonType: "bool",
           },
+          isMultipart: {
+            bsonType: "bool",
+          },
+          uploadId: {
+            bsonType: ["string", "null"],
+          },
           __v: {
             bsonType: "number",
           },
