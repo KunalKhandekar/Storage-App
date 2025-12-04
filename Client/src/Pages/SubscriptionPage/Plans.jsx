@@ -36,8 +36,8 @@ export const monthlyPlans = [
     price: 299,
     icon: Zap,
     features: [
-      "200 GB secure storage",
-      "File upload limit: 2 GB per file",
+      "100 GB secure storage",
+      "File upload limit: 50 GB per file",
       "Access from up to 3 devices",
       "Priority upload/download speed",
       "Email & chat support",
@@ -56,8 +56,8 @@ export const monthlyPlans = [
     price: 699,
     icon: Crown,
     features: [
-      "2 TB secure storage",
-      "File upload limit: 10 GB per file",
+      "250 GB secure storage",
+      "File upload limit: 100 GB per file",
       "Access from up to 3 devices",
       "Priority upload/download speed",
       "Priority customer support",
