@@ -1,7 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { isAuthenticated } from "../Apis/authApi";
-import { toast } from "sonner";
-import axiosInstance from "../Apis/axios";
 
 const AuthContext = createContext();
 
@@ -24,34 +22,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    const interceptor = axiosInstance.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        const location = window.location.pathname;
-
-        const noToastRoutes = ["/privacy-policy", "/terms-of-service"];
-
-        if (
-          error?.response?.status === 401 &&
-          error?.response?.data?.message === "No active session found" &&
-          !noToastRoutes.includes(location)
-        ) {
-          toast.error("No active session found", { toasterId: "error" });
-          setIsAuth(false);
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      axiosInstance.interceptors.response.eject(interceptor);
-    };
-  }, []);
-
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
 
   return (
     <AuthContext.Provider

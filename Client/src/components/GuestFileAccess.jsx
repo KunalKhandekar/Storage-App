@@ -1,20 +1,18 @@
 "use client";
 
 import {
+  AlertCircle,
   Download,
   ExternalLink,
   FileText,
-  AlertCircle,
   Loader2,
-  Eye,
-  PenIcon,
+  PenIcon
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getFileInfo, renameFileSharedViaLink } from "../Apis/shareApi";
-import FilePreview from "./RenderFile";
-import { renderFilePreview } from "../Utils/helpers";
 import RenameModal from "../Pages/DirectoryPage/RenameModal";
+import { renderFilePreview } from "../Utils/helpers";
 
 const GuestFileAccess = () => {
   const { fileId } = useParams();
