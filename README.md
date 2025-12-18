@@ -428,6 +428,6 @@ PAYMENT_ENV="test"
 1. **Google Cloud Console**: Create a project and enable the Google Drive API.
 2. **OAuth 2.0 Credentials**: Configure OAuth 2.0 client IDs for both web application and server-side access.
 3. **Consent Screen**: Set up the OAuth consent screen with appropriate scopes for Drive access.
-4. **API Key**: Generate an API key for Google Drive operations (if required).
+4. **API Key**: Generate an API key for Google Drive operations (if required)
 
 ### Razorpay API KEYS 
