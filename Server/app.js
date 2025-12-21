@@ -104,7 +104,7 @@ app.use("/events", eventController);
 app.use("/verify-subscription", verifySubscriptionId);
 
 app.get("/", (req, res) => {
-  return CustomSuccess.send(res, "App working fine", StatusCodes.OK);
+  return CustomSuccess.send(res, "App working fine in production", StatusCodes.OK);
 });
 
 // Error Handler
